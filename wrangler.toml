@@ -1,0 +1,9 @@
+name = "little-base-e252" # 본인의 워커 이름으로 수정해주세요
+compatibility_date = "2025-10-04" # 오늘 날짜 또는 wrangler init 시 생성된 날짜
+
+# 워커의 '두뇌'인 시작 스크립트 파일을 지정합니다.
+main = "src/index.js"
+
+# 웹사이트의 '얼굴'인 정적 파일들이 담긴 폴더를 지정합니다.
+[site]
+bucket = "./public"
