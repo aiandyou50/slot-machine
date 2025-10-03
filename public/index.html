@@ -99,7 +99,7 @@
     </style>
 </head>
 <body>
-    <div class="version-info"> v0.8 (2025-10-04) </div>
+    <div class="version-info"> v0.9 (2025-10-04) </div>
     <div id="app-container" class="container">
         <div id="landing-view" class="view active">
             <div class="card">
@@ -117,10 +117,11 @@
                 <button id="disconnect-wallet-button" class="disconnect-btn">Disconnect</button>
             </div>
             <div class="game-card">
+                <!-- ▼▼▼ [수정] ? 대신 초기 심볼을 표시합니다. ▼▼▼ -->
                 <div class="reel-grid">
-                    <div class="reel">?</div> <div class="reel">?</div> <div class="reel">?</div>
-                    <div class="reel">?</div> <div class="reel">?</div> <div class="reel">?</div>
-                    <div class="reel">?</div> <div class="reel">?</div> <div class="reel">?</div>
+                    <div class="reel">💎</div> <div class="reel">💰</div> <div class="reel">🍀</div>
+                    <div class="reel">🔔</div> <div class="reel">🍒</div> <div class="reel">7️⃣</div>
+                    <div class="reel">💎</div> <div class="reel">💰</div> <div class="reel">🍀</div>
                 </div>
                 <div class="controls-container">
                     <div class="bet-controls">
@@ -216,12 +217,10 @@
                 setControlsDisabled(true);
 
                 try {
-                    // 1. 백엔드(서버리스 함수)에 스핀 요청
                     console.log('Sending spin request to serverless function...');
                     const response = await fetch('/spin', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        // body: JSON.stringify({ wallet: tonConnectUI.wallet.account.address, bet: currentBet })
                     });
                     
                     if (!response.ok) {
@@ -232,7 +231,6 @@
                     console.log('Received from server:', result);
 
                     if (result.success) {
-                        // 2. 백엔드가 성공 응답을 주면, 프론트엔드 애니메이션 시작
                         await runSpinAnimation(result.data);
                     } else {
                         throw new Error(result.message || 'Spin failed on the server.');
@@ -263,7 +261,10 @@
 
                     setTimeout(() => {
                         clearInterval(spinningInterval);
+                        // ▼▼▼ [수정] 백엔드에서 받은 9개의 결과로 모든 릴을 업데이트합니다. ▼▼▼
                         reels.forEach((reel, index) => {
+                            // 서버에서 받은 symbols 배열의 길이가 9개보다 짧을 경우를 대비하여,
+                            // 결과가 없는 칸은 '?'로 표시하는 방어 코드를 추가합니다.
                             reel.textContent = resultData.symbols[index] || '?';
                         });
                         console.log("Spin animation finished. Win:", resultData.isWin, "Payout:", resultData.payout);
@@ -284,3 +285,5 @@
     </script>
 </body>
 </html>
+
+
