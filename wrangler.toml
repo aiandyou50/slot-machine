@@ -1,5 +1,5 @@
-name = "tonslotmachin" # 본인의 워커 이름으로 수정해주세요
-compatibility_date = "2025-10-04" # 오늘 날짜 또는 wrangler init 시 생성된 날짜
+name = "tonslotmachin" # 스크린샷에 보이는 이름으로 수정했습니다.
+compatibility_date = "2025-10-03" # [수정] 미래 날짜가 아닌, 실제 빌드 날짜로 변경했습니다.
 
 # 워커의 '두뇌'인 시작 스크립트 파일을 지정합니다.
 main = "src/index.js"
