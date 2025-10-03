@@ -6,12 +6,20 @@
     <title>TON 슬롯머신</title>
     <!-- External Libraries -->
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <!-- ▼▼▼ [추가] 블록체인 거래 생성을 위한 TonWeb 라이브러리 ▼▼▼ -->
+    <script src="https://cdn.jsdelivr.net/npm/tonweb@0.0.66/dist/tonweb.js"></script>
     <!-- Our Stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- Version Info Display -->
     <div class="version-info"></div>
+
+    <!-- ▼▼▼ [추가] 거래 진행 상태를 보여주는 로딩 오버레이 ▼▼▼ -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p id="loading-text"></p>
+    </div>
 
     <!-- Main App Container -->
     <div id="app-container" class="container">
@@ -36,7 +44,6 @@
             </div>
             <div class="game-card">
                 <div class="reel-grid">
-                    <!-- Reels will be populated by script.js -->
                     <div class="reel">?</div> <div class="reel">?</div> <div class="reel">?</div>
                     <div class="reel">?</div> <div class="reel">?</div> <div class="reel">?</div>
                     <div class="reel">?</div> <div class="reel">?</div> <div class="reel">?</div>
