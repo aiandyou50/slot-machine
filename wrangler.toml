@@ -1,0 +1,10 @@
+name = "tonslotmachin"
+compatibility_date = "2025-10-03"
+
+main = "src/index.js"
+
+# [[routes]] 설정은 이제 Cloudflare 대시보드에서 직접 관리하므로,
+# 이 파일에서는 해당 부분을 완전히 삭제하여 충돌을 방지합니다.
+
+[site]
+bucket = "./public"
