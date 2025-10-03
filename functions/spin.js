@@ -1,18 +1,26 @@
 /**
  * POST /spin
- * 이 함수는 사용자가 SPIN 버튼을 눌렀을 때 호출되는 서버리스 백엔드입니다.
- * Cloudflare Pages는 functions 폴더의 파일을 자동으로 서버리스 함수로 배포합니다.
+ * This function is the serverless backend for the spin action.
+ * It generates a random result for all 9 reels.
  */
 export async function onRequest(context) {
   try {
-    // TODO: 여기에 실제 슬롯머신 결과 계산 로직, 블록체인 트랜잭션 등을 추가합니다.
+    const symbols = ['💎', '💰', '🍀', '🔔', '🍒', '7️⃣'];
+    const finalReels = [];
+
+    // Generate a random symbol for each of the 9 reels
+    for (let i = 0; i < 9; i++) {
+        const randomIndex = Math.floor(Math.random() * symbols.length);
+        finalReels.push(symbols[randomIndex]);
+    }
+    
+    // TODO: Add logic to determine if the result is a win and calculate payout
     const result = {
-      symbols: ['🍒', '🍋', '🔔'], // 임시 결과
-      isWin: true,
-      payout: 50
+      symbols: finalReels,
+      isWin: false, // Placeholder
+      payout: 0   // Placeholder
     };
 
-    // 성공 응답을 프론트엔드에 JSON 형태로 보냅니다.
     return new Response(JSON.stringify({
       success: true,
       message: "Spin successful!",
@@ -23,7 +31,6 @@ export async function onRequest(context) {
     });
 
   } catch (error) {
-    // 에러 발생 시 실패 응답을 보냅니다.
     return new Response(JSON.stringify({
       success: false,
       message: "An error occurred during the spin."
