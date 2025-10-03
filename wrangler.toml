@@ -10,3 +10,7 @@ bucket = "./public"
 
 # workers.dev 주소를 사용하도록 명시합니다.
 workers_dev = true
+
+# wrangler.toml (wrangler v3.88.0^)
+[observability.logs]
+enabled = true
