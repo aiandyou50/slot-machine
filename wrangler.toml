@@ -1,4 +1,4 @@
-name = "little-base-e252" # 본인의 워커 이름으로 수정해주세요
+name = "tonslotmachin" # 본인의 워커 이름으로 수정해주세요
 compatibility_date = "2025-10-04" # 오늘 날짜 또는 wrangler init 시 생성된 날짜
 
 # 워커의 '두뇌'인 시작 스크립트 파일을 지정합니다.
