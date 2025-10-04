@@ -2,18 +2,18 @@
  * CandleSpinner Frontend Logic
  * (CandleSpinner 프론트엔드 로직)
  *
- * @version 1.2.0
+ * @version 1.2.1
  * @date 2025-10-04
  * @author Gemini AI (in collaboration with the user)
  *
  * @changelog
- * - v1.2.0 (2025-10-04): [BUGFIX] Corrected the object used to create the transfer payload. Used a `JettonWallet` instance instead of `JettonMinter`. This is the definitive fix for the 'is not a function' errors.
- * (전송 페이로드 생성에 사용되는 객체를 수정했습니다. `JettonMinter` 대신 `JettonWallet` 인스턴스를 사용합니다. 'is not a function' 오류에 대한 최종 수정입니다.)
- * - v1.1.9 (2025-10-04): [BUGFIX] Attempted rename to `createTransferMessage`.
- * (메서드 이름을 `createTransferMessage`로 변경 시도했습니다.)
+ * - v1.2.1 (2025-10-04): [FEAT] Added developer mode, activated by a 'dev' URL query parameter, to send a dev key to the backend.
+ * ('dev' URL 쿼리 파라미터로 활성화되는 개발자 모드를 추가하여 백엔드로 개발자 키를 전송합니다.)
+ * - v1.2.0 (2025-10-04): [BUGFIX] Corrected the object used to create the transfer payload (JettonWallet).
+ * (전송 페이로드 생성에 사용되는 객체(JettonWallet)를 수정했습니다.)
  */
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
+    // DOM Elements and other variables...
     const landingView = document.getElementById('landing-view');
     const gameView = document.getElementById('game-view');
     const walletInfoSpan = document.getElementById('wallet-info');
@@ -30,17 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingOverlay = document.getElementById('loading-overlay');
     const loadingText = document.getElementById('loading-text');
 
-    // Blockchain & Game Constants
     const GAME_WALLET_ADDRESS = "UQBFPDdSlPgqPrn2XwhpVq0KQExN2kv83_batQ-dptaR8Mtd";
     const TOKEN_MASTER_ADDRESS = "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV";
     const TOKEN_DECIMALS = 9;
     const MIN_TON_FOR_GAS = 0.05;
 
-    // App Version
-    const APP_VERSION = "1.2.0";
+    const APP_VERSION = "1.2.1";
     const RELEASE_DATE = "2025-10-04";
 
-    // Game state
     let fullUserAddress = '';
     const symbols = ['💎', '💰', '🍀', '🔔', '🍒', '7️⃣'];
     let currentBet = 10;
@@ -49,32 +46,27 @@ document.addEventListener('DOMContentLoaded', () => {
     
     versionInfoDiv.textContent = `v${APP_VERSION} (${RELEASE_DATE})`;
 
+    // Check for dev mode key in URL on page load.
+    // (페이지 로드 시 URL에서 개발자 모드 키를 확인합니다.)
+    const urlParams = new URLSearchParams(window.location.search);
+    const devKey = urlParams.get('dev');
+    if (devKey) {
+        console.warn("DEV MODE ACTIVE. Spins will include the dev key.");
+    }
+
     const httpProvider = new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC');
     const tonweb = new TonWeb(httpProvider);
-
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://aiandyou.me/tonconnect-manifest.json',
-    });
-
-    tonConnectUI.uiOptions = {
-        uiPreferences: { theme: 'DARK' },
-        buttonRootId: 'connect-wallet-button-container'
-    };
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://aiandyou.me/tonconnect-manifest.json' });
+    tonConnectUI.uiOptions = { uiPreferences: { theme: 'DARK' }, buttonRootId: 'connect-wallet-button-container' };
     
     // Event Listeners
-    tonConnectUI.onStatusChange(wallet => {
-        updateUI(wallet ? wallet.account : null);
-    });
-    disconnectBtn.addEventListener('click', () => { tonConnectUI.disconnect(); });
+    tonConnectUI.onStatusChange(wallet => updateUI(wallet ? wallet.account : null));
+    disconnectBtn.addEventListener('click', () => tonConnectUI.disconnect());
     copyAddressBtn.addEventListener('click', () => {
         if (!fullUserAddress) return;
         navigator.clipboard.writeText(fullUserAddress).then(() => {
-            const originalIcon = copyAddressBtn.textContent;
             copyAddressBtn.textContent = '✅';
-            setTimeout(() => { copyAddressBtn.textContent = originalIcon; }, 1500);
-        }).catch(err => {
-            console.error('Failed to copy address: ', err);
-            alert('Failed to copy address.');
+            setTimeout(() => { copyAddressBtn.textContent = '📋'; }, 1500);
         });
     });
     decreaseBetBtn.addEventListener('click', () => {
@@ -90,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         betAmountSpan.textContent = currentBet;
     });
     spinBtn.addEventListener('click', () => {
-        if (isSpinning || !tonConnectUI.connected) { return; }
+        if (isSpinning || !tonConnectUI.connected) return;
         startSpin();
     });
 
@@ -112,18 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     async function getJettonWalletAddress(ownerAddress, jettonMasterAddress) {
-        try {
-            const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: jettonMasterAddress });
-            const jettonWalletAddress = await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address(ownerAddress));
-            return jettonWalletAddress.toString(true, true, true);
-        } catch (error) {
-            console.error("!!! DETAILED ERROR from getJettonWalletAddress:", error);
-            let userFriendlyMessage = "A network or contract error occurred.";
-            if (error && typeof error.message === 'string' && error.message.includes("exit_code: -13")) {
-                userFriendlyMessage = "Contract error (-13). Is the TOKEN_MASTER_ADDRESS correct?";
-            }
-            throw new Error(userFriendlyMessage);
-        }
+        const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: jettonMasterAddress });
+        return (await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address(ownerAddress))).toString(true, true, true);
     }
 
     async function startSpin() {
@@ -131,31 +113,16 @@ document.addEventListener('DOMContentLoaded', () => {
         setControlsDisabled(true);
         showLoadingOverlay("Checking TON balance for gas fee...");
         showError('');
-
         try {
             const tonBalance = await getTonBalance();
-            if (tonBalance < MIN_TON_FOR_GAS) {
-                throw new Error(`Not enough TON for gas fee. You need at least ${MIN_TON_FOR_GAS} TON.`);
-            }
-
+            if (tonBalance < MIN_TON_FOR_GAS) throw new Error(`Not enough TON for gas fee. You need at least ${MIN_TON_FOR_GAS} TON.`);
+            
             showLoadingOverlay("1. Finding your token wallet...");
             const userJettonWalletAddress = await getJettonWalletAddress(fullUserAddress, TOKEN_MASTER_ADDRESS);
-
+            
             showLoadingOverlay("2. Preparing transaction...");
-            
-            // ▼▼▼ [BUGFIX] Create a JettonWallet instance and call `createTransferBody` on it.
-            // ([버그 수정] JettonWallet 인스턴스를 생성하고, 그 인스턴스에서 `createTransferBody`를 호출합니다.)
-            
-            // 1. Create a JettonWallet object representing the user's token wallet.
-            // (1. 사용자의 토큰 지갑을 나타내는 JettonWallet 객체를 생성합니다.)
-            const userJettonWallet = new TonWeb.token.jetton.JettonWallet(httpProvider, {
-                address: userJettonWalletAddress
-            });
-            
+            const userJettonWallet = new TonWeb.token.jetton.JettonWallet(httpProvider, { address: userJettonWalletAddress });
             const amountInNano = new TonWeb.utils.BN(currentBet).mul(new TonWeb.utils.BN(10).pow(new TonWeb.utils.BN(TOKEN_DECIMALS)));
-
-            // 2. Call `createTransferBody` on the JettonWallet instance, NOT the JettonMinter.
-            // (2. JettonMinter가 아닌 JettonWallet 인스턴스에서 `createTransferBody`를 호출합니다.)
             const payloadCell = await userJettonWallet.createTransferBody({
                 jettonAmount: amountInNano,
                 toAddress: new TonWeb.utils.Address(GAME_WALLET_ADDRESS),
@@ -163,37 +130,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 forwardAmount: TonWeb.utils.toNano('0.01')
             });
             const payload = TonWeb.utils.bytesToBase64(await payloadCell.toBoc());
-            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
+            
             const transaction = {
                 validUntil: Math.floor(Date.now() / 1000) + 600,
-                messages: [{
-                    address: userJettonWalletAddress,
-                    amount: TonWeb.utils.toNano('0.05').toString(),
-                    payload: payload
-                }]
+                messages: [{ address: userJettonWalletAddress, amount: TonWeb.utils.toNano('0.05').toString(), payload: payload }]
             };
             
             showLoadingOverlay("3. Please approve in your wallet...");
             const result = await tonConnectUI.sendTransaction(transaction);
             
             showLoadingOverlay("4. Waiting for blockchain confirmation...");
+            
+            // Create the request body for the backend.
+            // (백엔드로 보낼 요청 본문을 생성합니다.)
+            const requestBody = {
+                boc: result.boc,
+                betAmount: currentBet,
+                userAddress: fullUserAddress
+            };
+            // If a dev key is present in the URL, add it to the request.
+            // (URL에 개발자 키가 있으면, 요청에 추가합니다.)
+            if (devKey) {
+                requestBody.devKey = devKey;
+            }
+
             const response = await fetch('/spin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ boc: result.boc, betAmount: currentBet, userAddress: fullUserAddress })
+                body: JSON.stringify(requestBody)
             });
             if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
             const spinResult = await response.json();
             if (!spinResult.success) throw new Error(spinResult.message);
-
+            
             showLoadingOverlay("5. Spin starting!");
             await runSpinAnimation(spinResult.data);
-            
             if (spinResult.data.isWin) {
                 alert(`Congratulations! You won ${spinResult.data.payout} CSPIN!`);
             }
-
         } catch (error) {
             console.error('Error during spin transaction:', error);
             showError(error.message || "Transaction was rejected or failed.");
@@ -207,8 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function getTonBalance() {
         if (!fullUserAddress) return 0;
         try {
-            const balance = await tonweb.getBalance(fullUserAddress);
-            return parseFloat(TonWeb.utils.fromNano(balance));
+            return parseFloat(TonWeb.utils.fromNano(await tonweb.getBalance(fullUserAddress)));
         } catch (e) {
             console.error("Could not fetch TON balance", e);
             return 0;
@@ -221,10 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const spinIntervalTime = 100;
             const spinningInterval = setInterval(() => {
                 reels.forEach(reel => {
-                    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                    reel.textContent = randomSymbol;
-                    reel.classList.add('spinning');
-                    setTimeout(() => reel.classList.remove('spinning'), 50);
+                    reel.textContent = symbols[Math.floor(Math.random() * symbols.length)];
                 });
             }, spinIntervalTime);
             setTimeout(() => {
@@ -257,16 +227,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const errorElement = gameView.classList.contains('active') ? gameErrorMessageP : landingErrorMessageP;
         if (errorElement) {
             errorElement.textContent = message;
-            if(message){
+            if (message) {
                 setTimeout(() => {
-                    if (errorElement.textContent === message) {
-                        errorElement.textContent = '';
-                    }
+                    if (errorElement.textContent === message) errorElement.textContent = '';
                 }, 7000);
             }
         }
     }
 
-    // Call checkConnection on load
     checkConnection();
 });
