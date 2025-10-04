@@ -2,15 +2,15 @@
  * CandleSpinner Frontend Logic
  * (CandleSpinner 프론트엔드 로직)
  *
- * @version 1.1.8
+ * @version 1.1.9
  * @date 2025-10-04
  * @author Gemini AI (in collaboration with the user)
  *
  * @changelog
- * - v1.1.8 (2025-10-04): [BUGFIX] Replaced manual transaction payload creation with the TonWeb library's `createTransferBody` helper function to fix the recurring 'locked' fee issue.
- * (반복적인 'locked' 비용 문제를 해결하기 위해, 수동 트랜잭션 페이로드 생성을 TonWeb 라이브러리의 `createTransferBody` 헬퍼 함수로 교체했습니다.)
- * - v1.1.7 (2025-10-04): [BUGFIX] Corrected TonWeb library initialization logic.
- * (TonWeb 라이브러리 초기화 로직을 수정했습니다.)
+ * - v1.1.9 (2025-10-04): [BUGFIX] Renamed `createTransferBody` to `createTransferMessage` to match the latest TonWeb library API.
+ * (최신 TonWeb 라이브러리 API에 맞게 `createTransferBody`를 `createTransferMessage`로 변경했습니다.)
+ * - v1.1.8 (2025-10-04): [BUGFIX] Replaced manual transaction payload creation with the TonWeb library's helper function.
+ * (수동 페이로드 생성을 라이브러리의 헬퍼 함수로 교체했습니다.)
  */
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MIN_TON_FOR_GAS = 0.05;
 
     // App Version
-    const APP_VERSION = "1.1.8";
+    const APP_VERSION = "1.1.9";
     const RELEASE_DATE = "2025-10-04";
 
     // Game state
@@ -147,20 +147,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             showLoadingOverlay("2. Preparing transaction...");
             
-            // ▼▼▼ [BUGFIX] Replace manual payload creation with the library's helper function.
-            // ([버그 수정] 수동 페이로드 생성을 라이브러리의 헬퍼 함수로 교체합니다.)
             const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: TOKEN_MASTER_ADDRESS });
             const amountInNano = new TonWeb.utils.BN(currentBet).mul(new TonWeb.utils.BN(10).pow(new TonWeb.utils.BN(TOKEN_DECIMALS)));
 
-            const payloadCell = await jettonMinter.createTransferBody({
+            // ▼▼▼ [BUGFIX] Use `createTransferMessage` for the latest TonWeb version.
+            // ([버그 수정] 최신 TonWeb 버전에 맞게 `createTransferMessage`를 사용합니다.)
+            const payloadCell = await jettonMinter.createTransferMessage({
                 jettonAmount: amountInNano,
                 toAddress: new TonWeb.utils.Address(GAME_WALLET_ADDRESS),
                 responseAddress: new TonWeb.utils.Address(fullUserAddress),
                 forwardAmount: TonWeb.utils.toNano('0.01')
             });
-            const payload = TonWeb.utils.bytesToBase64(await payloadCell.toBoc());
-            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
+            const payload = TonWeb.utils.bytesToBase64(await payloadCell.toBoc());
+            
             const transaction = {
                 validUntil: Math.floor(Date.now() / 1000) + 600,
                 messages: [{
