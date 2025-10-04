@@ -41,8 +41,10 @@
                 <span id="wallet-info"></span>
                 <button id="disconnect-wallet-button" class="disconnect-btn">Disconnect</button>
             </div>
-            <!-- ▼▼▼ [추가] 게임 화면 내 에러 메시지 표시 영역 ▼▼▼ -->
-            <p class="error-text game-error-text"></p> 
+
+            <!-- ▼▼▼ [핵심 수정] 게임 화면 내 에러 메시지를 표시할 영역을 추가합니다. ▼▼▼ -->
+            <p id="game-error-message" class="error-text"></p>
+            
             <div class="game-card">
                 <div class="reel-grid">
                     <div class="reel">?</div> <div class="reel">?</div> <div class="reel">?</div>
@@ -68,5 +70,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
-
