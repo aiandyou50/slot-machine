@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TON 슬롯머신</title>
-    <!-- External Libraries -->
+    <title>CandleSpinner: TON 슬롯머신</title>
+    <!-- 1. TON Connect UI 라이브러리 -->
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tonweb@0.0.66/dist/tonweb.js"></script>
-    <!-- Our Stylesheet -->
+    <!-- ▼▼▼ [핵심 수정] 빠뜨렸던 TonWeb 라이브러리를 추가합니다. ▼▼▼ -->
+    <script src="https://unpkg.com/tonweb@latest/dist/tonweb.js"></script>
+    
+    <!-- 분리된 CSS 파일을 연결합니다. -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Version Info Display -->
+    <!-- 버전 정보 표시 -->
     <div class="version-info"></div>
 
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="loading-overlay">
+    <!-- 로딩 오버레이 -->
+    <div id="loading-overlay">
         <div class="loading-spinner"></div>
-        <p id="loading-text"></p>
+        <p id="loading-text">Processing...</p>
     </div>
 
-    <!-- Main App Container -->
+    <!-- 메인 앱 컨테이너 -->
     <div id="app-container" class="container">
-        
-        <!-- Landing View (Before Login) -->
+        <!-- 랜딩 뷰 (지갑 연결 전) -->
         <div id="landing-view" class="view active">
             <div class="card">
                 <div class="icon-placeholder"></div>
@@ -35,21 +36,19 @@
             </div>
         </div>
 
-        <!-- Game View (After Login) -->
+        <!-- 게임 뷰 (지갑 연결 후) -->
         <div id="game-view" class="view">
             <div class="header">
                 <span id="wallet-info"></span>
                 <button id="disconnect-wallet-button" class="disconnect-btn">Disconnect</button>
             </div>
-
-            <!-- ▼▼▼ [핵심 수정] 게임 화면 내 에러 메시지를 표시할 영역을 추가합니다. ▼▼▼ -->
-            <p id="game-error-message" class="error-text"></p>
-            
+            <!-- 게임 화면 내 에러 메시지 표시 영역 -->
+            <p id="game-error-message" class="error-text game-error"></p>
             <div class="game-card">
                 <div class="reel-grid">
-                    <div class="reel">?</div> <div class="reel">?</div> <div class="reel">?</div>
-                    <div class="reel">?</div> <div class="reel">?</div> <div class="reel">?</div>
-                    <div class="reel">?</div> <div class="reel">?</div> <div class="reel">?</div>
+                    <div class="reel">💎</div> <div class="reel">💰</div> <div class="reel">🍀</div>
+                    <div class="reel">🔔</div> <div class="reel">🍒</div> <div class="reel">7️⃣</div>
+                    <div class="reel">💎</div> <div class="reel">💰</div> <div class="reel">🍀</div>
                 </div>
                 <div class="controls-container">
                     <div class="bet-controls">
@@ -66,7 +65,8 @@
         </div>
     </div>
 
-    <!-- Our Script -->
+    <!-- 분리된 JavaScript 파일을 연결합니다. -->
     <script src="script.js"></script>
 </body>
 </html>
+
