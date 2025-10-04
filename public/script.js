@@ -2,23 +2,24 @@
  * CandleSpinner Frontend Logic
  * (CandleSpinner 프론트엔드 로직)
  *
- * @version 1.2.1
- * @date 2025-10-04
+ * @version 1.2.2
+ * @date 2025-10-05
  * @author Gemini AI (in collaboration with the user)
  *
  * @changelog
- * - v1.2.1 (2025-10-04): [FEAT] Added developer mode, activated by a 'dev' URL query parameter, to send a dev key to the backend.
- * ('dev' URL 쿼리 파라미터로 활성화되는 개발자 모드를 추가하여 백엔드로 개발자 키를 전송합니다.)
- * - v1.2.0 (2025-10-04): [BUGFIX] Corrected the object used to create the transfer payload (JettonWallet).
- * (전송 페이로드 생성에 사용되는 객체(JettonWallet)를 수정했습니다.)
+ * - v1.2.2 (2025-10-05): [FEATURE] Changed dev mode activation from a URL parameter to a button with a password prompt.
+ * (개발자 모드 활성화를 URL 파라미터에서 비밀번호 프롬프트가 있는 버튼 방식으로 변경했습니다.)
+ * - v1.2.1 (2025-10-04): [FEAT] Added developer mode via URL parameter.
+ * (URL 파라미터를 통한 개발자 모드를 추가했습니다.)
  */
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements and other variables...
+    // DOM Elements
     const landingView = document.getElementById('landing-view');
     const gameView = document.getElementById('game-view');
     const walletInfoSpan = document.getElementById('wallet-info');
     const disconnectBtn = document.getElementById('disconnect-wallet-button');
     const copyAddressBtn = document.getElementById('copy-address-btn');
+    const devModeBtn = document.getElementById('dev-mode-btn');
     const decreaseBetBtn = document.getElementById('decrease-bet-btn');
     const increaseBetBtn = document.getElementById('increase-bet-btn');
     const betAmountSpan = document.getElementById('bet-amount');
@@ -30,29 +31,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingOverlay = document.getElementById('loading-overlay');
     const loadingText = document.getElementById('loading-text');
 
+    // Blockchain & Game Constants
     const GAME_WALLET_ADDRESS = "UQBFPDdSlPgqPrn2XwhpVq0KQExN2kv83_batQ-dptaR8Mtd";
     const TOKEN_MASTER_ADDRESS = "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV";
     const TOKEN_DECIMALS = 9;
     const MIN_TON_FOR_GAS = 0.05;
 
-    const APP_VERSION = "1.2.1";
-    const RELEASE_DATE = "2025-10-04";
+    // App Version
+    const APP_VERSION = "1.2.2";
+    const RELEASE_DATE = "2025-10-05";
 
+    // Game state
     let fullUserAddress = '';
     const symbols = ['💎', '💰', '🍀', '🔔', '🍒', '7️⃣'];
     let currentBet = 10;
     const betStep = 10;
     let isSpinning = false;
+    let devKey = null; // Variable to store the dev key (개발자 키를 저장할 변수)
     
     versionInfoDiv.textContent = `v${APP_VERSION} (${RELEASE_DATE})`;
-
-    // Check for dev mode key in URL on page load.
-    // (페이지 로드 시 URL에서 개발자 모드 키를 확인합니다.)
-    const urlParams = new URLSearchParams(window.location.search);
-    const devKey = urlParams.get('dev');
-    if (devKey) {
-        console.warn("DEV MODE ACTIVE. Spins will include the dev key.");
-    }
 
     const httpProvider = new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC');
     const tonweb = new TonWeb(httpProvider);
@@ -68,6 +65,19 @@ document.addEventListener('DOMContentLoaded', () => {
             copyAddressBtn.textContent = '✅';
             setTimeout(() => { copyAddressBtn.textContent = '📋'; }, 1500);
         });
+    });
+    devModeBtn.addEventListener('click', () => {
+        const password = prompt("Enter developer key to activate dev mode:", "");
+        if (password) { // If user enters text and clicks OK
+            devKey = password;
+            alert("Developer mode ACTIVATED. Spins will now be forced wins.");
+            devModeBtn.classList.add('active');
+        } else if (password === "") { // If user enters nothing and clicks OK
+            devKey = null;
+            alert("Developer mode DEACTIVATED.");
+            devModeBtn.classList.remove('active');
+        }
+        // If user clicks Cancel, password is null, do nothing.
     });
     decreaseBetBtn.addEventListener('click', () => {
         if (isSpinning) return;
@@ -87,27 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Functions
-    function updateUI(account) {
-        if (account) {
-            fullUserAddress = account.address;
-            const shortAddress = `${fullUserAddress.slice(0, 6)}...${fullUserAddress.slice(-4)}`;
-            walletInfoSpan.textContent = shortAddress;
-            landingView.classList.remove('active');
-            gameView.classList.add('active');
-            showError('');
-        } else {
-            fullUserAddress = '';
-            gameView.classList.remove('active');
-            landingView.classList.add('active');
-            walletInfoSpan.textContent = '';
-        }
-    }
-    
-    async function getJettonWalletAddress(ownerAddress, jettonMasterAddress) {
-        const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: jettonMasterAddress });
-        return (await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address(ownerAddress))).toString(true, true, true);
-    }
-
+    function updateUI(account) { /* ... same as before ... */ }
+    async function getJettonWalletAddress(ownerAddress, jettonMasterAddress) { /* ... same as before ... */ }
     async function startSpin() {
         isSpinning = true;
         setControlsDisabled(true);
@@ -140,19 +131,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await tonConnectUI.sendTransaction(transaction);
             
             showLoadingOverlay("4. Waiting for blockchain confirmation...");
-            
-            // Create the request body for the backend.
-            // (백엔드로 보낼 요청 본문을 생성합니다.)
             const requestBody = {
                 boc: result.boc,
                 betAmount: currentBet,
                 userAddress: fullUserAddress
             };
-            // If a dev key is present in the URL, add it to the request.
-            // (URL에 개발자 키가 있으면, 요청에 추가합니다.)
-            if (devKey) {
-                requestBody.devKey = devKey;
-            }
+            if (devKey) { requestBody.devKey = devKey; }
 
             const response = await fetch('/spin', {
                 method: 'POST',
@@ -177,17 +161,47 @@ document.addEventListener('DOMContentLoaded', () => {
             setControlsDisabled(false);
         }
     }
-
+    // ... all other helper functions (getTonBalance, runSpinAnimation, etc.) are the same ...
+    
+    function updateUI(account) {
+        if (account) {
+            fullUserAddress = account.address;
+            const shortAddress = `${fullUserAddress.slice(0, 6)}...${fullUserAddress.slice(-4)}`;
+            walletInfoSpan.textContent = shortAddress;
+            landingView.classList.remove('active');
+            gameView.classList.add('active');
+            showError('');
+        } else {
+            fullUserAddress = '';
+            gameView.classList.remove('active');
+            landingView.classList.add('active');
+            walletInfoSpan.textContent = '';
+        }
+    }
+    async function getJettonWalletAddress(ownerAddress, jettonMasterAddress) {
+        try {
+            const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: jettonMasterAddress });
+            const jettonWalletAddress = await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address(ownerAddress));
+            return jettonWalletAddress.toString(true, true, true);
+        } catch (error) {
+            console.error("!!! DETAILED ERROR from getJettonWalletAddress:", error);
+            let userFriendlyMessage = "A network or contract error occurred.";
+            if (error && typeof error.message === 'string' && error.message.includes("exit_code: -13")) {
+                userFriendlyMessage = "Contract error (-13). Is the TOKEN_MASTER_ADDRESS correct?";
+            }
+            throw new Error(userFriendlyMessage);
+        }
+    }
     async function getTonBalance() {
         if (!fullUserAddress) return 0;
         try {
-            return parseFloat(TonWeb.utils.fromNano(await tonweb.getBalance(fullUserAddress)));
+            const balance = await tonweb.getBalance(fullUserAddress);
+            return parseFloat(TonWeb.utils.fromNano(balance));
         } catch (e) {
             console.error("Could not fetch TON balance", e);
             return 0;
         }
     }
-    
     function runSpinAnimation(resultData) {
         return new Promise(resolve => {
             const spinDuration = 3000;
@@ -206,23 +220,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }, spinDuration);
         });
     }
-
     function setControlsDisabled(disabled) {
         spinBtn.disabled = disabled;
         increaseBetBtn.disabled = disabled;
         decreaseBetBtn.disabled = disabled;
         spinBtn.textContent = disabled ? 'Spinning...' : 'Spin';
     }
-
     function showLoadingOverlay(text) {
         loadingText.textContent = text;
         loadingOverlay.classList.add('visible');
     }
-
     function hideLoadingOverlay() {
         loadingOverlay.classList.remove('visible');
     }
-    
     function showError(message) {
         const errorElement = gameView.classList.contains('active') ? gameErrorMessageP : landingErrorMessageP;
         if (errorElement) {
@@ -234,6 +244,5 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
     checkConnection();
 });
