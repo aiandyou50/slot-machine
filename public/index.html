@@ -6,7 +6,7 @@
     <title>CandleSpinner: TON 슬롯머신</title>
     <!-- 1. TON Connect UI 라이브러리 -->
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <!-- ▼▼▼ [핵심 수정] 빠뜨렸던 TonWeb 라이브러리를 추가합니다. ▼▼▼ -->
+    <!-- 2. TonWeb 라이브러리 -->
     <script src="https://unpkg.com/tonweb@latest/dist/tonweb.js"></script>
     
     <!-- 분리된 CSS 파일을 연결합니다. -->
@@ -65,8 +65,8 @@
         </div>
     </div>
 
-    <!-- 분리된 JavaScript 파일을 연결합니다. -->
-    <script src="script.js"></script>
+    <!-- ▼▼▼ [핵심 수정] defer 속성을 추가하여 스크립트 실행 순서 문제를 해결합니다. ▼▼▼ -->
+    <script src="script.js" defer></script>
 </body>
 </html>
 
