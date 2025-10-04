@@ -2,14 +2,14 @@
  * Cloudflare Worker for CandleSpinner Game Logic
  * (클라우드플레어 워커: 캔들스피너 게임 로직)
  *
- * @version 1.1.4 (Backend Logic)
+ * @version 1.1.5 (Backend Logic)
  * @date 2025-10-05
  *
  * @changelog
- * - v1.1.4 (2025-10-05): [DEBUG] Changed `waitUntil` to `await` for the payout function to expose backend errors to the frontend for easier debugging on mobile.
- * (모바일 환경에서의 디버깅을 용이하게 하기 위해, 백엔드 오류를 프론트엔드에 노출시키도록 상금 지급 함수를 `waitUntil`에서 `await`으로 변경했습니다.)
- * - v1.1.3 (2025-10-04): [FEATURE] Added a developer mode.
- * (개발자 모드를 추가했습니다.)
+ * - v1.1.5 (2025-10-05): [BUGFIX] Corrected the object used for creating the payout payload. Used a `JettonWallet` instance instead of `JettonMinter`, mirroring the frontend fix.
+ * (상금 지급 페이로드 생성에 사용되는 객체를 수정했습니다. 프론트엔드 수정사항을 반영하여, `JettonMinter` 대신 `JettonWallet` 인스턴스를 사용합니다.)
+ * - v1.1.4 (2025-10-05): [DEBUG] Changed to `await` to expose backend errors to the frontend.
+ * (백엔드 오류를 프론트엔드에 노출시키도록 `await`으로 변경했습니다.)
  */
 
 // --- ⚙️ Game Configuration (게임 설정) ---
@@ -40,8 +40,6 @@ async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
     
     const mnemonic = context.env.GAME_WALLET_MNEMONIC;
     if (!mnemonic) {
-        // This error will now be thrown and caught in onRequest.
-        // (이제 이 오류는 onRequest에서 잡히게 됩니다.)
         throw new Error("CRITICAL: GAME_WALLET_MNEMONIC is not set in Cloudflare secrets.");
     }
 
@@ -54,15 +52,24 @@ async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
     const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: config.tokenMasterAddress });
     const gameJettonWalletAddress = await jettonMinter.getJettonWalletAddress(gameWalletAddress);
 
+    // ▼▼▼ [BUGFIX] Create a JettonWallet instance for the GAME's wallet and call `createTransferBody` on it.
+    // ([버그 수정] 게임 지갑의 JettonWallet 인스턴스를 생성하고, 거기서 `createTransferBody`를 호출합니다.)
+    const gameJettonWallet = new TonWeb.token.jetton.JettonWallet(httpProvider, {
+        address: gameJettonWalletAddress.toString(true, true, true)
+    });
+
     const amountInNano = new TonWeb.utils.BN(payoutAmount).mul(new TonWeb.utils.BN(10).pow(new TonWeb.utils.BN(config.tokenDecimals)));
     const seqno = await wallet.methods.seqno().call();
 
-    const transferPayload = await jettonMinter.createTransferBody({
+    // Call createTransferBody on the JettonWallet instance, NOT the JettonMinter.
+    // (JettonMinter가 아닌 JettonWallet 인스턴스에서 `createTransferBody`를 호출합니다.)
+    const transferPayload = await gameJettonWallet.createTransferBody({
         jettonAmount: amountInNano,
         toAddress: new TonWeb.utils.Address(recipientAddress),
         forwardAmount: TonWeb.utils.toNano('0.01'),
         responseAddress: gameWalletAddress
     });
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     await wallet.methods.transfer({
         secretKey: keyPair.secretKey,
@@ -106,15 +113,10 @@ export async function onRequest(context) {
         
         if (result.isWin) {
             console.log(`WIN! Attempting to send ${result.payout} CSPIN to ${userAddress}`);
-            
-            // ▼▼▼ [DEBUGGING CHANGE] Switched to `await` to catch errors and report to frontend.
-            // ([디버깅 변경] 오류를 잡아 프론트엔드로 보고하기 위해 `await`으로 변경.)
             try {
                 await sendPayoutTransaction(context, userAddress, result.payout);
             } catch (payoutError) {
                 console.error("Payout failed:", payoutError);
-                // If payout fails, return a specific error message to the user.
-                // (상금 지급이 실패하면, 사용자에게 특정 오류 메시지를 반환합니다.)
                 return new Response(JSON.stringify({
                     success: false,
                     message: `Payout Error: ${payoutError.message}`
