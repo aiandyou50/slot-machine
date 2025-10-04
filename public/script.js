@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (account) {
             landingView.classList.remove('active');
             gameView.classList.add('active');
-            showError(''); // 뷰가 바뀔 때 에러 메시지 초기화
+            showError(''); // Clear errors on view change
             const shortAddress = `${account.address.slice(0, 6)}...${account.address.slice(-4)}`;
             walletInfoSpan.textContent = shortAddress;
         } else {
@@ -122,22 +122,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const amountInNano = new TonWeb.utils.BN(currentBet).mul(new TonWeb.utils.BN(10).pow(new TonWeb.utils.BN(TOKEN_DECIMALS)));
             
             const body = new TonWeb.boc.Cell();
-            body.bits.writeUint(0xf8a7ea5, 32); // op-code for jetton transfer
-            body.bits.writeUint(0, 64); // query-id
-            body.bits.writeCoins(amountInNano); // jetton amount
-            body.bits.writeAddress(new TonWeb.utils.Address(GAME_WALLET_ADDRESS)); // destination
-            body.bits.writeAddress(new TonWeb.utils.Address(tonConnectUI.wallet.account.address)); // response address
-            body.bits.writeBit(0); // custom payload
-            body.bits.writeCoins(new TonWeb.utils.BN(1)); // forward ton amount (usually 1 nano)
-            body.bits.writeBit(0); // forward payload
+            body.bits.writeUint(0xf8a7ea5, 32);
+            body.bits.writeUint(0, 64);
+            body.bits.writeCoins(amountInNano);
+            body.bits.writeAddress(new TonWeb.utils.Address(GAME_WALLET_ADDRESS));
+            body.bits.writeAddress(new TonWeb.utils.Address(tonConnectUI.wallet.account.address));
+            body.bits.writeBit(0);
+            body.bits.writeCoins(new TonWeb.utils.BN(1)); 
+            body.bits.writeBit(0);
 
             const payload = TonWeb.utils.bytesToBase64(await body.toBoc());
             
             const transaction = {
-                validUntil: Math.floor(Date.now() / 1000) + 600, // 10 minutes from now
+                validUntil: Math.floor(Date.now() / 1000) + 600,
                 messages: [{
                     address: userJettonWalletAddress,
-                    amount: TonWeb.utils.toNano('0.05').toString(), // gas fee for the transaction
+                    amount: TonWeb.utils.toNano('0.05').toString(),
                     payload: payload
                 }]
             };
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function getTonBalance() {
         if (!tonConnectUI.wallet) return 0;
         try {
-            // 일관성을 위해 TonWeb 라이브러리를 사용하여 잔액을 가져옵니다.
+            // Using tonweb to get balance for consistency
             const balance = await tonweb.getBalance(tonConnectUI.wallet.account.address);
             return parseFloat(TonWeb.utils.fromNano(balance));
         } catch (e) {
@@ -227,11 +227,11 @@ document.addEventListener('DOMContentLoaded', () => {
             errorElement.textContent = message;
             if(message){
                 setTimeout(() => {
-                    // 메시지가 지워지기 전에 다른 에러로 바뀌지 않았는지 확인
+                    // Check if the message is still the same before clearing it
                     if (errorElement.textContent === message) {
                         errorElement.textContent = '';
                     }
-                }, 7000); // 에러 메시지 표시 시간 증가
+                }, 7000); // Increased timeout for better readability
             }
         }
     }
