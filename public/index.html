@@ -6,17 +6,14 @@
     <title>CandleSpinner: TON 슬롯머신</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://unpkg.com/tonweb@latest/dist/tonweb.js"></script>
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="version-info"></div>
-
     <div id="loading-overlay">
         <div class="loading-spinner"></div>
         <p id="loading-text">Processing...</p>
     </div>
-
     <div id="app-container" class="container">
         <div id="landing-view" class="view active">
             <div class="card">
@@ -28,9 +25,9 @@
                 <p class="subtle-text">TON Connect를 통해 안전하게 연결됩니다.</p>
             </div>
         </div>
-
         <div id="game-view" class="view">
             <div class="header">
+                <button id="dev-mode-btn" class="dev-btn" title="Developer Mode">⚙️</button>
                 <div id="wallet-display" class="wallet-display">
                     <span id="wallet-info"></span>
                     <button id="copy-address-btn" class="copy-btn" title="Copy full address">📋</button>
@@ -40,17 +37,14 @@
             <p id="game-error-message" class="error-text game-error"></p>
             <div class="game-card">
                 <div class="reel-grid">
-                    <div class="reel">💎</div> <div class="reel">💰</div> <div class="reel">🍀</div>
-                    <div class="reel">🔔</div> <div class="reel">🍒</div> <div class="reel">7️⃣</div>
-                    <div class="reel">💎</div> <div class="reel">💰</div> <div class="reel">🍀</div>
+                    <div class="reel">💎</div><div class="reel">💰</div><div class="reel">🍀</div>
+                    <div class="reel">🔔</div><div class="reel">🍒</div><div class="reel">7️⃣</div>
+                    <div class="reel">💎</div><div class="reel">💰</div><div class="reel">🍀</div>
                 </div>
                 <div class="controls-container">
                     <div class="bet-controls">
                         <button id="decrease-bet-btn" class="bet-btn">-</button>
-                        <div class="bet-info">
-                            <span>BET</span>
-                            <span id="bet-amount">10</span>
-                        </div>
+                        <div class="bet-info"><span>BET</span><span id="bet-amount">10</span></div>
                         <button id="increase-bet-btn" class="bet-btn">+</button>
                     </div>
                     <button id="spin-btn" class="spin-btn">Spin</button>
@@ -58,7 +52,6 @@
             </div>
         </div>
     </div>
-
     <script src="script.js" defer></script>
 </body>
 </html>
