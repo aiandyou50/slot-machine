@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const betAmountSpan = document.getElementById('bet-amount');
     const spinBtn = document.getElementById('spin-btn');
     const reels = document.querySelectorAll('.reel');
-    const errorMessageP = document.getElementById('error-message');
+    const landingErrorMessageP = document.getElementById('error-message');
+    const gameErrorMessageP = document.getElementById('game-error-message'); // Game view error element
     const versionInfoDiv = document.querySelector('.version-info');
     const loadingOverlay = document.getElementById('loading-overlay');
     const loadingText = document.getElementById('loading-text');
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const GAME_WALLET_ADDRESS = "UQBFPDdSlPgqPrn2XwhpVq0KQExN2kv83_batQ-dptaR8Mtd";
     const TOKEN_MASTER_ADDRESS = "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV";
     const TOKEN_DECIMALS = 9;
-    const MIN_TON_FOR_GAS = 0.05; // 가스비를 위한 최소 TON 잔액 (예: 0.05 TON)
+    const MIN_TON_FOR_GAS = 0.05; // Minimum TON balance required for gas fees
 
     // App Version
     const APP_VERSION = "1.1.1";
@@ -69,7 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (account) {
             landingView.classList.remove('active');
             gameView.classList.add('active');
-            errorMessageP.textContent = '';
+            landingErrorMessageP.textContent = '';
+            gameErrorMessageP.textContent = '';
             const shortAddress = `${account.address.slice(0, 6)}...${account.address.slice(-4)}`;
             walletInfoSpan.textContent = shortAddress;
         } else {
@@ -87,10 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("Failed to restore connection", error);
-        } finally {
-             tonConnectUI.getWallets().then(() => {
-                 if(!tonConnectUI.wallet) errorMessageP.textContent = '';
-             });
+            showError("Could not restore wallet connection.");
         }
     }
     
@@ -98,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isSpinning = true;
         setControlsDisabled(true);
         showLoadingOverlay("Checking TON balance for gas fee...");
+        showError(''); // Clear previous error messages
 
         try {
             // 1. Check for sufficient TON balance
@@ -163,8 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function getTonBalance() {
         if (!tonConnectUI.wallet) return 0;
         try {
-            // Using a public TON API to get balance
             const response = await fetch(`https://toncenter.com/api/v2/getAddressInformation?address=${tonConnectUI.wallet.account.address}`);
+            if (!response.ok) return 0;
             const data = await response.json();
             if (data.ok) {
                 const balanceInNano = new TonWeb.utils.BN(data.result.balance);
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return 0;
         } catch (e) {
             console.error("Could not fetch TON balance", e);
-            return 0; // Assume 0 if API fails
+            return 0;
         }
     }
     
@@ -217,19 +217,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function showError(message) {
-        // A helper to show error messages on the main screen
-        const errorElement = document.getElementById('error-message') || document.querySelector('.error-text');
+        const errorElement = gameView.classList.contains('active') ? gameErrorMessageP : landingErrorMessageP;
         if (errorElement) {
             errorElement.textContent = message;
-            setTimeout(() => {
-                if (errorElement.textContent === message) {
-                    errorElement.textContent = '';
-                }
-            }, 5000); // Clear message after 5 seconds
+            // Only auto-clear if there is a message
+            if(message){
+                setTimeout(() => {
+                    if (errorElement.textContent === message) {
+                        errorElement.textContent = '';
+                    }
+                }, 5000); // Clear message after 5 seconds
+            }
         }
     }
 
     checkConnection();
 });
-
 
