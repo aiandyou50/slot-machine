@@ -2,19 +2,15 @@
  * Cloudflare Worker for CandleSpinner Game Logic
  * (클라우드플레어 워커: 캔들스피너 게임 로직)
  *
- * @version 1.1.1 (Backend Logic)
+ * @version 1.1.2 (Backend Logic)
  * @date 2025-10-04
  *
  * @changelog
- * - v1.1.1 (2025-10-04): [BUGFIX] Corrected a typo in the TonWeb import URL (https:/ -> https://).
+ * - v1.1.2 (2025-10-04): [BUGFIX] Switched to a dynamic import for TonWeb to bypass a parsing bug in the secure Cloudflare runtime.
+ * (보안 클라우드플레어 런타임의 파싱 버그를 우회하기 위해 TonWeb를 동적 import로 전환했습니다.)
+ * - v1.1.1 (2025-10-04): [BUGFIX] Corrected a typo in the TonWeb import URL.
  * (TonWeb import URL의 오타를 수정했습니다.)
- * - v1.1.0 (2025-10-04): [FEATURE] Implemented on-chain payout logic.
- * (온체인 상금 지급 로직을 구현했습니다.)
  */
-
-// [BUGFIX] Corrected the import URL from 'https:/' to 'https://'
-// ([버그 수정] import URL을 'https:/' 에서 'https://'로 수정)
-import TonWeb from 'https://esm.sh/tonweb@0.0.66';
 
 // --- ⚙️ Game Configuration (게임 설정) ---
 const config = {
@@ -30,9 +26,6 @@ const config = {
 /**
  * Calculates the result of a spin, including wins and payout.
  * (스핀 결과를 계산하고, 당첨 여부와 총 상금을 반환합니다.)
- * @param {string[]} finalReels - A flat array of 9 symbols representing the 3x3 grid. (3x3 그리드를 나타내는 9개의 심볼 배열)
- * @param {number} betAmount - The amount bet by the user. (사용자가 베팅한 금액)
- * @returns {{symbols: string[], isWin: boolean, payout: number}} - The result object. (게임 결과 객체)
  */
 function calculateResult(finalReels, betAmount) {
     let totalPayout = 0;
@@ -49,15 +42,15 @@ function calculateResult(finalReels, betAmount) {
 /**
  * Sends the payout as a Jetton transaction from the game wallet to the user.
  * (게임 지갑에서 사용자에게 젯톤 트랜잭션으로 상금을 전송합니다.)
- * @param {object} context - The Cloudflare Worker context, containing environment variables. (환경 변수를 포함한 CF 워커 컨텍스트)
- * @param {string} recipientAddress - The user's wallet address to send the payout to. (상금을 받을 사용자의 지갑 주소)
- * @param {number} payoutAmount - The amount of CSPIN tokens to send. (전송할 CSPIN 토큰의 양)
- * @returns {Promise<boolean>} - True if the transaction was sent successfully. (트랜잭션이 성공적으로 전송되었으면 true)
  */
 async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
+    // [BUGFIX] Dynamically import TonWeb inside the function to bypass the runtime parsing issue.
+    // ([버그 수정] 런타임 파싱 이슈를 우회하기 위해 함수 내부에서 TonWeb을 동적으로 import합니다.)
+    const TonWeb = (await import('https://esm.sh/tonweb@0.0.66')).default;
+    
     const mnemonic = context.env.GAME_WALLET_MNEMONIC;
     if (!mnemonic) {
-        console.error("CRITICAL: GAME_WALLET_MNEMONIC is not set in Cloudflare environment variables.");
+        console.error("CRITICAL: GAME_WALLET_MNEMONIC is not set.");
         return false;
     }
 
@@ -80,7 +73,7 @@ async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
         responseAddress: gameWalletAddress
     });
 
-    const result = await wallet.methods.transfer({
+    await wallet.methods.transfer({
         secretKey: keyPair.secretKey,
         to: gameJettonWalletAddress.toString(true, true, true),
         amount: TonWeb.utils.toNano('0.05'),
@@ -89,14 +82,13 @@ async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
         sendMode: 3
     }).send();
 
-    console.log("Payout transaction sent:", result);
+    console.log(`Payout of ${payoutAmount} CSPIN to ${recipientAddress} sent successfully.`);
     return true;
 }
 
 /**
  * Handles the HTTP request for a spin.
  * ('/spin' 요청을 처리하는 메인 핸들러 함수입니다.)
- * @param {object} context - The Cloudflare Worker context. (CF 워커 컨텍스트)
  */
 export async function onRequest(context) {
     try {
@@ -118,7 +110,7 @@ export async function onRequest(context) {
         const result = calculateResult(finalReels, betAmount);
         
         if (result.isWin) {
-            console.log(`WIN! Sending ${result.payout} CSPIN to ${userAddress}`);
+            console.log(`WIN! Queuing payout of ${result.payout} CSPIN to ${userAddress}`);
             context.waitUntil(sendPayoutTransaction(context, userAddress, result.payout));
         }
 
