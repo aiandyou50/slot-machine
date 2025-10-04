@@ -4,27 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CandleSpinner: TON 슬롯머신</title>
-    <!-- 1. TON Connect UI 라이브러리 -->
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <!-- 2. TonWeb 라이브러리 -->
     <script src="https://unpkg.com/tonweb@latest/dist/tonweb.js"></script>
     
-    <!-- 분리된 CSS 파일을 연결합니다. -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 버전 정보 표시 -->
     <div class="version-info"></div>
 
-    <!-- 로딩 오버레이 -->
     <div id="loading-overlay">
         <div class="loading-spinner"></div>
         <p id="loading-text">Processing...</p>
     </div>
 
-    <!-- 메인 앱 컨테이너 -->
     <div id="app-container" class="container">
-        <!-- 랜딩 뷰 (지갑 연결 전) -->
         <div id="landing-view" class="view active">
             <div class="card">
                 <div class="icon-placeholder"></div>
@@ -36,13 +29,14 @@
             </div>
         </div>
 
-        <!-- 게임 뷰 (지갑 연결 후) -->
         <div id="game-view" class="view">
             <div class="header">
-                <span id="wallet-info"></span>
+                <div id="wallet-display" class="wallet-display">
+                    <span id="wallet-info"></span>
+                    <button id="copy-address-btn" class="copy-btn" title="Copy full address">📋</button>
+                </div>
                 <button id="disconnect-wallet-button" class="disconnect-btn">Disconnect</button>
             </div>
-            <!-- 게임 화면 내 에러 메시지 표시 영역 -->
             <p id="game-error-message" class="error-text game-error"></p>
             <div class="game-card">
                 <div class="reel-grid">
@@ -65,8 +59,6 @@
         </div>
     </div>
 
-    <!-- ▼▼▼ [핵심 수정] defer 속성을 추가하여 스크립트 실행 순서 문제를 해결합니다. ▼▼▼ -->
     <script src="script.js" defer></script>
 </body>
 </html>
-
