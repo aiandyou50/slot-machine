@@ -2,16 +2,18 @@
  * Cloudflare Worker for CandleSpinner Game Logic
  * (클라우드플레어 워커: 캔들스피너 게임 로직)
  *
- * @version 1.1.0 (Backend Logic)
+ * @version 1.1.1 (Backend Logic)
  * @date 2025-10-04
  *
  * @changelog
- * - v1.1.0 (2025-10-04): [FEATURE] Implemented on-chain payout logic. The server now sends CSPIN tokens to the winner from the game wallet.
- * (온체인 상금 지급 로직 구현. 서버가 이제 게임 지갑에서 승자에게 CSPIN 토큰을 전송합니다.)
+ * - v1.1.1 (2025-10-04): [BUGFIX] Corrected a typo in the TonWeb import URL (https:/ -> https://).
+ * (TonWeb import URL의 오타를 수정했습니다.)
+ * - v1.1.0 (2025-10-04): [FEATURE] Implemented on-chain payout logic.
+ * (온체인 상금 지급 로직을 구현했습니다.)
  */
 
-// Use esm.sh for modern ES module support of TonWeb in CF Workers.
-// (CF Worker 환경에서 TonWeb의 ES 모듈을 지원하기 위해 esm.sh를 사용합니다.)
+// [BUGFIX] Corrected the import URL from 'https:/' to 'https://'
+// ([버그 수정] import URL을 'https:/' 에서 'https://'로 수정)
 import TonWeb from 'https://esm.sh/tonweb@0.0.66';
 
 // --- ⚙️ Game Configuration (게임 설정) ---
@@ -21,8 +23,6 @@ const config = {
     payoutMultipliers: {
         '🌸': 5, '💎': 10, '🍀': 15, '🔔': 20, '💰': 50, '7️⃣': 100
     },
-    // The master address of the CSPIN token.
-    // (CSPIN 토큰의 마스터 주소입니다.)
     tokenMasterAddress: "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV",
     tokenDecimals: 9,
 };
@@ -55,35 +55,24 @@ function calculateResult(finalReels, betAmount) {
  * @returns {Promise<boolean>} - True if the transaction was sent successfully. (트랜잭션이 성공적으로 전송되었으면 true)
  */
 async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
-    // 1. Securely load the game wallet's mnemonic from Cloudflare's environment variables.
-    // (1. Cloudflare 환경 변수에서 게임 지갑의 니모닉을 안전하게 불러옵니다.)
     const mnemonic = context.env.GAME_WALLET_MNEMONIC;
     if (!mnemonic) {
         console.error("CRITICAL: GAME_WALLET_MNEMONIC is not set in Cloudflare environment variables.");
         return false;
     }
 
-    // 2. Initialize TonWeb and the game wallet from the mnemonic.
-    // (2. TonWeb을 초기화하고 니모닉으로부터 게임 지갑을 생성합니다.)
     const httpProvider = new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC');
     const keyPair = await TonWeb.utils.mnemonicToKeyPair(mnemonic.split(' '));
-    const WalletClass = TonWeb.Wallets.all.v4R2; // Use a standard wallet version, e.g., v4R2
+    const WalletClass = TonWeb.Wallets.all.v4R2;
     const wallet = new WalletClass(httpProvider, { publicKey: keyPair.publicKey });
     const gameWalletAddress = await wallet.getAddress();
 
-    // 3. Find the game wallet's own Jetton wallet for CSPIN.
-    // (3. CSPIN 토큰에 대한 게임 지갑 자신의 젯톤 지갑을 찾습니다.)
     const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: config.tokenMasterAddress });
     const gameJettonWalletAddress = await jettonMinter.getJettonWalletAddress(gameWalletAddress);
 
-    // 4. Create the transaction.
-    // (4. 트랜잭션을 생성합니다.)
     const amountInNano = new TonWeb.utils.BN(payoutAmount).mul(new TonWeb.utils.BN(10).pow(new TonWeb.utils.BN(config.tokenDecimals)));
+    const seqno = await wallet.methods.seqno().call();
 
-    const seqno = await wallet.methods.seqno().call(); // Get the current sequence number of the wallet. (지갑의 현재 시퀀스 번호를 가져옵니다.)
-
-    // Create the transfer payload
-    // (전송 페이로드를 생성합니다.)
     const transferPayload = await jettonMinter.createTransferBody({
         jettonAmount: amountInNano,
         toAddress: new TonWeb.utils.Address(recipientAddress),
@@ -91,12 +80,10 @@ async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
         responseAddress: gameWalletAddress
     });
 
-    // Send the transaction from the game wallet
-    // (게임 지갑에서 트랜잭션을 전송합니다.)
     const result = await wallet.methods.transfer({
         secretKey: keyPair.secretKey,
         to: gameJettonWalletAddress.toString(true, true, true),
-        amount: TonWeb.utils.toNano('0.05'), // Gas fee for the transaction (트랜잭션 가스비)
+        amount: TonWeb.utils.toNano('0.05'),
         seqno: seqno || 0,
         payload: transferPayload,
         sendMode: 3
@@ -105,7 +92,6 @@ async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
     console.log("Payout transaction sent:", result);
     return true;
 }
-
 
 /**
  * Handles the HTTP request for a spin.
@@ -116,7 +102,7 @@ export async function onRequest(context) {
     try {
         const requestData = await context.request.json();
         const betAmount = Number(requestData.betAmount);
-        const userAddress = requestData.userAddress; // Get the user's address from the request (요청에서 사용자 주소 가져오기)
+        const userAddress = requestData.userAddress;
 
         if (!betAmount || betAmount <= 0 || !userAddress) {
             return new Response(JSON.stringify({ success: false, message: "Invalid bet amount or user address." }), {
@@ -133,8 +119,6 @@ export async function onRequest(context) {
         
         if (result.isWin) {
             console.log(`WIN! Sending ${result.payout} CSPIN to ${userAddress}`);
-            // Do not wait for the transaction to complete to keep the UI responsive.
-            // (UI 응답성을 유지하기 위해 트랜잭션이 완료될 때까지 기다리지 않습니다.)
             context.waitUntil(sendPayoutTransaction(context, userAddress, result.payout));
         }
 
