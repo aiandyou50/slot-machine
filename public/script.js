@@ -2,15 +2,15 @@
  * CandleSpinner Frontend Logic
  * (CandleSpinner 프론트엔드 로직)
  *
- * @version 1.1.9
+ * @version 1.2.0
  * @date 2025-10-04
  * @author Gemini AI (in collaboration with the user)
  *
  * @changelog
- * - v1.1.9 (2025-10-04): [BUGFIX] Renamed `createTransferBody` to `createTransferMessage` to match the latest TonWeb library API.
- * (최신 TonWeb 라이브러리 API에 맞게 `createTransferBody`를 `createTransferMessage`로 변경했습니다.)
- * - v1.1.8 (2025-10-04): [BUGFIX] Replaced manual transaction payload creation with the TonWeb library's helper function.
- * (수동 페이로드 생성을 라이브러리의 헬퍼 함수로 교체했습니다.)
+ * - v1.2.0 (2025-10-04): [BUGFIX] Corrected the object used to create the transfer payload. Used a `JettonWallet` instance instead of `JettonMinter`. This is the definitive fix for the 'is not a function' errors.
+ * (전송 페이로드 생성에 사용되는 객체를 수정했습니다. `JettonMinter` 대신 `JettonWallet` 인스턴스를 사용합니다. 'is not a function' 오류에 대한 최종 수정입니다.)
+ * - v1.1.9 (2025-10-04): [BUGFIX] Attempted rename to `createTransferMessage`.
+ * (메서드 이름을 `createTransferMessage`로 변경 시도했습니다.)
  */
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MIN_TON_FOR_GAS = 0.05;
 
     // App Version
-    const APP_VERSION = "1.1.9";
+    const APP_VERSION = "1.2.0";
     const RELEASE_DATE = "2025-10-04";
 
     // Game state
@@ -111,10 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    async function checkConnection() {
-        console.log("Checking for existing wallet connection...");
-    }
-    
     async function getJettonWalletAddress(ownerAddress, jettonMasterAddress) {
         try {
             const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: jettonMasterAddress });
@@ -147,21 +143,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
             showLoadingOverlay("2. Preparing transaction...");
             
-            const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: TOKEN_MASTER_ADDRESS });
+            // ▼▼▼ [BUGFIX] Create a JettonWallet instance and call `createTransferBody` on it.
+            // ([버그 수정] JettonWallet 인스턴스를 생성하고, 그 인스턴스에서 `createTransferBody`를 호출합니다.)
+            
+            // 1. Create a JettonWallet object representing the user's token wallet.
+            // (1. 사용자의 토큰 지갑을 나타내는 JettonWallet 객체를 생성합니다.)
+            const userJettonWallet = new TonWeb.token.jetton.JettonWallet(httpProvider, {
+                address: userJettonWalletAddress
+            });
+            
             const amountInNano = new TonWeb.utils.BN(currentBet).mul(new TonWeb.utils.BN(10).pow(new TonWeb.utils.BN(TOKEN_DECIMALS)));
 
-            // ▼▼▼ [BUGFIX] Use `createTransferMessage` for the latest TonWeb version.
-            // ([버그 수정] 최신 TonWeb 버전에 맞게 `createTransferMessage`를 사용합니다.)
-            const payloadCell = await jettonMinter.createTransferMessage({
+            // 2. Call `createTransferBody` on the JettonWallet instance, NOT the JettonMinter.
+            // (2. JettonMinter가 아닌 JettonWallet 인스턴스에서 `createTransferBody`를 호출합니다.)
+            const payloadCell = await userJettonWallet.createTransferBody({
                 jettonAmount: amountInNano,
                 toAddress: new TonWeb.utils.Address(GAME_WALLET_ADDRESS),
                 responseAddress: new TonWeb.utils.Address(fullUserAddress),
                 forwardAmount: TonWeb.utils.toNano('0.01')
             });
-            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
             const payload = TonWeb.utils.bytesToBase64(await payloadCell.toBoc());
-            
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
             const transaction = {
                 validUntil: Math.floor(Date.now() / 1000) + 600,
                 messages: [{
@@ -264,5 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Call checkConnection on load
     checkConnection();
 });
