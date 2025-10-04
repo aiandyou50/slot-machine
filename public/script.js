@@ -14,10 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingOverlay = document.getElementById('loading-overlay');
     const loadingText = document.getElementById('loading-text');
 
-    // ▼▼▼ [추가] 블록체인 및 게임 관련 상수 ▼▼▼
+    // Blockchain & Game Constants
     const GAME_WALLET_ADDRESS = "UQBFPDdSlPgqPrn2XwhpVq0KQExN2kv83_batQ-dptaR8Mtd";
+    const TOKEN_MASTER_ADDRESS = "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV";
     const TOKEN_DECIMALS = 9;
-    const APP_VERSION = "1.1.0";
+    const MIN_TON_FOR_GAS = 0.05; // 가스비를 위한 최소 TON 잔액 (예: 0.05 TON)
+
+    // App Version
+    const APP_VERSION = "1.1.1";
     const RELEASE_DATE = "2025-10-04";
 
     // Game state
@@ -40,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Event Listeners
     tonConnectUI.onStatusChange(wallet => {
-        updateUI(wallet ? wallet.account.address : null);
+        updateUI(wallet ? wallet.account : null);
     });
     disconnectBtn.addEventListener('click', () => { tonConnectUI.disconnect(); });
     decreaseBetBtn.addEventListener('click', () => {
@@ -61,12 +65,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Functions
-    function updateUI(address) {
-        if (address) {
+    function updateUI(account) {
+        if (account) {
             landingView.classList.remove('active');
             gameView.classList.add('active');
             errorMessageP.textContent = '';
-            const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+            const shortAddress = `${account.address.slice(0, 6)}...${account.address.slice(-4)}`;
             walletInfoSpan.textContent = shortAddress;
         } else {
             gameView.classList.remove('active');
@@ -79,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await tonConnectUI.restoreConnection();
             if (tonConnectUI.wallet) {
-                updateUI(tonConnectUI.wallet.account.address);
+                updateUI(tonConnectUI.wallet.account);
             }
         } catch (error) {
             console.error("Failed to restore connection", error);
@@ -90,14 +94,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // ▼▼▼ [수정] startSpin 함수 전체 로직 변경 ▼▼▼
     async function startSpin() {
         isSpinning = true;
         setControlsDisabled(true);
-        showLoadingOverlay("1. Preparing transaction...");
+        showLoadingOverlay("Checking TON balance for gas fee...");
 
         try {
-            // 1. Create Jetton transfer payload
+            // 1. Check for sufficient TON balance
+            const tonBalance = await getTonBalance();
+            if (tonBalance < MIN_TON_FOR_GAS) {
+                throw new Error(`Not enough TON for gas fee. You need at least ${MIN_TON_FOR_GAS} TON.`);
+            }
+
+            showLoadingOverlay("1. Preparing transaction...");
+            
+            // 2. Create Jetton transfer payload
             const amountInNano = new TonWeb.utils.BN(currentBet).mul(new TonWeb.utils.BN(10).pow(new TonWeb.utils.BN(TOKEN_DECIMALS)));
             
             const body = new TonWeb.boc.Cell();
@@ -105,56 +116,64 @@ document.addEventListener('DOMContentLoaded', () => {
             body.bits.writeUint(0, 64); // query-id
             body.bits.writeCoins(amountInNano);
             body.bits.writeAddress(new TonWeb.utils.Address(GAME_WALLET_ADDRESS));
-            body.bits.writeAddress(new TonWeb.utils.Address(tonConnectUI.wallet.account.address)); // response-address
-            body.bits.writeBit(0); // custom payload
-            body.bits.writeCoins(new TonWeb.utils.BN(1)); // forward ton amount
-            body.bits.writeBit(0); // forward payload
+            body.bits.writeAddress(new TonWeb.utils.Address(tonConnectUI.wallet.account.address));
+            body.bits.writeBit(0);
+            body.bits.writeCoins(new TonWeb.utils.BN(1));
+            body.bits.writeBit(0);
 
             const payload = TonWeb.utils.bytesToBase64(await body.toBoc());
             
-            // 2. Prepare transaction object
             const transaction = {
-                validUntil: Math.floor(Date.now() / 1000) + 600, // 10 minutes
-                messages: [
-                    {
-                        address: "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV", // CSPIN Jetton Master Address
-                        amount: TonWeb.utils.toNano('0.05').toString(), // 0.05 TON for gas
-                        payload: payload
-                    }
-                ]
+                validUntil: Math.floor(Date.now() / 1000) + 600,
+                messages: [{
+                    address: TOKEN_MASTER_ADDRESS,
+                    amount: TonWeb.utils.toNano('0.05').toString(),
+                    payload: payload
+                }]
             };
             
             showLoadingOverlay("2. Please approve in your wallet...");
 
-            // 3. Send transaction
             const result = await tonConnectUI.sendTransaction(transaction);
             
             showLoadingOverlay("3. Waiting for blockchain confirmation...");
 
-            // 4. (보안) 백엔드에 거래 검증 및 결과 요청 (지금은 성공으로 간주)
-            // TODO: 실제 운영 시에는 result.boc를 백엔드로 보내 검증해야 합니다.
-            
-            // 5. 서버에 결과 요청
             const response = await fetch('/spin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ boc: result.boc }) // 거래 증거를 백엔드에 전달
+                body: JSON.stringify({ boc: result.boc })
             });
             if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
             const spinResult = await response.json();
-            if (!spinResult.success) throw new Error(spinResult.message || 'Spin failed on the server.');
+            if (!spinResult.success) throw new Error(spinResult.message);
 
             showLoadingOverlay("4. Spin starting!");
             await runSpinAnimation(spinResult.data);
 
         } catch (error) {
             console.error('Error during spin transaction:', error);
-            errorMessageP.textContent = error.message || "Transaction was rejected or failed.";
-            setTimeout(() => errorMessageP.textContent = '', 5000);
+            showError(error.message || "Transaction was rejected or failed.");
         } finally {
             hideLoadingOverlay();
             isSpinning = false;
             setControlsDisabled(false);
+        }
+    }
+
+    async function getTonBalance() {
+        if (!tonConnectUI.wallet) return 0;
+        try {
+            // Using a public TON API to get balance
+            const response = await fetch(`https://toncenter.com/api/v2/getAddressInformation?address=${tonConnectUI.wallet.account.address}`);
+            const data = await response.json();
+            if (data.ok) {
+                const balanceInNano = new TonWeb.utils.BN(data.result.balance);
+                return parseFloat(TonWeb.utils.fromNano(balanceInNano));
+            }
+            return 0;
+        } catch (e) {
+            console.error("Could not fetch TON balance", e);
+            return 0; // Assume 0 if API fails
         }
     }
     
@@ -196,6 +215,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function hideLoadingOverlay() {
         loadingOverlay.classList.remove('visible');
     }
+    
+    function showError(message) {
+        // A helper to show error messages on the main screen
+        const errorElement = document.getElementById('error-message') || document.querySelector('.error-text');
+        if (errorElement) {
+            errorElement.textContent = message;
+            setTimeout(() => {
+                if (errorElement.textContent === message) {
+                    errorElement.textContent = '';
+                }
+            }, 5000); // Clear message after 5 seconds
+        }
+    }
 
     checkConnection();
 });
+
+
