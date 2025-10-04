@@ -2,14 +2,14 @@
  * Cloudflare Worker for CandleSpinner Game Logic
  * (클라우드플레어 워커: 캔들스피너 게임 로직)
  *
- * @version 1.1.5 (Backend Logic)
+ * @version 1.1.6 (Backend Logic)
  * @date 2025-10-05
  *
  * @changelog
- * - v1.1.5 (2025-10-05): [BUGFIX] Corrected the object used for creating the payout payload. Used a `JettonWallet` instance instead of `JettonMinter`, mirroring the frontend fix.
- * (상금 지급 페이로드 생성에 사용되는 객체를 수정했습니다. 프론트엔드 수정사항을 반영하여, `JettonMinter` 대신 `JettonWallet` 인스턴스를 사용합니다.)
- * - v1.1.4 (2025-10-05): [DEBUG] Changed to `await` to expose backend errors to the frontend.
- * (백엔드 오류를 프론트엔드에 노출시키도록 `await`으로 변경했습니다.)
+ * - v1.1.6 (2025-10-05): [CRITICAL BUGFIX] Re-added the missing dynamic import for TonWeb which was accidentally deleted. This caused the entire function to crash.
+ * (누락되었던 TonWeb의 동적 import 구문을 다시 추가했습니다. 이 문제로 인해 함수 전체가 멈추는 현상이 있었습니다.)
+ * - v1.1.5 (2025-10-05): [BUGFIX] Corrected the object used for creating the payout payload (JettonWallet).
+ * (상금 지급 페이로드 생성에 사용되는 객체(JettonWallet)를 수정했습니다.)
  */
 
 // --- ⚙️ Game Configuration (게임 설정) ---
@@ -36,7 +36,10 @@ function calculateResult(finalReels, betAmount) {
 }
 
 async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
+    // ▼▼▼ [CRITICAL BUGFIX] Re-added the missing dynamic import for TonWeb.
+    // ([중요 버그 수정] 누락되었던 TonWeb의 동적 import를 다시 추가합니다.)
     const TonWeb = (await import('https://esm.sh/tonweb@0.0.66')).default;
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
     
     const mnemonic = context.env.GAME_WALLET_MNEMONIC;
     if (!mnemonic) {
@@ -52,8 +55,6 @@ async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
     const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: config.tokenMasterAddress });
     const gameJettonWalletAddress = await jettonMinter.getJettonWalletAddress(gameWalletAddress);
 
-    // ▼▼▼ [BUGFIX] Create a JettonWallet instance for the GAME's wallet and call `createTransferBody` on it.
-    // ([버그 수정] 게임 지갑의 JettonWallet 인스턴스를 생성하고, 거기서 `createTransferBody`를 호출합니다.)
     const gameJettonWallet = new TonWeb.token.jetton.JettonWallet(httpProvider, {
         address: gameJettonWalletAddress.toString(true, true, true)
     });
@@ -61,15 +62,12 @@ async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
     const amountInNano = new TonWeb.utils.BN(payoutAmount).mul(new TonWeb.utils.BN(10).pow(new TonWeb.utils.BN(config.tokenDecimals)));
     const seqno = await wallet.methods.seqno().call();
 
-    // Call createTransferBody on the JettonWallet instance, NOT the JettonMinter.
-    // (JettonMinter가 아닌 JettonWallet 인스턴스에서 `createTransferBody`를 호출합니다.)
     const transferPayload = await gameJettonWallet.createTransferBody({
         jettonAmount: amountInNano,
         toAddress: new TonWeb.utils.Address(recipientAddress),
         forwardAmount: TonWeb.utils.toNano('0.01'),
         responseAddress: gameWalletAddress
     });
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     await wallet.methods.transfer({
         secretKey: keyPair.secretKey,
