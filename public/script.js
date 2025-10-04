@@ -1,11 +1,12 @@
 /**
  * CandleSpinner Frontend Logic
  *
- * @version 1.1.5
+ * @version 1.1.6
  * @date 2025-10-04
  * @author Gemini AI (in collaboration with the user)
  *
  * @changelog
+ * - v1.1.6 (2025-10-04): [DEBUG] Added detailed error logging to the `getJettonWalletAddress` function to expose the raw error from the blockchain.
  * - v1.1.5 (2025-10-04): [FEAT] Added a copy-to-clipboard button for the user's full wallet address.
  * - v1.1.4 (2025-10-04): [BUGFIX] Corrected the object path for TonWeb's JettonMinter class.
  */
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameView = document.getElementById('game-view');
     const walletInfoSpan = document.getElementById('wallet-info');
     const disconnectBtn = document.getElementById('disconnect-wallet-button');
-    const copyAddressBtn = document.getElementById('copy-address-btn'); // 복사 버튼
+    const copyAddressBtn = document.getElementById('copy-address-btn');
     const decreaseBetBtn = document.getElementById('decrease-bet-btn');
     const increaseBetBtn = document.getElementById('increase-bet-btn');
     const betAmountSpan = document.getElementById('bet-amount');
@@ -29,16 +30,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Blockchain & Game Constants
     const GAME_WALLET_ADDRESS = "UQBFPDdSlPgqPrn2XwhpVq0KQExN2kv83_batQ-dptaR8Mtd";
-    const TOKEN_MASTER_ADDRESS = "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV";
+    const TOKEN_MASTER_ADDRESS = "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV"; // 이 주소가 정확한지 확인이 필요합니다.
     const TOKEN_DECIMALS = 9;
     const MIN_TON_FOR_GAS = 0.05;
 
     // App Version
-    const APP_VERSION = "1.1.5";
+    const APP_VERSION = "1.1.6";
     const RELEASE_DATE = "2025-10-04";
 
     // Game state
-    let fullUserAddress = ''; // 전체 주소를 저장할 변수
+    let fullUserAddress = '';
     const symbols = ['💎', '💰', '🍀', '🔔', '🍒', '7️⃣'];
     let currentBet = 10;
     const betStep = 10;
@@ -64,23 +65,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     disconnectBtn.addEventListener('click', () => { tonConnectUI.disconnect(); });
 
-    // ▼▼▼ [기능 추가] 복사 버튼 클릭 이벤트 ▼▼▼
     copyAddressBtn.addEventListener('click', () => {
         if (!fullUserAddress) return;
-
         navigator.clipboard.writeText(fullUserAddress).then(() => {
-            // 성공 피드백: 아이콘을 잠시 변경
             const originalIcon = copyAddressBtn.textContent;
             copyAddressBtn.textContent = '✅';
-            setTimeout(() => {
-                copyAddressBtn.textContent = originalIcon;
-            }, 1500);
+            setTimeout(() => { copyAddressBtn.textContent = originalIcon; }, 1500);
         }).catch(err => {
             console.error('Failed to copy address: ', err);
-            alert('Failed to copy address.'); // 간단한 오류 알림
+            alert('Failed to copy address.');
         });
     });
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     decreaseBetBtn.addEventListener('click', () => {
         if (isSpinning) return;
@@ -104,15 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Functions
     function updateUI(account) {
         if (account) {
-            fullUserAddress = account.address; // 전체 주소 저장
+            fullUserAddress = account.address;
             const shortAddress = `${fullUserAddress.slice(0, 6)}...${fullUserAddress.slice(-4)}`;
             walletInfoSpan.textContent = shortAddress;
-
             landingView.classList.remove('active');
             gameView.classList.add('active');
             showError('');
         } else {
-            fullUserAddress = ''; // 연결 해제 시 주소 초기화
+            fullUserAddress = '';
             gameView.classList.remove('active');
             landingView.classList.add('active');
             walletInfoSpan.textContent = '';
@@ -137,8 +131,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const jettonWalletAddress = await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address(ownerAddress));
             return jettonWalletAddress.toString(true, true, true);
         } catch (error) {
-            console.error("Error getting jetton wallet address:", error);
-            throw new Error("Could not find your token wallet. Make sure you have CSPIN token.");
+            // ▼▼▼ [오류 수정] 상세 오류 로깅 기능 추가 ▼▼▼
+            console.error("!!! DETAILED ERROR from getJettonWalletAddress:", error);
+            let userFriendlyMessage = "Could not find your token wallet.";
+
+            if (error && typeof error.message === 'string') {
+                if (error.message.includes("exit_code: -13")) {
+                    userFriendlyMessage = "Contract error (-13). Is the TOKEN_MASTER_ADDRESS correct?";
+                } else if (error.message.includes("is not a valid Address")) {
+                    userFriendlyMessage = "Invalid address format. Check TOKEN_MASTER_ADDRESS.";
+                } else {
+                    // 기타 기술적인 오류 메시지를 사용자에게 좀 더 친화적으로 표시
+                    userFriendlyMessage = "A network or contract error occurred.";
+                }
+            }
+            // 브라우저 콘솔에 찍힌 상세 오류와 함께, 화면에는 좀 더 이해하기 쉬운 메시지를 표시
+            throw new Error(userFriendlyMessage);
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
         }
     }
 
@@ -155,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             showLoadingOverlay("1. Finding your token wallet...");
-            const userJettonWalletAddress = await getJettonWalletAddress(tonConnectUI.wallet.account.address, TOKEN_MASTER_ADDRESS);
+            const userJettonWalletAddress = await getJettonWalletAddress(fullUserAddress, TOKEN_MASTER_ADDRESS);
 
             showLoadingOverlay("2. Preparing transaction...");
             
@@ -166,10 +175,9 @@ document.addEventListener('DOMContentLoaded', () => {
             body.bits.writeUint(0, 64);
             body.bits.writeCoins(amountInNano);
             body.bits.writeAddress(new TonWeb.utils.Address(GAME_WALLET_ADDRESS));
-            body.bits.writeAddress(new TonWeb.utils.Address(tonConnectUI.wallet.account.address));
+            body.bits.writeAddress(new TonWeb.utils.Address(fullUserAddress));
             body.bits.writeBit(0);
 
-            // v1.1.4 수정 사항: forward_ton_amount를 더 작은 값으로 변경 (1 -> 0.01)
             body.bits.writeCoins(TonWeb.utils.toNano('0.01')); 
             body.bits.writeBit(0);
 
@@ -193,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/spin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ boc: result.boc, betAmount: currentBet })
+                body: JSON.stringify({ boc: result.boc, betAmount: currentBet, userAddress: fullUserAddress })
             });
             if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
             const spinResult = await response.json();
@@ -219,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function getTonBalance() {
         if (!tonConnectUI.wallet) return 0;
         try {
-            const balance = await tonweb.getBalance(tonConnectUI.wallet.account.address);
+            const balance = await tonweb.getBalance(fullUserAddress);
             return parseFloat(TonWeb.utils.fromNano(balance));
         } catch (e) {
             console.error("Could not fetch TON balance", e);
@@ -246,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     reel.textContent = resultData.symbols[index] || '?';
                 });
                 resolve();
-            }, spinDuration);
+            }, spinIntervalTime);
         });
     }
 
