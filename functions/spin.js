@@ -74,7 +74,7 @@ export async function onRequest(context) {
         const requestData = await context.request.json();
         const betAmount = Number(requestData.betAmount);
         const userAddress = requestData.userAddress;
-        const devKey = requestData.devKey; // Get the dev key from the request (요청에서 개발자 키 가져오기)
+        const devKey = requestData.devKey;
 
         if (!betAmount || betAmount <= 0 || !userAddress) {
             return new Response(JSON.stringify({ success: false, message: "Invalid bet amount or user address." }), {
@@ -85,14 +85,10 @@ export async function onRequest(context) {
         let finalReels = [];
         const correctDevKey = context.env.DEV_KEY;
 
-        // Check if dev mode is activated and the key is correct.
-        // (개발자 모드가 활성화되었고 키가 정확한지 확인합니다.)
         if (correctDevKey && devKey === correctDevKey) {
             console.log("DEV MODE: Forcing a win.");
-            finalReels = ['7️⃣', '7️⃣', '7️⃣', '💎', '💰', '🍀', '🔔', '🌸', '🍒']; // Guaranteed win on the first line (첫 줄 무조건 당첨)
+            finalReels = ['7️⃣', '7️⃣', '7️⃣', '💎', '💰', '🍀', '🔔', '🌸', '🍒'];
         } else {
-            // Normal random generation
-            // (일반 무작위 생성)
             for (let i = 0; i < (config.gridSize * config.gridSize); i++) {
                 finalReels.push(config.symbols[Math.floor(Math.random() * config.symbols.length)]);
             }
@@ -114,7 +110,5 @@ export async function onRequest(context) {
         return new Response(JSON.stringify({ success: false, message: "An error occurred during the spin." }), {
             headers: { 'Content-Type': 'application/json' }, status: 500
         });
-    }
-}
     }
 }
