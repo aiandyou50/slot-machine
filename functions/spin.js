@@ -2,17 +2,17 @@
  * Cloudflare Worker for CandleSpinner Game Logic
  * (클라우드플레어 워커: 캔들스피너 게임 로직)
  *
- * @version 1.3.0 (Backend Logic) - Final Stable Version
+ * @version 1.4.0 (Backend Logic) - Stable Dependencies
  * @date 2025-10-05
  *
  * @changelog
- * - v1.3.0 (2025-10-05): [STABLE] Reverted to a standard static import for TonWeb, which is now confirmed to work in the environment. This is the final version with all bug fixes.
- * (환경에서 작동하는 것이 확인된 표준 정적 import 방식으로 TonWeb 코드를 되돌렸습니다. 모든 버그가 수정된 최종 버전입니다.)
+ * - v1.4.0 (2025-10-05): [REFACTOR] Switched from a URL import to a formal npm dependency via package.json to resolve persistent deployment errors.
+ * (지속적인 배포 오류를 해결하기 위해 URL import 방식에서 package.json을 통한 정식 npm 의존성 방식으로 전환했습니다.)
  */
 
-// Use a standard, static import. The environment is confirmed to be working.
-// (환경이 정상 작동함을 확인했으므로, 표준 정적 import를 사용합니다.)
-import TonWeb from 'https://esm.sh/tonweb@0.0.66';
+// Import from the npm package that Cloudflare will install for us.
+// (Cloudflare가 설치해 줄 npm 패키지에서 import 합니다.)
+import TonWeb from 'tonweb';
 
 // --- ⚙️ Game Configuration (게임 설정) ---
 const config = {
