@@ -1,20 +1,20 @@
 /**
- * Cloudflare Worker for CandleSpinner Game Logic (using @ton/* libraries)
- * (클라우드플레어 워커: 캔들스피너 게임 로직 - @ton/* 라이브러리 사용)
+ * Cloudflare Worker for CandleSpinner Game Logic (using @ton/* libraries via URL import)
+ * (클라우드플레어 워커: 캔들스피너 게임 로직 - URL import를 통해 @ton/* 라이브러리 사용)
  *
- * @version 2.0.0 (Backend Logic) - Engine Swap
+ * @version 2.1.0 (Backend Logic) - URL Import Refactor
  * @date 2025-10-05
  *
  * @changelog
- * - v2.0.0 (2025-10-05): [MAJOR REFACTOR] Replaced the entire blockchain logic from 'tonweb' to the official '@ton/ton', '@ton/crypto', and '@ton/core' libraries to resolve fundamental compatibility issues with the Cloudflare environment.
- * (Cloudflare 환경과의 근본적인 호환성 문제를 해결하기 위해, 블록체인 로직 전체를 'tonweb'에서 공식 '@ton/ton', '@ton/crypto', '@ton/core' 라이브러리로 교체했습니다.)
+ * - v2.1.0 (2025-10-05): [REFACTOR] Reverted to a URL-based import method, but now using the modern @ton/* libraries from a CDN (esm.sh) instead of npm. Removed the need for package.json.
+ * (URL 기반 import 방식으로 복귀하되, npm 대신 CDN(esm.sh)에서 최신 @ton/* 라이브러리를 사용하도록 변경했습니다. package.json의 필요성을 제거했습니다.)
  */
 
-// Import from the new official TON libraries
-// (새로운 공식 TON 라이브러리에서 import 합니다.)
-import { TonClient, WalletContractV4, internal } from "@ton/ton";
-import { mnemonicToWalletKey } from "@ton/crypto";
-import { Address, toNano, JettonMaster, JettonWallet } from "@ton/core";
+// Import from the new official TON libraries via a trusted CDN.
+// (신뢰할 수 있는 CDN을 통해 새로운 공식 TON 라이브러리에서 import 합니다.)
+import { TonClient, WalletContractV4, internal } from "https://esm.sh/@ton/ton";
+import { mnemonicToWalletKey } from "https://esm.sh/@ton/crypto";
+import { Address, toNano, JettonMaster, JettonWallet } from "https://esm.sh/@ton/core";
 
 // --- ⚙️ Game Configuration (게임 설정) ---
 const config = {
@@ -38,49 +38,29 @@ async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
     const mnemonic = context.env.GAME_WALLET_MNEMONIC;
     if (!mnemonic) { throw new Error("CRITICAL: GAME_WALLET_MNEMONIC is not set."); }
 
-    // 1. Initialize TON Client
-    // (1. TON 클라이언트 초기화)
-    const client = new TonClient({
-        endpoint: 'https://toncenter.com/api/v2/jsonRPC',
-    });
-
-    // 2. Open the game wallet from mnemonic
-    // (2. 니모닉으로 게임 지갑 열기)
+    const client = new TonClient({ endpoint: 'https://toncenter.com/api/v2/jsonRPC' });
     const key = await mnemonicToWalletKey(mnemonic.split(' '));
     const wallet = WalletContractV4.create({ publicKey: key.publicKey, workchain: 0 });
     const walletContract = client.open(wallet);
     const sender = walletContract.sender(key.secretKey);
-
-    // 3. Find the Jetton wallets for the game wallet
-    // (3. 게임 지갑의 젯톤 지갑 찾기)
     const jettonMaster = client.open(JettonMaster.create(Address.parse(config.tokenMasterAddress)));
     const gameJettonWalletAddress = await jettonMaster.getWalletAddress(walletContract.address);
-
-    // 4. Create the transfer message
-    // (4. 전송 메시지 생성)
     const payoutInNano = toNano(payoutAmount.toString());
-    const forwardPayload = {
-        text: "CandleSpinner Prize! Congratulations!",
-        toString: function() { return this.text; } // Simple payload
-    };
 
     const transferMessage = internal({
         to: gameJettonWalletAddress,
-        value: toNano("0.05"), // Gas fee for the jetton wallet
+        value: toNano("0.05"),
         body: JettonWallet.createTransferBody({
             queryId: 0,
             jettonAmount: payoutInNano,
             destination: Address.parse(recipientAddress),
             responseDestination: walletContract.address,
             forwardTonAmount: toNano("0.01"),
-            forwardPayload: JettonMaster.createComment(forwardPayload.text),
+            forwardPayload: JettonMaster.createComment("CandleSpinner Prize!"),
         }),
     });
 
-    // 5. Send the transaction from the main wallet
-    // (5. 메인 지갑에서 트랜잭션 전송)
     await walletContract.sendTransfer(sender, transferMessage);
-    
     console.log(`Payout of ${payoutAmount} CSPIN to ${recipientAddress} sent successfully.`);
     return true;
 }
