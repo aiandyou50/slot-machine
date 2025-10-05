@@ -2,15 +2,15 @@
  * CandleSpinner Frontend Logic
  * (CandleSpinner 프론트엔드 로직)
  *
- * @version 1.2.2
+ * @version 1.3.0
  * @date 2025-10-05
  * @author Gemini AI (in collaboration with the user)
  *
  * @changelog
- * - v1.2.2 (2025-10-05): [FEATURE] Changed dev mode activation from a URL parameter to a button with a password prompt.
+ * - v1.3.0 (2025-10-05): [CHORE] Synced frontend version with the stable backend v1.3.0 to mark the completion of core features.
+ * (핵심 기능 완성을 기념하여 프론트엔드 버전을 안정화된 백엔드 v1.3.0과 동기화했습니다.)
+ * - v1.2.2 (2025-10-05): [FEATURE] Changed dev mode activation to a button with a password prompt.
  * (개발자 모드 활성화를 URL 파라미터에서 비밀번호 프롬프트가 있는 버튼 방식으로 변경했습니다.)
- * - v1.2.1 (2025-10-04): [FEAT] Added developer mode via URL parameter.
- * (URL 파라미터를 통한 개발자 모드를 추가했습니다.)
  */
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MIN_TON_FOR_GAS = 0.05;
 
     // App Version
-    const APP_VERSION = "1.2.2";
+    const APP_VERSION = "1.3.0";
     const RELEASE_DATE = "2025-10-05";
 
     // Game state
@@ -97,8 +97,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Functions
-    function updateUI(account) { /* ... same as before ... */ }
-    async function getJettonWalletAddress(ownerAddress, jettonMasterAddress) { /* ... same as before ... */ }
+    function updateUI(account) {
+        if (account) {
+            fullUserAddress = account.address;
+            const shortAddress = `${fullUserAddress.slice(0, 6)}...${fullUserAddress.slice(-4)}`;
+            walletInfoSpan.textContent = shortAddress;
+            landingView.classList.remove('active');
+            gameView.classList.add('active');
+            showError('');
+        } else {
+            fullUserAddress = '';
+            gameView.classList.remove('active');
+            landingView.classList.add('active');
+            walletInfoSpan.textContent = '';
+        }
+    }
+
+    async function getJettonWalletAddress(ownerAddress, jettonMasterAddress) {
+        try {
+            const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: jettonMasterAddress });
+            const jettonWalletAddress = await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address(ownerAddress));
+            return jettonWalletAddress.toString(true, true, true);
+        } catch (error) {
+            console.error("!!! DETAILED ERROR from getJettonWalletAddress:", error);
+            let userFriendlyMessage = "A network or contract error occurred.";
+            if (error && typeof error.message === 'string' && error.message.includes("exit_code: -13")) {
+                userFriendlyMessage = "Contract error (-13). Is the TOKEN_MASTER_ADDRESS correct?";
+            }
+            throw new Error(userFriendlyMessage);
+        }
+    }
+    
     async function startSpin() {
         isSpinning = true;
         setControlsDisabled(true);
@@ -161,37 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setControlsDisabled(false);
         }
     }
-    // ... all other helper functions (getTonBalance, runSpinAnimation, etc.) are the same ...
     
-    function updateUI(account) {
-        if (account) {
-            fullUserAddress = account.address;
-            const shortAddress = `${fullUserAddress.slice(0, 6)}...${fullUserAddress.slice(-4)}`;
-            walletInfoSpan.textContent = shortAddress;
-            landingView.classList.remove('active');
-            gameView.classList.add('active');
-            showError('');
-        } else {
-            fullUserAddress = '';
-            gameView.classList.remove('active');
-            landingView.classList.add('active');
-            walletInfoSpan.textContent = '';
-        }
-    }
-    async function getJettonWalletAddress(ownerAddress, jettonMasterAddress) {
-        try {
-            const jettonMinter = new TonWeb.token.jetton.JettonMinter(httpProvider, { address: jettonMasterAddress });
-            const jettonWalletAddress = await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address(ownerAddress));
-            return jettonWalletAddress.toString(true, true, true);
-        } catch (error) {
-            console.error("!!! DETAILED ERROR from getJettonWalletAddress:", error);
-            let userFriendlyMessage = "A network or contract error occurred.";
-            if (error && typeof error.message === 'string' && error.message.includes("exit_code: -13")) {
-                userFriendlyMessage = "Contract error (-13). Is the TOKEN_MASTER_ADDRESS correct?";
-            }
-            throw new Error(userFriendlyMessage);
-        }
-    }
     async function getTonBalance() {
         if (!fullUserAddress) return 0;
         try {
@@ -202,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return 0;
         }
     }
+
     function runSpinAnimation(resultData) {
         return new Promise(resolve => {
             const spinDuration = 3000;
@@ -220,19 +220,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }, spinDuration);
         });
     }
+
     function setControlsDisabled(disabled) {
         spinBtn.disabled = disabled;
         increaseBetBtn.disabled = disabled;
         decreaseBetBtn.disabled = disabled;
         spinBtn.textContent = disabled ? 'Spinning...' : 'Spin';
     }
+
     function showLoadingOverlay(text) {
         loadingText.textContent = text;
         loadingOverlay.classList.add('visible');
     }
+
     function hideLoadingOverlay() {
         loadingOverlay.classList.remove('visible');
     }
+
     function showError(message) {
         const errorElement = gameView.classList.contains('active') ? gameErrorMessageP : landingErrorMessageP;
         if (errorElement) {
@@ -244,5 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+    
     checkConnection();
 });
