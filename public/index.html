@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CandleSpinner: TON 슬롯머신</title>
+    <title>CandleSpinner: Lucky Gemstone Slot</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://unpkg.com/tonweb@latest/dist/tonweb.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="version-info"></div>
     <div id="loading-overlay">
         <div class="loading-spinner"></div>
         <p id="loading-text">Processing...</p>
@@ -18,8 +17,8 @@
         <div id="landing-view" class="view active">
             <div class="card">
                 <div class="icon-placeholder"></div>
-                <h1>웹3 슬롯머신</h1>
-                <p>TON 블록체인 위에서 행운을 시험하세요!</p>
+                <h1>CandleSpinner</h1>
+                <p>반짝이는 보석의 세계에서 행운을 시험하세요!</p>
                 <p id="error-message" class="error-text"></p>
                 <div id="connect-wallet-button-container"></div>
                 <p class="subtle-text">TON Connect를 통해 안전하게 연결됩니다.</p>
@@ -36,10 +35,10 @@
             </div>
             <p id="game-error-message" class="error-text game-error"></p>
             <div class="game-card">
-                <div class="reel-grid">
-                    <div class="reel">💎</div><div class="reel">💰</div><div class="reel">🍀</div>
-                    <div class="reel">🔔</div><div class="reel">🍒</div><div class="reel">7️⃣</div>
-                    <div class="reel">💎</div><div class="reel">💰</div><div class="reel">🍀</div>
+                <div class="reel-grid five-reels">
+                    <div class="reel">💎</div><div class="reel">❤️</div><div class="reel">💙</div><div class="reel">A</div><div class="reel">K</div>
+                    <div class="reel">👑</div><div class="reel">🎁</div><div class="reel">💎</div><div class="reel">❤️</div><div class="reel">💙</div>
+                    <div class="reel">A</div><div class="reel">K</div><div class="reel">Q</div><div class="reel">👑</div><div class="reel">🎁</div>
                 </div>
                 <div class="controls-container">
                     <div class="bet-controls">
@@ -52,6 +51,9 @@
             </div>
         </div>
     </div>
+    <footer class="footer">
+        <div class="version-info"></div>
+    </footer>
     <script src="script.js" defer></script>
 </body>
 </html>

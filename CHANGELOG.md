@@ -3,9 +3,24 @@
 All notable changes to this project will be documented in this file.
 (이 프로젝트의 모든 주요 변경 사항은 이 파일에 문서화됩니다.)
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+The format is based on [Keep a Changelog](httpshttps://keepachangelog.com/en/1.0.0/),
 and this project adheres to Semantic Versioning.
 (이 문서의 형식은 "Keep a Changelog"를 따르며, 이 프로젝트는 시맨틱 버저닝을 준수합니다.)
+
+---
+
+## [2.0.0] - 2025-10-05
+
+### Changed (변경된 기능)
+
+- **Major Game Engine Overhaul to "Lucky Gemstone Slot":** Replaced the original 3x3 slot machine with a new, full-featured 5-reel, 3-row, 20-payline game engine.
+  - Implemented core logic for payline and scatter win calculations based on the new paytable.
+  - The backend now generates weighted random symbols for each reel.
+  - The frontend UI has been updated to a 5x3 grid to match the new engine.
+- **(Korean): "Lucky Gemstone Slot" 게임 엔진으로 대대적인 개편:** 기존 3x3 슬롯머신을 새로운 5릴, 3행, 20 페이라인 게임 엔진으로 교체했습니다.
+  - 새로운 배당률 표에 기반한 페이라인 및 스캐터 당첨 계산 핵심 로직을 구현했습니다.
+  - 백엔드는 이제 각 릴에 대해 가중치 기반의 무작위 심볼을 생성합니다.
+  - 프론트엔드 UI가 새로운 엔진에 맞춰 5x3 그리드로 업데이트되었습니다.
 
 ---
 
@@ -49,4 +64,3 @@ Initial version of the CandleSpinner slot machine.
   **(온체인 베팅):** 사용자가 "Spin"을 클릭했을 때 `CSPIN` 젯톤 전송 트랜잭션을 생성하고 보내는 프론트엔드 로직을 구현했습니다.
 - **Backend Win Calculation:** Created a Cloudflare Function (`/spin`) that calculates a random slot result and determines win/loss status based on payout lines.
   **(백엔드 당첨 계산):** 무작위 슬롯 결과를 계산하고 페이라인에 따라 승패를 결정하는 Cloudflare Function (`/spin`)을 생성했습니다.
-

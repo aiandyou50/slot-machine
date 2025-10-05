@@ -15,11 +15,11 @@
 
 body {
     margin: 0;
-    padding-top: 40px;
     font-family: 'Noto Sans KR', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
     display: flex;
+    flex-direction: column; /* Ensure footer is pushed to the bottom */
     justify-content: center;
     align-items: center;
     min-height: 100vh;
@@ -64,24 +64,15 @@ body {
     color: var(--subtle-text);
 }
 
-.version-info {
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: #ffffff;
-    padding: 5px 15px;
-    font-size: 12px;
-    font-family: monospace;
-    border-bottom-right-radius: 8px;
-    z-index: 1000;
-}
-
 .container {
     width: 100%;
     max-width: 480px;
     padding: 20px;
     box-sizing: border-box;
+    flex-grow: 1; /* Allow container to take up available space */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .view { display: none; }
@@ -133,7 +124,7 @@ p { margin: 0 0 24px; color: var(--subtle-text); line-height: 1.6; }
     background-color: var(--card-color);
     padding: 12px 20px;
     border-radius: 12px;
-    gap: 10px; /* Add gap for spacing */
+    gap: 10px;
 }
 
 .dev-btn {
@@ -150,7 +141,7 @@ p { margin: 0 0 24px; color: var(--subtle-text); line-height: 1.6; }
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-    order: -1; /* Place it at the beginning */
+    order: -1;
 }
 .dev-btn:hover {
     border-color: var(--primary-color);
@@ -171,7 +162,7 @@ p { margin: 0 0 24px; color: var(--subtle-text); line-height: 1.6; }
     padding: 8px 12px;
     border-radius: 8px;
     overflow: hidden;
-    flex-grow: 1; /* Allow wallet display to take up space */
+    flex-grow: 1;
     justify-content: center;
 }
 
@@ -220,13 +211,16 @@ p { margin: 0 0 24px; color: var(--subtle-text); line-height: 1.6; }
 
 .reel-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     background-color: #000;
     padding: 10px;
     border-radius: 10px;
     border: 2px solid var(--primary-color);
-    aspect-ratio: 1 / 1;
+}
+
+.reel-grid.five-reels {
+    grid-template-columns: repeat(5, 1fr);
+    aspect-ratio: 5 / 3;
 }
 
 .reel {
@@ -235,11 +229,17 @@ p { margin: 0 0 24px; color: var(--subtle-text); line-height: 1.6; }
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 3rem;
+    font-size: 2.5rem;
     color: var(--text-color);
     transition: transform 0.1s ease-out;
 }
 .reel.spinning { transform: scale(0.9); opacity: 0.8; }
+
+.reel.winning-reel {
+    box-shadow: 0 0 15px #ffc107, 0 0 5px #fff;
+    border: 2px solid #ffc107;
+    transform: scale(1.05);
+}
 
 .controls-container { display: flex; flex-direction: column; gap: 16px; }
 
@@ -287,3 +287,33 @@ p { margin: 0 0 24px; color: var(--subtle-text); line-height: 1.6; }
 }
 .spin-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px #2e6b31; }
 .spin-btn:disabled { opacity: 0.7; cursor: not-allowed; background: #555; box-shadow: 0 5px #333; }
+
+.footer {
+    width: 100%;
+    text-align: center;
+    padding: 20px 0;
+    color: var(--subtle-text);
+}
+
+.version-info {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    padding: 5px 15px;
+    font-size: 12px;
+    font-family: monospace;
+    border-radius: 8px;
+    display: inline-block;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 480px) {
+    .reel {
+        font-size: 1.8rem;
+    }
+    .game-card {
+        padding: 16px;
+    }
+    .header {
+        padding: 10px;
+    }
+}
