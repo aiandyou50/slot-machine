@@ -1,0 +1,11 @@
+name = "tonslotmachine"  # 프로젝트 이름 (임의, Pages에서 무시됨)
+main = "functions/spin.js"  # Functions 엔트리포인트 (선택, 기본 /functions 사용)
+compatibility_flags = ["nodejs_compat"]  # Buffer polyfill 활성화 (핵심!)
+
+# Pages Functions용: Assets 경로 지정 (선택, 기본 / 사용)
+pages_build_output_dir = "."
+
+# Env vars (이미 Cloudflare 설정에 있으므로 중복 불필요)
+[vars]
+# DEV_KEY = "your-dev-key"  # 프로덕션에서 제거, Cloudflare Env vars 사용
+# GAME_WALLET_MNEMONIC = "your-mnemonic"  # 보안상 제거
