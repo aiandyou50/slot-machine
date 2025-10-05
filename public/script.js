@@ -2,15 +2,13 @@
  * CandleSpinner Frontend Logic
  * (CandleSpinner 프론트엔드 로직)
  *
- * @version 1.3.0
+ * @version 2.1.0
  * @date 2025-10-05
  * @author Gemini AI (in collaboration with the user)
  *
  * @changelog
- * - v1.3.0 (2025-10-05): [CHORE] Synced frontend version with the stable backend v1.3.0 to mark the completion of core features.
- * (핵심 기능 완성을 기념하여 프론트엔드 버전을 안정화된 백엔드 v1.3.0과 동기화했습니다.)
- * - v1.2.2 (2025-10-05): [FEATURE] Changed dev mode activation to a button with a password prompt.
- * (개발자 모드 활성화를 URL 파라미터에서 비밀번호 프롬프트가 있는 버튼 방식으로 변경했습니다.)
+ * - v2.1.0 (2025-10-05): [CHORE] Synced frontend version with the new backend v2.1.0.
+ * (프론트엔드 버전을 새로운 백엔드 v2.1.0과 동기화했습니다.)
  */
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
@@ -38,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MIN_TON_FOR_GAS = 0.05;
 
     // App Version
-    const APP_VERSION = "1.3.0";
+    const APP_VERSION = "2.1.0";
     const RELEASE_DATE = "2025-10-05";
 
     // Game state
@@ -47,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentBet = 10;
     const betStep = 10;
     let isSpinning = false;
-    let devKey = null; // Variable to store the dev key (개발자 키를 저장할 변수)
+    let devKey = null;
     
     versionInfoDiv.textContent = `v${APP_VERSION} (${RELEASE_DATE})`;
 
@@ -68,16 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     devModeBtn.addEventListener('click', () => {
         const password = prompt("Enter developer key to activate dev mode:", "");
-        if (password) { // If user enters text and clicks OK
+        if (password) {
             devKey = password;
             alert("Developer mode ACTIVATED. Spins will now be forced wins.");
             devModeBtn.classList.add('active');
-        } else if (password === "") { // If user enters nothing and clicks OK
+        } else if (password === "") {
             devKey = null;
             alert("Developer mode DEACTIVATED.");
             devModeBtn.classList.remove('active');
         }
-        // If user clicks Cancel, password is null, do nothing.
     });
     decreaseBetBtn.addEventListener('click', () => {
         if (isSpinning) return;
@@ -120,11 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return jettonWalletAddress.toString(true, true, true);
         } catch (error) {
             console.error("!!! DETAILED ERROR from getJettonWalletAddress:", error);
-            let userFriendlyMessage = "A network or contract error occurred.";
-            if (error && typeof error.message === 'string' && error.message.includes("exit_code: -13")) {
-                userFriendlyMessage = "Contract error (-13). Is the TOKEN_MASTER_ADDRESS correct?";
-            }
-            throw new Error(userFriendlyMessage);
+            throw new Error("A network or contract error occurred.");
         }
     }
     
@@ -172,8 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody)
             });
-            if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
-            const spinResult = await response.json();
+            const responseText = await response.text();
+            if (!response.ok) throw new Error(`Server error: ${responseText}`);
+            const spinResult = JSON.parse(responseText);
             if (!spinResult.success) throw new Error(spinResult.message);
             
             showLoadingOverlay("5. Spin starting!");
