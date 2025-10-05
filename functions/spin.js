@@ -1,20 +1,21 @@
 /**
- * Cloudflare Worker for CandleSpinner Game Logic (using @ton/* libraries via URL import)
- * (클라우드플레어 워커: 캔들스피너 게임 로직 - URL import를 통해 @ton/* 라이브러리 사용)
+ * Cloudflare Worker for CandleSpinner Game Logic (using @ton/* libraries via npm)
+ * (클라우드플레어 워커: 캔들스피너 게임 로직 - npm을 통해 @ton/* 라이브러리 사용)
  *
- * @version 2.1.0 (Backend Logic) - URL Import Refactor
+ * @version 2.1.1 (Backend Logic) - NPM Import Fix for Deployment
  * @date 2025-10-05
  *
  * @changelog
- * - v2.1.0 (2025-10-05): [REFACTOR] Reverted to a URL-based import method, but now using the modern @ton/* libraries from a CDN (esm.sh) instead of npm. Removed the need for package.json.
- * (URL 기반 import 방식으로 복귀하되, npm 대신 CDN(esm.sh)에서 최신 @ton/* 라이브러리를 사용하도록 변경했습니다. package.json의 필요성을 제거했습니다.)
+ * - v2.1.1 (2025-10-05): [FIX] Switched back to npm imports to resolve Cloudflare deployment bug with URL imports (missing slash in esm.sh URLs).
+ * (클라우드플레어 배포 버그(URL import 시 슬래시 누락)를 해결하기 위해 npm import으로 전환했습니다.)
  */
 
-// Import from the new official TON libraries via a trusted CDN.
-// (신뢰할 수 있는 CDN을 통해 새로운 공식 TON 라이브러리에서 import 합니다.)
-import { TonClient, WalletContractV4, internal } from "https://esm.sh/@ton/ton";
-import { mnemonicToWalletKey } from "https://esm.sh/@ton/crypto";
-import { Address, toNano, JettonMaster, JettonWallet } from "https://esm.sh/@ton/core";
+// Import from the official TON libraries via npm.
+// (npm을 통해 공식 TON 라이브러리에서 import 합니다.)
+import { TonClient, WalletContractV4, internal } from "@ton/ton";
+import { mnemonicToWalletKey } from "@ton/crypto";
+import { Address, toNano, JettonMaster, JettonWallet } from "@ton/core";
+
 
 // --- ⚙️ Game Configuration (게임 설정) ---
 const config = {
