@@ -1,0 +1,8 @@
+{
+  "name": "tonslotmachine-functions",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "tonweb": "0.0.66"
+  }
+}
