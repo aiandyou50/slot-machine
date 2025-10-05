@@ -26,7 +26,7 @@
         </div>
         <div id="game-view" class="view">
             <div class="header">
-                <button id="dev-mode-btn" class="dev-btn" title="Developer Mode">⚙️</button>
+                <button id="dev-mode-btn" class="dev-btn" title="Developer Mode">😶‍🌫️</button>
                 <div id="wallet-display" class="wallet-display">
                     <span id="wallet-info"></span>
                     <button id="copy-address-btn" class="copy-btn" title="Copy full address">📋</button>
@@ -47,8 +47,25 @@
                         <button id="increase-bet-btn" class="bet-btn">+</button>
                     </div>
                     <button id="spin-btn" class="spin-btn">Spin</button>
+                    <div id="gamble-controls" class="gamble-controls">
+                        <button id="claim-prize-btn" class="claim-btn">Claim Prize</button>
+                        <button id="double-up-btn" class="double-up-btn">Gamble 2x</button>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <div id="double-up-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Double Up!</h2>
+            <p>Current Win: <span id="double-up-current-win">0</span></p>
+            <p>Gamble to Win: <span id="double-up-next-win">0</span></p>
+            <div class="double-up-choices">
+                <button id="double-up-red-btn" class="choice-btn red">Red</button>
+                <button id="double-up-black-btn" class="choice-btn black">Black</button>
+            </div>
+            <p class="double-up-chances">Chances left: <span id="double-up-chances-left">5</span></p>
+            <button id="double-up-close-btn" class="close-btn" title="Claim Prize and Close">✖</button>
         </div>
     </div>
     <footer class="footer">
