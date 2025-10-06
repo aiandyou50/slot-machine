@@ -9,9 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ton/core": "~0.56.3",
-    "@ton/crypto": "~3.2.0",
-    "@ton/ton": "~0.11.3",
+    "@ton/core": "0.56.3",
+    "@ton/crypto": "3.2.0",
+    "ton": "13.9.0",
     "@tonconnect/ui": "^2.0.0",
     "buffer": "^6.0.3",
     "jose": "^5.2.4",
