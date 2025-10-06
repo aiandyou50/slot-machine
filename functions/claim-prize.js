@@ -31,16 +31,18 @@ async function sendPayoutTransaction(context, recipientAddress, payoutAmount) {
     const gameJettonWalletAddress = await jettonMaster.getWalletAddress(walletContract.address);
     const payoutInNano = toNano(payoutAmount.toFixed(2));
 
+    // Korean: 거래 메시지 생성 (가스비 최적화)
+    // English: Create transfer message (gas optimized)
     const transferMessage = internal({
         to: gameJettonWalletAddress,
-        value: toNano("0.05"),
+        value: toNano("0.02"), // TON for gas
         body: JettonWallet.createTransferBody({
             queryId: 0,
             jettonAmount: payoutInNano,
             destination: Address.parse(recipientAddress),
-            responseDestination: walletContract.address,
-            forwardTonAmount: toNano("0.01"),
-            forwardPayload: JettonMaster.createComment("CandleSpinner Prize Claim!"),
+            responseDestination: walletContract.address, // Response address
+            forwardTonAmount: toNano("0.005"), // Forward TON amount
+            forwardPayload: JettonMaster.createComment("Win!"), // Shortened comment
         }),
     });
 

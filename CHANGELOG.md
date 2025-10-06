@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 (이 프로젝트의 모든 주요 변경 사항은 이 파일에 문서화됩니다.)
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to Semantic Versioning.
+(이 문서의 형식은 "Keep a Changelog"를 따르며, 이 프로젝트는 시맨틱 버저닝을 준수합니다.)
+
+---
+
+## [3.0.0] - 2025-10-06
+
+### Added (추가된 기능)
+- **Multi-language Support:** The application now supports five languages: English, Korean, Japanese, Simplified Chinese, and Traditional Chinese. It auto-detects browser language and saves user preference.
+- **(Korean): 다국어 지원:** 이제 앱이 5개 언어(영어, 한국어, 일본어, 중국어 간체/번체)를 지원하며, 브라우저 언어를 자동 감지하고 사용자 설정을 저장합니다.
+- **Sound Effects:** Added placeholder BGM and SFX with toggle controls for a more immersive experience.
+- **(Korean): 사운드 효과:** 몰입감 있는 경험을 위해 BGM 및 SFX 토글 컨트롤을 추가했습니다 (플레이스홀더).
+
+### Changed (변경된 기능)
+- **Complete UI/UX Overhaul to "Cosmic Gemstone" Theme:** The entire user interface has been redesigned with a deep space and neon aesthetic, including a new layout, new "Cosmic Gemstone" symbols, and redesigned components.
+- **(Korean): "우주 보석" 테마로 UI/UX 전면 개편:** 전체 UI를 새로운 레이아웃, "우주 보석" 심볼, 재설계된 컴포넌트를 포함한 우주/네온 컨셉으로 개편했습니다.
+- **Gas Cost Optimization:** Significantly reduced the TON required for transactions. Betting and prize claim fees were lowered from 0.05 TON to 0.02 TON.
+- **(Korean): Gas 비용 최적화:** 베팅 및 상금 수령 비용을 0.05 TON에서 0.02 TON으로 하향 조정하여 트랜잭션에 필요한 Gas를 대폭 줄였습니다.
+- **Shortened Transaction Comment:** The on-chain comment for prize claims has been shortened to "Win!" to reduce transaction size.
+- **(Korean): 트랜잭션 코멘트 단축:** 상금 수령 시 온체인 코멘트를 "Win!"으로 단축하여 트랜잭션 크기를 줄였습니다.
+
 The format is based on [Keep a Changelog](httpshttps://keepachangelog.com/en/1.0.0/),
 and this project adheres to Semantic Versioning.
 (이 문서의 형식은 "Keep a Changelog"를 따르며, 이 프로젝트는 시맨틱 버저닝을 준수합니다.)
