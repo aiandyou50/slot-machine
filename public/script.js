@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const buttonContainer = document.getElementById('connect-wallet-button-container-landing');
         if (buttonContainer) buttonContainer.innerHTML = '';
 
-        tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        tonConnectUI = new TonConnectUI({
             manifestUrl: 'https://aiandyou.me/tonconnect-manifest.json',
             uiOptions: {
                 uiPreferences: { theme: 'DARK' },
