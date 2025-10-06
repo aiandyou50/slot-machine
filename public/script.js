@@ -205,10 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- JWT Helper ---
     function decodeWinTicketPayload(jwtString) {
         try {
-            // Safely decode the payload for UI purposes
-            const payloadPart = jwtString.split('.')[1];
-            const decoded = JSON.parse(atob(payloadPart.replace(/-/g, '+').replace(/_/g, '/')));
-            return decoded;
+            // Korean: UI 목적을 위해 JWT 페이로드를 안전하게 디코딩합니다. 'jose' 라이브러리를 사용합니다.
+            // English: Safely decode the JWT payload for UI purposes using the 'jose' library.
+            return jose.decodeJwt(jwtString);
         } catch (e) {
             console.error('Failed to decode JWT payload', e);
             return null;
