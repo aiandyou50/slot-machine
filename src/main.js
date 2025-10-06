@@ -1,22 +1,14 @@
 /**
  * CandleSpinner v4.0: Galactic Casino - Main Application Entry Point
- * (CandleSpinner v4.0: Galactic Casino - 메인 애플리케이션 진입점)
- *
- * @version 4.0.0
- * @date 2025-10-06
+ * @version 4.0.3
  * @author Jules (AI Assistant)
- *
- * @description This file uses a modern module-based approach with Vite.
- * All dependencies are imported, eliminating race conditions and ensuring stability.
- * (이 파일은 Vite를 사용한 모던 모듈 기반 접근 방식을 사용합니다.
- * 모든 종속성은 import되어 경쟁 상태를 제거하고 안정성을 보장합니다.)
  */
-import './style.css'; // Vite handles CSS imports
+import './style.css'; // Vite가 CSS 파일을 JS로 가져옵니다.
 import { TonConnectUI } from '@tonconnect/ui';
 import TonWeb from 'tonweb';
 import * as jose from 'jose';
 
-// ---  Application Shell ---
+// ---  HTML 뼈대 렌더링 ---
 document.querySelector('#app').innerHTML = `
     <div class="stars"></div>
     <div id="loading-overlay">
@@ -49,6 +41,7 @@ document.querySelector('#app').innerHTML = `
                         <option value="ko">KO</option>
                         <option value="ja">JA</option>
                         <option value="zh-CN">CN</option>
+                        <option value="zh-TW">TW</option>
                     </select>
                     <button id="disconnect-wallet-button" title="Disconnect">⏏</button>
                  </div>
@@ -82,29 +75,88 @@ document.querySelector('#app').innerHTML = `
                         <button id="double-up-btn" data-i18n-key="gamble.controls.double_up">DOUBLE</button>
                     </div>
                 </div>
-                 <div class="version-info">v4.0.0</div>
+                 <div class="version-info">v4.0.3</div>
             </footer>
         </div>
     </div>
 `;
 
+// --- DOM 요소 쿼리 ---
+const landingView = document.getElementById('landing-view');
+const gameView = document.getElementById('game-view');
+const walletInfoDisplay = document.querySelector('.wallet-info');
+const walletAddressShort = document.getElementById('wallet-address-short');
+const cspinBalanceSpan = document.getElementById('cspin-balance');
+const disconnectBtn = document.getElementById('disconnect-wallet-button');
+const languageSelector = document.getElementById('language-selector');
+const decreaseBetBtn = document.getElementById('decrease-bet-btn');
+const increaseBetBtn = document.getElementById('increase-bet-btn');
+const betAmountSpan = document.getElementById('bet-amount');
+const spinBtn = document.getElementById('spin-btn');
+const reels = document.querySelectorAll('.reel');
+const versionInfoDiv = document.querySelector('.version-info');
+const loadingOverlay = document.getElementById('loading-overlay');
+const loadingText = document.getElementById('loading-text');
+const gambleControls = document.getElementById('gamble-controls');
+const claimPrizeBtn = document.getElementById('claim-prize-btn');
+const doubleUpBtn = document.getElementById('double-up-btn');
 
-// --- Constants & State (Your existing logic, slightly adapted) ---
-// (기존 로직을 약간 수정하여 통합)
+// --- 상수 및 상태 변수 ---
 const GAME_WALLET_ADDRESS = "UQBFPDdSlPgqPrn2XwhpVq0KQExN2kv83_batQ-dptaR8Mtd";
 const TOKEN_MASTER_ADDRESS = "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV";
-// ... (The rest of your game logic like constants, state variables, and functions will go here)
-// ... (나머지 게임 로직: 상수, 상태 변수, 함수 등)
-// For brevity, the full game logic is omitted here, but you would paste your
-// existing functions (`startSpin`, `handleError`, etc.) here, adapting them
-// to use the new imported libraries (e.g., `new TonConnectUI` instead of `new window.TonConnectUI`).
-// 전체 게임 로직은 생략되었지만, 기존의 함수들(`startSpin`, `handleError` 등)을
-// 여기에 붙여넣고, import된 라이브러리를 사용하도록 수정하면 됩니다 (예: `new window.TonConnectUI` 대신 `new TonConnectUI`).
-// The key is that the setup is now stable.
-// 핵심은 이제 이 구조가 안정적이라는 것입니다.
+const TOKEN_DECIMALS = 9;
+const MIN_TON_FOR_GAS = 0.03;
+const ALL_SYMBOLS = ['🪐', '💫', '💎', '✨', '☄️', 'A', 'K', 'Q'];
+const SUPPORTED_LANGUAGES = ['en', 'ko', 'ja', 'zh-CN', 'zh-TW'];
 
-console.log("CandleSpinner v4.0 Initialized!");
+let fullUserAddress = '';
+let currentBet = 10;
+const betStep = 10;
+let isSpinning = false;
+let currentWinTicket = null;
+let translations = {};
 
-// Example of how you'd start the app
-// 앱 시작 예시
-// initializeApp();
+// --- 라이브러리 초기화 ---
+const tonweb = new TonWeb(new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC'));
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: '/tonconnect-manifest.json',
+    uiOptions: {
+        uiPreferences: { theme: 'DARK' },
+        buttonRootId: 'connect-wallet-button-container-landing',
+    }
+});
+
+// --- 핵심 함수들 ---
+
+function updateUI(account) {
+    if (account) {
+        fullUserAddress = account.address;
+        walletAddressShort.textContent = `${fullUserAddress.slice(0, 4)}...${fullUserAddress.slice(-4)}`;
+        gameView.classList.add('active');
+        landingView.classList.remove('active');
+    } else {
+        fullUserAddress = '';
+        gameView.classList.remove('active');
+        landingView.classList.add('active');
+    }
+}
+
+async function startSpin() {
+    console.log("Spin started with bet:", currentBet);
+    // 여기에 기존 startSpin 함수 로직을 붙여넣으시면 됩니다.
+}
+
+// --- 이벤트 리스너 설정 ---
+function setupEventListeners() {
+    disconnectBtn.addEventListener('click', () => tonConnectUI.disconnect());
+    spinBtn.addEventListener('click', startSpin);
+}
+
+// --- 애플리케이션 초기화 ---
+async function initializeApp() {
+    console.log("CandleSpinner v4.0.3 Initializing...");
+    setupEventListeners();
+    tonConnectUI.onStatusChange(wallet => updateUI(wallet ? wallet.account : null));
+}
+
+initializeApp();
