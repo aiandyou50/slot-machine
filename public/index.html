@@ -3,122 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>CandleSpinner v3.0: Cosmic Gemstone</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪐</text></svg>">
+    <title>CandleSpinner v4.0: Galactic Casino</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>">
 </head>
 <body>
-    <div class="stars"></div>
-
-    <div id="loading-overlay">
-        <div class="cosmic-spinner"></div>
-        <p id="loading-text" data-i18n-key="loading.preparing_transaction">Preparing transaction...</p>
-    </div>
-
-    <div id="app-container">
-        <div id="landing-view" class="view active">
-            <div class="landing-content">
-                <div class="logo-large">
-                    <img src="placeholder.svg" alt="Cosmic Gemstone Logo">
-                    <h1>CandleSpinner</h1>
-                </div>
-                <p data-i18n-key="landing.tagline">Test your luck in a world of cosmic gems and aim for the grand jackpot!</p>
-                <div id="connect-wallet-button-container-landing">
-                    </div>
-                <p class="subtle-text" data-i18n-key="landing.secure_note">Securely connects via TON Connect.</p>
-            </div>
+    <div id="app">
         </div>
-
-        <div id="game-view" class="view">
-            <header class="app-header">
-                <div class="logo">
-                    <img src="placeholder.svg" alt="Cosmic Gemstone Logo">
-                    <span>CandleSpinner</span>
-                </div>
-                <div class="header-controls">
-                    <div id="wallet-info-display" class="wallet-info">
-                        <span id="cspin-balance">0</span> CSPIN
-                        <span id="wallet-info"></span>
-                        <button id="disconnect-wallet-button" data-i18n-key="wallet.disconnect">Disconnect</button>
-                    </div>
-                    <div class="language-selector-container">
-                        <label for="language-selector" data-i18n-key="language">Language</label>
-                        <select id="language-selector">
-                            <option value="en">English</option>
-                            <option value="ko">한국어</option>
-                            <option value="ja">日本語</option>
-                            <option value="zh-CN">简体中文</option>
-                            <option value="zh-TW">繁體中文</option>
-                        </select>
-                    </div>
-                </div>
-            </header>
-
-            <main class="main-content">
-                <div class="jackpot-display">
-                    <span data-i18n-key="jackpot">JACKPOT</span>
-                    <span id="jackpot-amount">1,000,000</span>
-                </div>
-                <div class="slot-machine">
-                    <div class="reel-grid">
-                        <div class="reel"></div><div class="reel"></div><div class="reel"></div><div class="reel"></div><div class="reel"></div>
-                        <div class="reel"></div><div class="reel"></div><div class="reel"></div><div class="reel"></div><div class="reel"></div>
-                        <div class="reel"></div><div class="reel"></div><div class="reel"></div><div class="reel"></div><div class="reel"></div>
-                    </div>
-                    <div class="info-buttons">
-                        <button id="rules-btn" class="icon-btn" title="Game Rules"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' width='24' height='24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z'/%3E%3C/svg%3E" alt="Rules"></button>
-                        <button id="paytable-btn" class="icon-btn" title="Paytable"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' width='24' height='24'%3E%3Cpath d='M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 18H7v-2h2v2zm0-4H7v-2h2v2zm0-4H7V8h2v2zm10 4h-8v-2h8v2zm0-4h-8v-2h8v2zm0-4h-8V8h8v2z'/%3E%3C/svg%3E" alt="Paytable"></button>
-                    </div>
-                </div>
-            </main>
-
-            <footer class="app-footer">
-                <div class="sound-controls">
-                    <button id="bgm-toggle" class="sound-btn" title="Background Music"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' width='24' height='24'%3E%3Cpath d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/%3E%3C/svg%3E" alt="BGM"></button>
-                    <button id="sfx-toggle" class="sound-btn" title="Sound Effects"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' width='24' height='24'%3E%3Cpath d='M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'/%3E%3C/svg%3E" alt="SFX"></button>
-                </div>
-                <div class="main-controls">
-                     <div class="bet-controls">
-                        <button id="decrease-bet-btn" class="bet-btn">-</button>
-                        <div class="bet-info">
-                            <span data-i18n-key="bet.amount">Bet Amount</span>
-                            <span id="bet-amount">10</span>
-                        </div>
-                        <button id="increase-bet-btn" class="bet-btn">+</button>
-                    </div>
-                    <button id="spin-btn" class="spin-btn" data-i18n-key="spin">SPIN</button>
-                    <div id="gamble-controls" class="gamble-controls">
-                        <button id="claim-prize-btn" class="claim-btn" data-i18n-key="gamble.controls.claim">CLAIM PRIZE</button>
-                        <button id="double-up-btn" class="double-up-btn" data-i18n-key="gamble.controls.double_up">DOUBLE UP</button>
-                    </div>
-                </div>
-                <div class="version-info">v3.0.0</div>
-            </footer>
-        </div>
-    </div>
-
-    <div id="double-up-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 data-i18n-key="double_up.modal.title">Double Up Gamble</h2>
-            <p><span data-i18n-key="double_up.modal.current_win">Current Win:</span> <span id="double-up-current-win">0</span></p>
-            <p><span data-i18n-key="double_up.modal.next_win">Next Win:</span> <span id="double-up-next-win">0</span></p>
-            <p><span data-i18n-key="double_up.modal.chances_left">Chances Left:</span> <span id="double-up-chances-left">5</span></p>
-            <p data-i18n-key="double_up.modal.pick_color">Pick a color:</p>
-            <div class="double-up-choices">
-                <button id="double-up-red-btn" class="choice-btn red" data-i18n-key="double_up.modal.red">RED</button>
-                <button id="double-up-black-btn" class="choice-btn black" data-i18n-key="double_up.modal.black">BLACK</button>
-            </div>
-            <button id="double-up-close-btn" class="close-btn" title="Claim Prize and Close">✖</button>
-        </div>
-    </div>
-
-    <div style="display:none;">
-        <button id="dev-mode-btn" title="Developer Mode">😶‍🌫️</button>
-    </div>
-    
-    <script src="script.js"></script>
+    <script type="module" src="/main.js"></script>
 </body>
 </html>
