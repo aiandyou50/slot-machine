@@ -202,9 +202,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- JWT Helper ---
+    function decodeWinTicketPayload(jwtString) {
+        try {
+            // Safely decode the payload for UI purposes
+            const payloadPart = jwtString.split('.')[1];
+            const decoded = JSON.parse(atob(payloadPart.replace(/-/g, '+').replace(/_/g, '/')));
+            return decoded;
+        } catch (e) {
+            console.error('Failed to decode JWT payload', e);
+            return null;
+        }
+    }
+
     function showDoubleUpModal() {
-        const decodedTicket = jose.decodeJwt(currentWinTicket);
-        updateDoubleUpModalUI(decodedTicket.payout, decodedTicket.doubleUpCount);
+        const payload = decodeWinTicketPayload(currentWinTicket);
+        if (!payload) {
+            handleError(new Error("Invalid win ticket."));
+            return;
+        }
+        updateDoubleUpModalUI(payload.payout, payload.doubleUpCount || 0);
         doubleUpModal.classList.add('visible');
     }
 
@@ -247,17 +264,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Utility Functions ---
     async function fetchApi(endpoint, body) {
         const response = await fetch(endpoint, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
         });
-        const result = await response.json();
-        if (!response.ok || !result.success) throw new Error(result.message || 'An unknown API error occurred.');
+
+        const text = await response.text();
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            // Korean: 서버에서 유효하지 않은 JSON 응답을 보냈습니다.
+            // English: The server sent an invalid JSON response.
+            console.error("Invalid JSON response from server:", text);
+            throw new Error(`Server returned invalid data. See console for details.`);
+        }
+
+        if (!response.ok || !result.success) {
+            // Korean: API 오류 발생
+            // English: An API error occurred
+            throw new Error(result.message || `API Error: HTTP ${response.status}`);
+        }
         return result;
     }
 
     function handleError(error, finallyCallback) {
-        console.error('An error occurred:', error);
+        // Korean: 오류 처리기 - 디버깅을 위해 전체 오류 객체를 콘솔에 기록
+        // English: Error handler - log the full error object to the console for debugging
+        console.error("An error occurred:", error.message, "\nStack:", error.stack);
         alert(`Error: ${error.message}`);
-        if(finallyCallback) finallyCallback();
+        if (finallyCallback) finallyCallback();
     }
 
     function updateUI(account) {
