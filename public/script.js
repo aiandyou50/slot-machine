@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentWinTicket) return;
         showLoadingOverlay("Claiming prize...");
         try {
-            const result = await fetchApi('/claim-prize', { winTicket: currentWinTicket });
+            const result = await fetchApi('/claimPrize', { winTicket: currentWinTicket });
             alert(result.message);
         } catch (error) {
             handleError(error);
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleDoubleUpChoice(choice) {
         showLoadingOverlay(`Gambling for ${choice}...`);
         try {
-            const result = await fetchApi('/double-up', { winTicket: currentWinTicket, choice });
+            const result = await fetchApi('/doubleUp', { winTicket: currentWinTicket, choice });
             hideLoadingOverlay();
             if (result.outcome === 'win') {
                 currentWinTicket = result.newTicket;
