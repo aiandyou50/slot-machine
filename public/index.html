@@ -4,30 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>CandleSpinner v3.0: Cosmic Gemstone</title>
-    <!-- External Libraries -->
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <script src="https://unpkg.com/tonweb@latest/dist/tonweb.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jose/5.2.4/index.umd.min.js"></script>
-    <!-- Fonts -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js" defer></script>
+    <script src="https://unpkg.com/tonweb@latest/dist/tonweb.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jose/5.2.4/index.umd.min.js" defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Local Files -->
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪐</text></svg>">
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <!-- Animated Starfield Background -->
     <div class="stars"></div>
 
-    <!-- Loading Overlay -->
     <div id="loading-overlay">
         <div class="cosmic-spinner"></div>
         <p id="loading-text" data-i18n-key="loading.preparing_transaction">Preparing transaction...</p>
     </div>
 
     <div id="app-container">
-        <!-- Landing View (Shown before wallet connection) -->
         <div id="landing-view" class="view active">
             <div class="landing-content">
                 <div class="logo-large">
@@ -36,15 +31,12 @@
                 </div>
                 <p data-i18n-key="landing.tagline">Test your luck in a world of cosmic gems and aim for the grand jackpot!</p>
                 <div id="connect-wallet-button-container-landing">
-                    <!-- TON Connect UI will mount here -->
-                </div>
+                    </div>
                 <p class="subtle-text" data-i18n-key="landing.secure_note">Securely connects via TON Connect.</p>
             </div>
         </div>
 
-        <!-- Game View (Shown after wallet connection) -->
         <div id="game-view" class="view">
-            <!-- Header Section -->
             <header class="app-header">
                 <div class="logo">
                     <img src="placeholder.svg" alt="Cosmic Gemstone Logo">
@@ -69,7 +61,6 @@
                 </div>
             </header>
 
-            <!-- Main Content -->
             <main class="main-content">
                 <div class="jackpot-display">
                     <span data-i18n-key="jackpot">JACKPOT</span>
@@ -88,7 +79,6 @@
                 </div>
             </main>
 
-            <!-- Footer Controls -->
             <footer class="app-footer">
                 <div class="sound-controls">
                     <button id="bgm-toggle" class="sound-btn" title="Background Music"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' width='24' height='24'%3E%3Cpath d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/%3E%3C/svg%3E" alt="BGM"></button>
@@ -114,7 +104,6 @@
         </div>
     </div>
 
-    <!-- Double Up Modal -->
     <div id="double-up-modal" class="modal-overlay">
         <div class="modal-content">
             <h2 data-i18n-key="double_up.modal.title">Double Up Gamble</h2>
@@ -130,11 +119,8 @@
         </div>
     </div>
 
-    <!-- Hidden elements for script interaction -->
     <div style="display:none;">
         <button id="dev-mode-btn" title="Developer Mode">😶‍🌫️</button>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>

@@ -1,2 +1,2 @@
-name = "tonslotmachine"  # 프로젝트 이름 (Pages에서 무시됨, 선택적)
+name = "CandleSpinner"  # 프로젝트 이름 (Pages에서 무시됨, 선택적)
 compatibility_flags = ["nodejs_compat"]  # Buffer polyfill (이전 오류 해결용, 필수!)
