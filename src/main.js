@@ -1,3 +1,8 @@
+// (EN) Polyfill for Buffer, required by various crypto/blockchain libraries in the browser.
+// (KO) 브라우저에서 여러 암호화/블록체인 라이브러리가 필요로 하는 Buffer에 대한 폴리필입니다.
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
+
 import './style.css';
 import { toUserFriendlyAddress } from '@ton/core';
 
