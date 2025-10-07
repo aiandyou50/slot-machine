@@ -29,7 +29,7 @@ document.querySelector('#app').innerHTML = `
                     <p class="tagline">The Galactic Casino</p>
                 </div>
                 
-                <button id="custom-connect-button" class="ton-connect-button" data-i18n-key="wallet.connect">Connect Wallet</button>
+                <div id="ton-connect-container"></div>
 
                 <p class="secure-note" data-i18n-key="landing.secure_note">Securely connects via TON Connect.</p>
             </div>
@@ -83,7 +83,6 @@ const gameView = document.getElementById('game-view');
 const walletAddressShort = document.getElementById('wallet-address-short');
 const cspinBalanceSpan = document.getElementById('cspin-balance');
 const disconnectBtn = document.getElementById('disconnect-wallet-button');
-const customConnectBtn = document.getElementById('custom-connect-button');
 const languageSelector = document.getElementById('language-selector');
 const decreaseBetBtn = document.getElementById('decrease-bet-btn');
 const increaseBetBtn = document.getElementById('increase-bet-btn');
@@ -117,11 +116,12 @@ let translations = {};
 // --- 라이브러리 초기화 ---
 const tonweb = new TonWeb(new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC'));
 
-// ✅ [수정] manifestUrl을 전체 경로로 변경하여 안정성을 높입니다.
+// ✅ [수정] manifestUrl을 전체 경로로 변경하고, buttonRootId를 추가하여 라이브러리가 버튼을 직접 렌더링하도록 합니다.
 const tonConnectUI = new TonConnectUI({
-    manifestUrl: 'https://aiandyou.me/tonconnect-manifest.json', // 👈 이 부분을 전체 URL로 수정하세요.
+    manifestUrl: 'https://aiandyou.me/tonconnect-manifest.json',
     uiOptions: {
         uiPreferences: { theme: 'DARK' },
+        buttonRootId: 'ton-connect-container' // 👈 라이브러리가 버튼을 렌더링할 컨테이너 ID
     }
 });
 
@@ -317,7 +317,6 @@ function showGambleControls() {
 
 // --- 이벤트 리스너 설정 ---
 function setupEventListeners() {
-    customConnectBtn.addEventListener('click', () => tonConnectUI.openModal());
     disconnectBtn.addEventListener('click', () => tonConnectUI.disconnect());
     spinBtn.addEventListener('click', startSpin);
     languageSelector.addEventListener('change', (e) => setLanguage(e.target.value));
