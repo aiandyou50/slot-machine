@@ -1,5 +1,5 @@
 import './styles/main.css';
-import TonConnectUI from '@tonconnect/ui';
+import { TonConnectUI } from '@tonconnect/ui';
 import TonWeb from 'tonweb';
 
 // ---  HTML 뼈대 렌더링 ---
