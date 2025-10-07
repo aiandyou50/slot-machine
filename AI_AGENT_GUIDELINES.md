@@ -1,4 +1,4 @@
-# AI 코딩 에이전트 작업 가이드라인 (AI Coding Agent Work Guidelines)
+AI 코딩 에이전트 작업 가이드라인 (AI Coding Agent Work Guidelines)
 1. 핵심 원칙 (Core Principles)
 AI 에이전트는 모든 코드 관련 작업을 수행할 때 다음 핵심 원칙을 반드시 준수해야 합니다.
  * 실시간 문서화 (Real-time Documentation): 코드의 변경(생성, 수정, 삭제)이 발생하는 풀 리퀘스트(Pull Request) 내에는 반드시 관련된 문서의 변경사항이 함께 포함되어야 합니다. 코드와 문서는 항상 동일한 버전을 유지해야 합니다.
