@@ -1,6 +1,9 @@
+// (EN) Polyfill for Buffer, required by various crypto/blockchain libraries in the browser.
+// (KO) 브라우저에서 여러 암호화/블록체인 라이브러리가 필요로 하는 Buffer에 대한 폴리필입니다.
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
+
 import './style.css';
-import '@tonconnect/ui/style.css';
-import { TonConnectUI } from '@tonconnect/ui';
 import { toUserFriendlyAddress } from '@ton/core';
 
 // (EN) English and (KO) Korean comments are mandatory.
@@ -213,11 +216,11 @@ async function handleDoubleUp() {
 }
 
 /**
- * (EN) Initializes the.
+ * (EN) Initializes the application.
  * (KO) 애플리케이션을 초기화합니다.
  */
 async function main() {
-  tonConnectUI = new TonConnectUI({
+  tonConnectUI = new window.TON_CONNECT_UI.TonConnectUI({
     manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
     buttonRootId: 'ton-connect-button',
   });
