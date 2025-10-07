@@ -1,5 +1,5 @@
 import './style.css';
-import '@tonconnect/ui/dist/tonconnect-ui.css';
+import '@tonconnect/ui/style.css';
 import { TonConnectUI } from '@tonconnect/ui';
 import { toUserFriendlyAddress } from '@ton/core';
 
