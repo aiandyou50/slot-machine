@@ -2,7 +2,7 @@
 ## 1.1. 핵심 사상 (Core Philosophy)
 - **서버리스 (Serverless-first):** Cloudflare 인프라를 최대한 활용하여 별도의 서버 관리 없이 높은 확장성과 낮은 유지보수 비용을 달성한다.
 - **탈중앙화 (Decentralized):** 사용자의 자산 통제권을 보장하기 위해 비수탁형(Non-Custodial) 지갑 연동 방식을 채택하고, 모든 베팅과 상금 지급은 온체인(On-chain)에서 투명하게 이루어진다.
-- **확장 가능한 다중 페이지 아키텍처 (Scalable, Multi-Page Architecture):** Vite를 사용하여 각 페이지(예: 게임, 리더보드, 프로필)를 독립적으로 관리하고 빌드할 수 있는 구조를 지향한다. 이를 통해 향후 기능 추가 시 유연성과 확장성을 확보하는 모던 웹 표준을 따른다.
+- **단일 페이지 애플리케이션 (Single Page Application, SPA):** Vite를 사용하여 효율적인 개발 경험과 최적화된 빌드 결과물을 생성하는 모던 웹 표준을 따른다.
 
 ## 1.2. 시스템 구성도 (System Diagram)
 ```

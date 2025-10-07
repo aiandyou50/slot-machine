@@ -46,16 +46,8 @@
   - 더블업은 최대 5회까지만 가능하다.
 
 ## 2.3. 개발 및 테스트 (Development & Testing)
-- **FR-DEV-01: 개발자 모드 (결과 강제) (Developer Mode (Force Result))**
+- **FR-DEV-01: 개발자 모드 (Developer Mode)**
   - 백엔드는 특정 `DEV_KEY` 환경 변수와 일치하는 키가 API 요청에 포함될 경우, 특정 결과(예: 잭팟)를 강제로 반환하는 개발자 모드를 지원해야 한다.
-- **FR-DEV-02: 개발자 모드 (무료 플레이) (Developer Mode (Free Play))**
-  - 이 모드가 활성화되었을 때, 개발자가 웹 기능 테스트를 위해 실제 토큰을 소비하지 않고 슬롯머신 게임을 플레이할 수 있도록 허용해야 한다.
-
-## 2.4. 게임 경제 (Game Economy)
-- **FR-ECON-01: 공식 게임 화폐 (Official Game Currency)**
-  - 블록체인: TON
-  - 토큰명: CandleSpinner (CSPIN)
-  - 토큰 컨트랙트 주소(Token Contract Address): EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV
 
 # 3. 비기능 요구사항 (Non-Functional Requirements)
 - **NFR-SYS-01: 서버리스 아키텍처 (Serverless Architecture)**
@@ -72,9 +64,6 @@
   - 모든 버전에 대한 변경 사항은 `CHANGELOG.md` 파일에 'Keep a Changelog' 형식에 따라 상세히 기록해야 한다.
 - **NFR-DOC-02: 로드맵 관리 (Roadmap Management)**
   - 프로젝트의 장기적인 개발 목표는 `roadmap.md`에 문서화하고, `roadmap.html`을 통해 시각적으로 표현해야 한다.
-- **NFR-DOC-03: 기술 아키텍처 문서화 및 유지보수 (Technical Architecture Documentation & Maintenance)**
-  - 프로젝트의 기술 아키텍처를 정의하는 `PROJECT_ARCHITECTURE.MD` 문서를 생성하고 지속적으로 관리해야 한다.
-  - 코드베이스에 아키텍처 관련 주요 변경사항이 발생할 경우, 해당 변경사항을 `PROJECT_ARCHITECTURE.MD` 문서에 즉시 반영하여 항상 최신 상태를 유지해야 한다.
 - **NFR-UI-01: 시각적 테마 (Visual Theme)**
   - 애플리케이션은 "Cosmic Gemstone" 테마를 가지며, 네온 스타일 UI 요소와 동적인 별 배경 효과를 포함해야 한다.
 - **NFR-LANG-01: 커뮤니케이션 언어 (Communication Language)**
