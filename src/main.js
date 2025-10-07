@@ -92,7 +92,7 @@ let translations = {};
 
 // --- 라이브러리 초기화 ---
 const tonConnectUI = new TonConnectUI({
-    manifestUrl: 'https://gist.githubusercontent.com/siandreev/75f1a2ff3da620b2606599819a557551/raw/tonconnect-manifest.json',
+    manifestUrl: 'https://aiandyou.me/tonconnect-manifest.json',
     uiOptions: {
         uiPreferences: { theme: 'DARK' },
         buttonRootId: 'ton-connect-container'
