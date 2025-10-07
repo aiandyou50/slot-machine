@@ -1,4 +1,4 @@
-/* CandleSpinner v4.0: Galactic Casino Theme - Final Layout & Button Fix */
+/* CandleSpinner v4.0: Galactic Casino Theme - Mobile & Button Final Fix */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap');
 
 :root {
@@ -80,52 +80,65 @@ body {
 /* --- 🔥 FIX for Layout & Button --- */
 #landing-view {
     flex-grow: 1;
-    padding: 40px 20px; /* Increased padding */
     text-align: center;
 }
 
 .landing-content {
     display: flex;
     flex-direction: column;
-    justify-content: space-around; /* Distribute space */
+    justify-content: space-around; /* Distribute space evenly */
     align-items: center;
     height: 100%;
-    width: 100%;
+    padding: 20px;
 }
 
 .logo-large {
-    flex-shrink: 0; /* Don't shrink the logo */
+    flex-shrink: 0; /* Prevent the logo from shrinking */
 }
 
 .logo-large h1 {
     font-family: var(--font-display);
-    font-size: clamp(2.5rem, 12vw, 4.5rem);
+    /* Use clamp for responsive font size that won't break the layout */
+    font-size: clamp(2.8rem, 12vw, 4rem);
     font-weight: 900;
     color: var(--accent-primary);
     text-shadow: 0 0 15px var(--accent-primary), 0 0 25px var(--accent-primary);
-    word-break: break-all; /* Prevent overflow */
-    padding: 0 10px;
+    white-space: nowrap; /* Prevent wrapping */
 }
 .tagline {
     font-size: clamp(0.9rem, 4vw, 1.2rem);
     color: var(--text-secondary);
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
-#connect-wallet-button-container-landing {
-    flex-grow: 1; /* Take up available space */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    min-height: 60px; /* Ensure space for the button */
+/* --- Custom Connect Button Style --- */
+.ton-connect-button {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 12px;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 0 15px rgba(0, 242, 234, 0.5);
+    flex-shrink: 0; /* Prevent the button from shrinking */
+}
+.ton-connect-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(0, 242, 234, 0.8);
+}
+.ton-connect-button:active {
+    transform: scale(0.98);
 }
 
 .secure-note {
     font-size: 0.8rem;
     color: var(--text-secondary);
-    flex-shrink: 0; /* Don't shrink */
+    flex-shrink: 0;
 }
+
 
 /* --- Game View --- */
 .app-header {
