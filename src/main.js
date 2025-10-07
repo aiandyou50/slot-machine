@@ -116,8 +116,10 @@ let translations = {};
 
 // --- 라이브러리 초기화 ---
 const tonweb = new TonWeb(new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC'));
+
+// ✅ [수정] manifestUrl을 전체 경로로 변경하여 안정성을 높입니다.
 const tonConnectUI = new TonConnectUI({
-    manifestUrl: '/tonconnect-manifest.json',
+    manifestUrl: 'https://aiandyou.me/tonconnect-manifest.json', // 👈 이 부분을 전체 URL로 수정하세요.
     uiOptions: {
         uiPreferences: { theme: 'DARK' },
     }
