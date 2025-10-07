@@ -28,7 +28,7 @@
 - **빌드 도구 (Build Tool):** Vite
 - **언어 (Language):** HTML, CSS, JavaScript (ESM, 순수 JS)
 - **핵심 라이브러리 (Core Libraries):**
-  - `@tonconnect/ui`: TON 지갑 연결 및 상호작용 UI 제공
+  - `@tonconnect/ui`: TON 지갑 연결 및 상호작용 UI 제공. **(중요: `import { TonConnectUI } from '@tonconnect/ui';`와 같이 Named Import로 가져와야 합니다.)**
   - `tonweb`: TON 블록체인과의 저수준 상호작용 및 트랜잭션 구성
   - `jose`: JWT(당첨 티켓) 생성 및 검증 (클라이언트 사이드에서는 주로 디코딩에 사용될 수 있음)
 
