@@ -1,9 +1,13 @@
-AI 코딩 에이전트 작업 가이드라인 (AI Coding Agent Work Guidelines)
+# AI 코딩 에이전트 작업 가이드라인 (AI Coding Agent Work Guidelines)
 1. 핵심 원칙 (Core Principles)
-AI 에이전트는 모든 코드 관련 작업을 수행할 때 다음 3가지 핵심 원칙을 반드시 준수해야 합니다.
+AI 에이전트는 모든 코드 관련 작업을 수행할 때 다음 핵심 원칙을 반드시 준수해야 합니다.
  * 실시간 문서화 (Real-time Documentation): 코드의 변경(생성, 수정, 삭제)이 발생하는 풀 리퀘스트(Pull Request) 내에는 반드시 관련된 문서의 변경사항이 함께 포함되어야 합니다. 코드와 문서는 항상 동일한 버전을 유지해야 합니다.
  * 2개 국어 작성 의무 (Bilingual Mandate): NFR-CODE-01 요구사항에 따라, 모든 문서와 코드 내 주석은 한국어와 영어를 병기하여 작성해야 합니다.
- * 요구사항 기반 작업 (Requirement-Driven Work): 모든 작업은 PROJECT_REQUIREMENTS.md에 명시된 요구사항에 근거해야 하며, 아키텍처는 PROJECT_ARCHITECTURE.MD를 따라야 합니다.
+ * 요구사항 기반 작업 (Requirement-Driven Work): 모든 작업은 docs/PROJECT_REQUIREMENTS.md에 명시된 요구사항에 근거해야 하며, 아키텍처는 docs/PROJECT_ARCHITECTURE.MD를 따라야 합니다.
+ * 신규 기능 추가 워크플로 (New Feature Workflow)
+   * '문서 우선' 원칙 (Documentation-First Principle): 명세서에 없는 신규 기능 개발 요청 시, 코드보다 문서 작업을 우선합니다.
+   * 작업 계약 및 승인 (Work Contract & Approval): AI는 요구사항, 아키텍처 등 관련 문서의 변경 초안을 먼저 사용자에게 제출하여 '작업 계약'으로 삼습니다.
+   * 승인 기반 개발 (Approval-Driven Development): 사용자가 문서 변경안을 최종 승인하기 전까지 코드 개발을 시작하지 않습니다.
 2. 문서 저장 위치 (Document Storage Location)
  * 본 가이드라인에서 명시하는 모든 산출물 문서는 프로젝트 최상위 경로(root)에 위치한 docs/ 폴더 내에서 생성하고 관리해야 합니다.
  * ADR(아키텍처 결정 기록)은 docs/adr/ 과 같이 하위 폴더를 만들어 체계적으로 관리합니다.
@@ -35,7 +39,7 @@ AI 에이전트는 아래 명시된 문서들을 생성하고, 코드 변경 시
  * 파일명 (Filename): docs/adr/YYYYMMDD-decision-title.md
  * 목적 (Purpose): "왜" 그렇게 설계했는지에 대한 중요한 아키텍처 결정의 배경과 결과를 기록하여 향후 기술적 혼란을 방지합니다.
  * 작성 지침 (Instructions):
-   * 새로운 라이브러리 도입, 핵심 알고리즘 변경 등 중요한 기술적 결정을 내릴 때마다 새로운 ADR 파일을 생성합니다.
+   * 새로운 라이브러리 도입, 핵심 알고즘 변경 등 중요한 기술적 결정을 내릴 때마다 새로운 ADR 파일을 생성합니다.
    * 템플릿: 모든 ADR은 다음 구조를 따라야 합니다.
      * 상태 (Status): 제안됨(Proposed), 채택됨(Accepted), 기각됨(Rejected) 등
      * 배경 (Context): 어떤 문제나 요구사항 때문에 이 결정이 필요했는지 설명합니다.
