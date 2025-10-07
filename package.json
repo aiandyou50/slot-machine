@@ -15,7 +15,6 @@
     "@ton/core": "^0.56.3",
     "@ton/crypto": "^3.2.0",
     "@ton/ton": "^13.11.2",
-    "@tonconnect/ui": "^2.0.5",
     "jose": "^5.4.1",
     "tonweb": "^0.0.66"
   }

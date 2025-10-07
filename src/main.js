@@ -1,6 +1,4 @@
 import './style.css';
-import '@tonconnect/ui/style.css';
-import { TonConnectUI } from '@tonconnect/ui';
 import { toUserFriendlyAddress } from '@ton/core';
 
 // (EN) English and (KO) Korean comments are mandatory.
@@ -213,11 +211,11 @@ async function handleDoubleUp() {
 }
 
 /**
- * (EN) Initializes the.
+ * (EN) Initializes the application.
  * (KO) 애플리케이션을 초기화합니다.
  */
 async function main() {
-  tonConnectUI = new TonConnectUI({
+  tonConnectUI = new window.TON_CONNECT_UI.TonConnectUI({
     manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
     buttonRootId: 'ton-connect-button',
   });
