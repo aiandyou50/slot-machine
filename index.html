@@ -2,12 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>CandleSpinner v4.0: Galactic Casino</title>
-    <link rel="icon" href="/favicon.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CandleSpinner</title>
+    <style>
+        body {
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            font-size: 3rem;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+    </style>
 </head>
 <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+
+    <h1>CandleSpinner</h1>
+    <p>The Galactic Casino</p>
+
+    <div id="ton-connect-button-root"></div>
+
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+
+    <script>
+        // 2. DOM이 로드된 후 스크립트 실행
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // 3. TON Connect UI 초기화
+            const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                manifestUrl: 'https://aiandyou.me/tonconnect-manifest.json', // 실제 매니페스트 파일 경로로 수정하세요.
+                buttonRootId: 'ton-connect-button-root'
+            });
+        });
+    </script>
 </body>
 </html>
