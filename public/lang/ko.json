@@ -1,0 +1,18 @@
+{
+  "connect_wallet_prompt": "TON 지갑을 연결하고 게임을 시작하세요.",
+  "welcome_message": "환영합니다!",
+  "processing_message": "처리 중...",
+  "connect_wallet_error": "먼저 지갑을 연결해주세요.",
+  "spin_win_message": "{payout} 당첨! 무엇을 하시겠습니까?",
+  "spin_lose_message": "이번엔 당첨되지 않았네요. 다시 시도하세요!",
+  "claim_success_message": "{amount}을(를) 성공적으로 수령했습니다!",
+  "claim_failed_message": "수령 실패: {error}",
+  "double_up_success_message": "더블업 성공! 새로운 당첨금: {payout}",
+  "double_up_failed_message": "더블업 실패. 상금을 잃었습니다.",
+  "double_up_error_message": "더블업 실패: {error}",
+  "generic_error_message": "오류: {error}",
+  "bet_label": "베팅",
+  "claim_button_text": "상금 수령",
+  "double_up_button_text": "더블업 (50/50)",
+  "spin_button_text": "스핀"
+}

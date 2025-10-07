@@ -1,0 +1,18 @@
+{
+  "connect_wallet_prompt": "Connect your TON wallet to start playing.",
+  "welcome_message": "Welcome!",
+  "processing_message": "Processing...",
+  "connect_wallet_error": "Please connect your wallet first.",
+  "spin_win_message": "You won {payout}! What will you do?",
+  "spin_lose_message": "No win this time. Try again!",
+  "claim_success_message": "Successfully claimed {amount}!",
+  "claim_failed_message": "Claim failed: {error}",
+  "double_up_success_message": "Double Up successful! New payout: {payout}",
+  "double_up_failed_message": "Double Up failed. You lost the prize.",
+  "double_up_error_message": "Double Up failed: {error}",
+  "generic_error_message": "Error: {error}",
+  "bet_label": "Bet",
+  "claim_button_text": "Claim Prize",
+  "double_up_button_text": "Double Up (50/50)",
+  "spin_button_text": "Spin"
+}

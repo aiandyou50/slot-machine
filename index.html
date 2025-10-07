@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CandleSpinner: The Galactic Casino</title>
+  </head>
+  <body>
+    <div id="starfield"></div>
+    <div id="app">
+      <!-- (KO) 지갑 미연결 시 랜딩 뷰 -->
+      <div id="landing-view" class="view active">
+        <h1>CandleSpinner</h1>
+        <p data-i18n-key="connect_wallet_prompt">Connect your TON wallet to start playing.</p>
+        <div id="ton-connect-button"></div>
+      </div>
+
+      <!-- (KO) 지갑 연결 후 게임 뷰 -->
+      <div id="game-view" class="view">
+        <div id="top-bar">
+          <div id="language-selector">
+            <select id="lang-select">
+              <option value="en">English</option>
+              <option value="ko">한국어</option>
+              <!-- (KO) 다른 언어는 나중에 추가 -->
+            </select>
+          </div>
+          <div id="wallet-info">
+            <span id="wallet-address"></span>
+          </div>
+        </div>
+
+        <!-- (KO) 슬롯머신 릴 디스플레이 -->
+        <div id="reels-container">
+          <!-- (KO) JS로 릴이 동적으로 생성될 위치 -->
+        </div>
+
+        <!-- (KO) 게임 결과 및 상태 메시지 -->
+        <div id="message-display">Welcome!</div>
+
+        <!-- (KO) 당첨 후 액션 버튼 (기본 숨김) -->
+        <div id="post-win-actions" class="hidden">
+            <button id="claim-button">Claim Prize</button>
+            <button id="double-up-button">Double Up (50/50)</button>
+        </div>
+
+        <!-- (KO) 게임 컨트롤 -->
+        <div id="controls">
+            <div id="bet-control">
+              <button id="decrease-bet">-</button>
+              <span>Bet: <span id="bet-amount">10</span></span>
+              <button id="increase-bet">+</button>
+            </div>
+            <button id="spin-button">Spin</button>
+        </div>
+
+        <div id="version-display">v0.0.1</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
