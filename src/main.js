@@ -9,7 +9,7 @@
  * 메인 애플리케이션 로직의 완전한 최종 버전입니다.)
  */
 import './style.css';
-import { TonConnectUI } from '@tonconnect/ui';
+import TonConnectUI from '@tonconnect/ui';
 import TonWeb from 'tonweb';
 import * as jose from 'jose';
 
