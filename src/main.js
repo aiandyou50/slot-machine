@@ -293,6 +293,7 @@ async function handleDoubleUp(choice) {
  * (KO) 애플리케이션을 초기화합니다.
  */
 async function main() {
+
   tonConnectUI = new window.TON_CONNECT_UI.TonConnectUI({
     manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
     buttonRootId: 'ton-connect-button',
@@ -301,6 +302,48 @@ async function main() {
   tonConnectUI.onStatusChange(wallet => {
     walletInfo = wallet;
     updateView(!!wallet);
+  });
+
+  // (KO) 개발자 모드 관련 변수
+  let devMode = false;
+  let testMode = false;
+  let versionClickCount = 0;
+  const versionDisplay = document.getElementById('version-display');
+  const devButtons = document.getElementById('dev-buttons');
+  const devModeToggle = document.getElementById('dev-mode-toggle');
+  const testModeToggle = document.getElementById('test-mode-toggle');
+
+  // (KO) 개발자 모드 진입: 버전 표시 7회 클릭
+  versionDisplay.addEventListener('click', () => {
+    versionClickCount++;
+    if (versionClickCount >= 7 && !devMode) {
+      const key = prompt('DEV_KEY를 입력하세요 (Enter DEV_KEY)');
+      if (key && key.length > 0) {
+        localStorage.setItem('DEV_KEY', key);
+        devMode = true;
+        devButtons.style.display = 'block';
+        alert('개발자 모드가 활성화되었습니다. (Developer mode ON)');
+        devModeToggle.textContent = '개발자 모드: ON';
+      } else {
+        alert('DEV_KEY가 입력되지 않았습니다. (No DEV_KEY entered)');
+      }
+      versionClickCount = 0;
+    }
+  });
+
+  // (KO) 개발자 모드 on/off 버튼
+  devModeToggle.addEventListener('click', () => {
+    devMode = !devMode;
+    devModeToggle.textContent = devMode ? '개발자 모드: ON' : '개발자 모드: OFF';
+    alert(devMode ? '개발자 모드가 켜졌습니다.' : '개발자 모드가 꺼졌습니다.');
+    devButtons.style.display = devMode ? 'block' : 'none';
+  });
+
+  // (KO) 토큰 없이 플레이 모드 on/off 버튼
+  testModeToggle.addEventListener('click', () => {
+    testMode = !testMode;
+    testModeToggle.textContent = testMode ? '테스트 모드(토큰 없이): ON' : '테스트 모드(토큰 없이): OFF';
+    alert(testMode ? '테스트 모드가 켜졌습니다. CSPIN 토큰 없이 게임을 플레이할 수 있습니다.' : '테스트 모드가 꺼졌습니다.');
   });
 
   // (EN) Event Listeners / (KO) 이벤트 리스너
@@ -313,7 +356,19 @@ async function main() {
     currentBet += BET_STEP;
     updateBetDisplay();
   });
-  spinButton.addEventListener('click', handleSpin);
+  spinButton.addEventListener('click', () => {
+    if (testMode) {
+      // (KO) 테스트 모드: CSPIN 토큰 없이 서버 호출 없이 로컬에서 결과 생성
+      const reels = Array(5).fill(null).map(() => Array(3).fill('?'));
+      renderReels(reels);
+      messageDisplay.textContent = '[테스트 모드] 슬롯머신 결과가 랜덤으로 표시됩니다.';
+      postWinActions.classList.add('hidden');
+      currentWinTicket = null;
+      setControlsLoading(false);
+    } else {
+      handleSpin();
+    }
+  });
   claimButton.addEventListener('click', handleClaim);
 
   // (EN) When Double Up is clicked, show the choice buttons.
@@ -327,7 +382,6 @@ async function main() {
   // (KO) 레드/블랙 선택 버튼 클릭을 처리합니다.
   redChoiceButton.addEventListener('click', () => handleDoubleUp('red'));
   blackChoiceButton.addEventListener('click', () => handleDoubleUp('black'));
-
 
   // (EN) Initial setup / (KO) 초기 설정
   // (EN) Detect browser language or default to 'en'
