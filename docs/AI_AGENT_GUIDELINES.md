@@ -120,4 +120,17 @@ AI 에이전트는 아래 명시된 문서들을 생성하고, 코드 변경 시
 - `package.json`의 버전이 업데이트되면, `index.html` 또는 관련 UI 스크립트를 수정하여 사용자가 보는 화면에도 반드시 동일한 버전(예: `v2.0.4`)이 표시되도록 업데이트해야 합니다.
 - 이는 사용자의 정확한 오류 보고를 돕기 위함입니다.
 
+### 3.7. 자동화 친화적 실행 원칙 (Automation-Friendly Execution)
+
+- 모든 PR은 **문서 변경 + 코드 변경**을 반드시 포함해야 하며, 분리된 PR은 무효 처리된다.  
+- 버그 수정 PR은 제목에 `[FIX]` 또는 `[PATCH]` 접두사를 붙여야 하며, 이 경우 `package.json`의 PATCH 버전을 1 증가시킨다.  
+- 프론트엔드는 빌드 시점에 `import.meta.env.VITE_APP_VERSION`을 통해 버전을 참조해야 하며, 이 값은 Vite 설정에서 `package.json`의 `version`으로 주입된다.  
+- `wrangler.toml`은 반드시 다음 속성을 포함해야 한다:
+  ```toml
+  name = "candlespinner-functions"
+  compatibility_flags = ["nodejs_compat"]
+  compatibility_date = "2025-10-08"
+  pages_build_output_dir = "dist"
+  ```
+
 ---
