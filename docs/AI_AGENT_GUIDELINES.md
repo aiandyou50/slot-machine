@@ -13,7 +13,7 @@ AI 에이전트는 모든 코드 관련 작업을 수행할 때 다음 핵심 �
   NFR-CODE-01 요구사항에 따라, 모든 문서와 코드 내 주석은 한국어와 영어를 병기하여 작성해야 합니다.
 
 - **요구사항 기반 작업 (Requirement-Driven Work)**  
-  모든 작업은 `docs/PROJECT_REQUIREMENTS.md`에 명시된 요구사항에 근거해야 하며, 아키텍처는 `docs/PROJECT_ARCHITECTURE.MD`를 따라야 합니다.
+  모든 작업은 `docs/PROJECT_REQUIREMENTS.md`에 명시된 요구사항에 근거해야 하며, 아키텍처는 `docs/PROJECT_ARCHITECTURE.md`를 따라야 합니다.
 
 - **신규 기능 추가 워크플로 (New Feature Workflow)**
   - **'문서 우선' 원칙 (Documentation-First Principle)**  
