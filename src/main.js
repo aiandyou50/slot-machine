@@ -1,29 +1,27 @@
 import './style.css';
+import { TonConnectUI } from '@tonconnect/ui';
+import TonWeb from 'tonweb';
 import { toUserFriendlyAddress } from '@ton/core';
 
 // (EN) English and (KO) Korean comments are mandatory.
-let tonweb;
-
-// (EN) Initialize TonWeb after ensuring the library is loaded
-// (KO) 라이브러리가 로드된 후 TonWeb을 초기화합니다
-function initTonWeb() {
-    if (typeof window.TonWeb === 'undefined') {
-        console.error('TonWeb is not loaded yet');
-        return null;
-    }
-    return new window.TonWeb(
-        new window.TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC')
-    );
-}
 
 // --- (EN) State Management / (KO) 상태 관리 ---
-let tonConnectUI;
 let walletInfo = null;
 let currentBet = 10;
 let currentWinTicket = null;
 let currentLang = 'en';
 let translations = {};
 const BET_STEP = 10;
+
+// (EN) Initialize libraries from NPM packages
+// (KO) NPM 패키지로부터 라이브러리 초기화
+const tonweb = new TonWeb(
+    new TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC')
+);
+
+// (EN) TonConnectUI will be initialized in main() after the DOM is ready.
+// (KO) TonConnectUI는 DOM이 준비된 후 main() 함수 내에서 초기화됩니다.
+let tonConnectUI;
 
 // --- (EN) DOM Element References / (KO) DOM 요소 참조 ---
 const landingView = document.getElementById('landing-view');
@@ -43,14 +41,6 @@ const increaseBetButton = document.getElementById('increase-bet');
 const spinButton = document.getElementById('spin-button');
 
 // --- (EN) I18n Functions / (KO) 다국어 함수 ---
-
-/**
- * (EN) Gets a translated string for a given key.
- * (KO) 주어진 키에 대한 번역된 문자열을 가져옵니다.
- * @param {string} key - The key for the translation string.
- * @param {object} params - (Optional) Parameters to replace in the string.
- * @returns {string} The translated string.
- */
 function t(key, params = {}) {
   let str = translations[key] || key;
   for (const [pKey, pValue] of Object.entries(params)) {
@@ -59,17 +49,11 @@ function t(key, params = {}) {
   return str;
 }
 
-/**
- * (EN) Applies translations to all elements with data-i18n-key attribute.
- * (KO) data-i18n-key 속성을 가진 모든 요소에 번역을 적용합니다.
- */
 function applyStaticTranslations() {
   document.querySelectorAll('[data-i18n-key]').forEach(el => {
     const key = el.getAttribute('data-i18n-key');
     el.textContent = t(key);
   });
-  // (EN) Update dynamic elements as well
-  // (KO) 동적 요소도 업데이트
   document.querySelector('#bet-control span').childNodes[0].textContent = `${t('bet_label')}: `;
   claimButton.textContent = t('claim_button_text');
   doubleUpButton.textContent = t('double_up_button_text');
@@ -77,11 +61,6 @@ function applyStaticTranslations() {
   messageDisplay.textContent = t('welcome_message');
 }
 
-/**
- * (EN) Loads a language file and applies the translations.
- * (KO) 언어 파일을 로드하고 번역을 적용합니다.
- * @param {string} lang - The language code to load (e.g., 'en', 'ko').
- */
 async function loadTranslations(lang) {
   try {
     const response = await fetch(`/lang/${lang}.json`);
@@ -95,7 +74,6 @@ async function loadTranslations(lang) {
 }
 
 // --- (EN) Core Application Logic / (KO) 핵심 애플리케이션 로직 ---
-
 function updateView(isConnected) {
   if (isConnected) {
     landingView.classList.remove('active');
@@ -132,14 +110,8 @@ function setControlsLoading(isLoading) {
   messageDisplay.textContent = isLoading ? t('processing_message') : messageDisplay.textContent;
 }
 
-// (EN) Address of the Jetton (CSPIN) contract
-// (KO) 제튼(CSPIN) 컨트랙트 주소
 const CSPIN_JETTON_ADDRESS = "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV";
-
-// (EN) The address of the game wallet to which users send their bets.
-// (KO) 사용자가 베팅을 보내는 게임 지갑의 주소입니다.
 const GAME_WALLET_ADDRESS = "UQBFPDdSlPgqPrn2XwhpVq0KQExN2kv83_batQ-dptaR8Mtd";
-
 
 async function handleSpin() {
   if (!walletInfo) {
@@ -157,50 +129,34 @@ async function handleSpin() {
   messageDisplay.textContent = t('creating_transaction_message');
 
   try {
-    if (!tonweb) {
-      console.error('TonWeb is not initialized');
-      messageDisplay.textContent = t('error_tonweb_not_initialized');
-      return;
-    }
-
-    // (EN) Get the Jetton Minter instance for CSPIN token.
-    // (KO) CSPIN 토큰의 Jetton Minter 인스턴스를 가져옵니다.
     const jettonMinter = new tonweb.token.jetton.JettonMinter(
         tonweb.provider, 
         { address: CSPIN_JETTON_ADDRESS }
     );
 
-    // (EN) Get the user's Jetton Wallet address.
-    // (KO) 사용자의 Jetton 지갑 주소를 가져옵니다.
-    const userWalletAddress = new window.TonWeb.utils.Address(walletInfo.account.address);
+    const userWalletAddress = new TonWeb.utils.Address(walletInfo.account.address);
     const userJettonWalletAddress = await jettonMinter.getJettonWalletAddress(userWalletAddress);
 
-    // (EN) Create a JettonWallet instance for the user's wallet.
-    // (KO) 사용자의 지갑에 대한 JettonWallet 인스턴스를 생성합니다.
     const userJettonWallet = new tonweb.token.jetton.JettonWallet(
         tonweb.provider, 
         { address: userJettonWalletAddress }
     );
 
-    // (EN) Create a payload for the Jetton transfer using the instance method.
-    // (KO) 인스턴스 메소드를 사용하여 제튼 전송을 위한 페이로드를 생성합니다.
     const body = await userJettonWallet.createTransferBody({
         queryId: 0,
-        jettonAmount: window.TonWeb.utils.toNano(currentBet.toString()),
-        toAddress: new window.TonWeb.utils.Address(GAME_WALLET_ADDRESS),
-        responseAddress: new window.TonWeb.utils.Address(walletInfo.account.address),
-        forwardTonAmount: window.TonWeb.utils.toNano('0.01'),
+        jettonAmount: TonWeb.utils.toNano(currentBet.toString()),
+        toAddress: new TonWeb.utils.Address(GAME_WALLET_ADDRESS),
+        responseAddress: new TonWeb.utils.Address(walletInfo.account.address),
+        forwardTonAmount: TonWeb.utils.toNano('0.01'),
         forwardPayload: new TextEncoder().encode('Bet')
     });
 
-    // (EN) Create the transaction object for TonConnectUI
-    // (KO) TonConnectUI를 위한 트랜잭션 객체를 생성합니다.
     const transaction = {
-      validUntil: Math.floor(Date.now() / 1000) + 600, // (EN) 10 minutes from now / (KO) 지금으로부터 10분
+      validUntil: Math.floor(Date.now() / 1000) + 600,
       messages: [
         {
           address: userJettonWalletAddress.toString(true, true, true),
-          amount: window.TonWeb.utils.toNano('0.1'), // (EN) Value for transaction fee / (KO) 트랜잭션 수수료
+          amount: TonWeb.utils.toNano('0.1'),
           stateInit: null,
           payload: await body.toBoc().then(boc => boc.toString('base64')),
         }
@@ -208,15 +164,9 @@ async function handleSpin() {
     };
 
     messageDisplay.textContent = t('confirm_transaction_message');
-
-    // (EN) Request the user to sign the transaction
-    // (KO) 사용자에게 트랜잭션 서명을 요청합니다.
     const result = await tonConnectUI.sendTransaction(transaction);
-
     messageDisplay.textContent = t('sending_transaction_message');
 
-    // (EN) Send the signed transaction (boc) to the backend
-    // (KO) 서명된 트랜잭션(boc)을 백엔드로 전송합니다.
     const response = await fetch('/spin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -240,8 +190,6 @@ async function handleSpin() {
       currentWinTicket = null;
     }
   } catch (error) {
-     // (EN) Distinguish between transaction cancellation and other errors
-     // (KO) 트랜잭션 취소와 기타 오류를 구분합니다.
     if (error.message.includes('Transaction was rejected')) {
         messageDisplay.textContent = t('transaction_cancelled_message');
     } else {
@@ -264,7 +212,6 @@ async function handleClaim() {
     });
     const data = await response.json();
     if (!data.success) throw new Error(data.message);
-
     messageDisplay.textContent = t('claim_success_message', { amount: data.transaction.amount });
   } catch (error) {
     messageDisplay.textContent = t('claim_failed_message', { error: error.message });
@@ -292,11 +239,11 @@ async function handleDoubleUp(choice) {
     if (data.win) {
         messageDisplay.textContent = t('double_up_success_message', { payout: data.newPayout });
         currentWinTicket = data.newTicket;
-        postWinActions.classList.remove('hidden'); // (EN) Show options again on win / (KO) 성공 시 옵션 다시 표시
+        postWinActions.classList.remove('hidden');
     } else {
         messageDisplay.textContent = t('double_up_failed_message');
         currentWinTicket = null;
-        postWinActions.classList.add('hidden'); // (EN) Hide on loss / (KO) 실패 시 숨김
+        postWinActions.classList.add('hidden');
     }
   } catch (error) {
     messageDisplay.textContent = t('double_up_error_message', { error: error.message });
@@ -308,61 +255,23 @@ async function handleDoubleUp(choice) {
 }
 
 /**
- * (EN) Wait for necessary external libraries (TonWeb, TON_CONNECT_UI) to be available.
- * (KO) 필요한 외부 라이브러리(TonWeb, TON_CONNECT_UI)가 준비될 때까지 대기합니다.
- */
-async function waitForLibraries(timeout = 15000) {
-  const start = Date.now();
-  while (Date.now() - start < timeout) {
-    if (typeof window.TonWeb !== 'undefined' && typeof window.TON_CONNECT_UI !== 'undefined') return true;
-    await new Promise(r => setTimeout(r, 100));
-  }
-  return false;
-}
-
-/**
  * (EN) Initializes the application.
- * (KO) 애플리케이션을 초기화합니다. 중복 초기화를 방지합니다.
+ * (KO) 애플리케이션을 초기화합니다.
  */
 async function main() {
-  // Prevent double initialization if main is called more than once
   if (window.__CANDLESPINNER_INITIALIZED) return;
   window.__CANDLESPINNER_INITIALIZED = true;
 
-  // Initialize TonConnect UI if not already created and the lib exists
-  if (!tonConnectUI && typeof TON_CONNECT_UI !== 'undefined') {
-    try {
-      tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
-        buttonRootId: 'ton-connect-button',
-      });
-    } catch (error) {
-      console.error('Failed to initialize TonConnect UI:', error);
-    }
-  }
+  tonConnectUI = new TonConnectUI({
+    manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
+    buttonRootId: 'ton-connect-button',
+  });
 
-  // Retry TonWeb initialization for a short period to avoid race conditions
-  for (let i = 0; i < 50; i++) {
-    tonweb = initTonWeb();
-    if (tonweb) break;
-    await new Promise(r => setTimeout(r, 100));
-  }
+  tonConnectUI.onStatusChange(wallet => {
+    walletInfo = wallet;
+    updateView(!!wallet);
+  });
 
-  if (!tonweb) {
-    console.error('Failed to initialize TonWeb');
-    messageDisplay.textContent = t('error_tonweb_not_initialized');
-    return;
-  }
-
-  // Wire status change handler only if tonConnectUI exists
-  if (tonConnectUI && typeof tonConnectUI.onStatusChange === 'function') {
-    tonConnectUI.onStatusChange(wallet => {
-      walletInfo = wallet;
-      updateView(!!wallet);
-    });
-  }
-
-  // (EN) Event Listeners / (KO) 이벤트 리스너
   langSelect.addEventListener('change', (e) => loadTranslations(e.target.value));
   decreaseBetButton.addEventListener('click', () => {
     currentBet = Math.max(BET_STEP, currentBet - BET_STEP);
@@ -374,18 +283,13 @@ async function main() {
   });
   spinButton.addEventListener('click', handleSpin);
   claimButton.addEventListener('click', handleClaim);
-
-  // (EN) When Double Up is clicked, show the choice buttons.
   doubleUpButton.addEventListener('click', () => {
     postWinActions.classList.add('hidden');
     doubleUpChoiceView.classList.remove('hidden');
   });
-
-  // (EN) Handle clicks on Red/Black choice buttons.
   redChoiceButton.addEventListener('click', () => handleDoubleUp('red'));
   blackChoiceButton.addEventListener('click', () => handleDoubleUp('black'));
 
-  // (EN) Initial setup
   const initialLang = navigator.language.startsWith('ko') ? 'ko' : 'en';
   langSelect.value = initialLang;
   await loadTranslations(initialLang);
@@ -394,11 +298,4 @@ async function main() {
   renderReels(Array(5).fill(Array(3).fill('?')));
 }
 
-// Start app once DOM is ready and required libs have loaded
-document.addEventListener('DOMContentLoaded', async () => {
-  const ok = await waitForLibraries();
-  if (!ok) {
-    console.warn('Some external libraries did not load within timeout. Proceeding anyway.');
-  }
-  await main();
-});
+document.addEventListener('DOMContentLoaded', main);
