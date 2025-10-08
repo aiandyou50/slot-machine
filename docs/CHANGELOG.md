@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.7] - 2025-10-08
+
 ### Fixed
 - **Jetton API 호환성 개선 (Jetton API Compatibility Improvement):**
   - (EN) **Error:** The `Cannot read properties of undefined (reading 'jetton')` error persisted after the CDN fix, indicating a deeper API compatibility issue.

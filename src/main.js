@@ -1,8 +1,9 @@
 import './style.css';
 import { toUserFriendlyAddress } from '@ton/core';
-import TonWeb from 'tonweb';
 
 // (EN) English and (KO) Korean comments are mandatory.
+// (EN) Use TonWeb from CDN / (KO) CDN으로 로드된 TonWeb을 사용합니다.
+const TonWeb = window.TonWeb;
 
 // --- (EN) State Management / (KO) 상태 관리 ---
 let tonConnectUI;
