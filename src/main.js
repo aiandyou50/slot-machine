@@ -211,7 +211,8 @@ async function handleSpin() {
   // Prefer using the local RPC proxy endpoint to forward JSON-RPC requests to the whitelist
   // This helps avoid CORS/proxy/response-format issues in some browsers.
   const ALT_RPC_ENDPOINTS = [
-    `${window.location.origin}/.netlify/functions/rpcProxy`, // Cloudflare Pages/Netlify style fallback if hosting rewrites are configured
+    `${window.location.origin}/functions/rpcProxy`, // Cloudflare Pages default Functions path
+    `${window.location.origin}/.netlify/functions/rpcProxy`, // legacy Netlify-style path (kept for some hosts)
     `${window.location.origin}/api/rpcProxy`, // another possible hosting path
     // Direct endpoints as ultimate fallback
     'https://testnet.toncenter.com/api/v2/jsonRPC',

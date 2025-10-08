@@ -29,6 +29,14 @@ export async function onRequest(context) {
     return new Response(null, { status: 204, headers: corsHeaders() });
   }
 
+  // Allow GET for diagnostics so deployed function endpoints return useful info instead of 405
+  if (request.method === 'GET') {
+    return new Response(JSON.stringify({ ok: true, message: 'rpcProxy: POST JSON-RPC to this endpoint or use POST with { endpoint, payload } wrapper.' }), {
+      status: 200,
+      headers: Object.assign({ 'Content-Type': 'application/json' }, corsHeaders()),
+    });
+  }
+
   if (request.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed. Use POST.' }), {
       status: 405,
