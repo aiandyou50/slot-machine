@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-10-08
+
+### Added
+- **실제 토큰 베팅 기능 (Real Token Betting):**
+  - (EN) Implemented the full-stack flow for real token betting. The frontend now creates a Jetton transfer transaction for the user to sign, and the backend receives the resulting `boc` to broadcast to the TON network.
+  - (KO) 실제 토큰 베팅을 위한 전체 스택 플로우를 구현했습니다. 프론트엔드는 이제 사용자가 서명할 제튼 전송 트랜잭션을 생성하고, 백엔드는 결과 `boc`를 받아 TON 네트워크에 브로드캐스트합니다.
+- **실제 토큰 상금 지급 (Real Token Prize Payout):**
+  - (EN) The `/claimPrize` function now executes a real on-chain transaction to send CSPIN tokens from the game wallet to the user's wallet.
+  - (KO) `/claimPrize` 함수는 이제 게임 지갑에서 사용자 지갑으로 CSPIN 토큰을 보내는 실제 온체인 트랜잭션을 실행합니다.
+- **더블업 미니게임 개선 (Double Up Minigame Enhancement):**
+  - (EN) Added an interactive UI with 'Red Card' and 'Black Card' choice buttons.
+  - (KO) '레드 카드'와 '블랙 카드' 선택 버튼이 있는 대화형 UI를 추가했습니다.
+  - (EN) The backend logic now uses the user's choice and a deterministic hash (based on `spinId`) to decide the outcome, ensuring provable fairness.
+  - (KO) 백엔드 로직은 이제 사용자의 선택과 결정론적 해시(`spinId` 기반)를 사용하여 결과를 결정하므로, 증명 가능한 공정성을 보장합니다.
+
+### Changed
+- **지갑 UI 개선 (Wallet UI Improvement):**
+  - (EN) The wallet connection button (`@tonconnect/ui`) has been moved to a persistent top bar, allowing users to view their address and disconnect at any time, fulfilling requirement `FR-UI-05`.
+  - (KO) 지갑 연결 버튼(`@tonconnect/ui`)을 상시 표시되는 상단 바로 이동하여, 사용자가 언제든지 주소를 확인하고 연결을 해제할 수 있도록 개선했습니다 (요구사항 `FR-UI-05` 충족).
+  - (EN) The frontend version display is updated to `2.0.0`.
+  - (KO) 프론트엔드 버전 표시를 `2.0.0`으로 업데이트했습니다.
+
+### Fixed
+- **배포 의존성 문제 해결 (Deployment Dependency Issues):**
+  - (EN) Fixed a series of Cloudflare Pages deployment failures. The root cause was identified as a corrupted dependency tree in `package-lock.json`, likely caused by a previous branch merge containing obsolete `expo` dependencies.
+  - (KO) 여러 차례 발생한 Cloudflare Pages 배포 실패 문제를 해결했습니다. 근본 원인은 이전 브랜치 병합으로 인해 `package-lock.json`에 사용되지 않는 `expo` 의존성이 포함되어 의존성 트리가 손상된 것으로 파악되었습니다.
+  - (EN) Fixed a subsequent build failure by adding the missing `@orbs-network/ton-access` package to `package.json`.
+  - (KO) 누락되었던 `@orbs-network/ton-access` 패키지를 `package.json`에 추가하여 후속 빌드 실패를 해결했습니다.
+  - (EN) The final solution involved completely removing `node_modules` and `package-lock.json`, updating `package.json` with the correct version and all required dependencies, and regenerating a clean `package-lock.json` from scratch.
+  - (KO) 최종 해결책으로 `node_modules`와 `package-lock.json`을 완전히 삭제하고, `package.json`을 올바른 버전과 모든 필수 의존성으로 업데이트한 후, 처음부터 깨끗한 `package-lock.json`을 다시 생성했습니다.
+
 ## [0.0.1] - 2025-10-07
 
 ### Added
