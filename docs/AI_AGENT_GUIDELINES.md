@@ -137,5 +137,3 @@ AI 에이전트는 아래 명시된 문서들을 생성하고, 코드 변경 시
   compatibility_flags = ["nodejs_compat"]
   compatibility_date = "2025-10-08"
   pages_build_output_dir = "dist"
-
-  ---
