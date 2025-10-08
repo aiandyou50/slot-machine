@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Backend (Cloudflare Functions: /spin, /claimPrize, /doubleUp)
   - JWT-based delayed payout system and Double Up minigame.
 
+### Changed
+- **(KO) 의존성 구조 현대화:** 배포 안정성을 저해하던 `tonweb` 라이브러리를 프로젝트에서 완전히 제거했습니다. 프론트엔드와 백엔드의 모든 블록체인 상호작용 로직을 최신 공식 라이브러리인 `@ton/core`와 `@ton/ton`을 사용하도록 전면 리팩토링하여 코드의 일관성과 안정성을 확보했습니다.
+- **(EN) Modernized Dependency Structure:** Completely removed the `tonweb` library, which was causing deployment instability. All blockchain interaction logic in both the frontend and backend was refactored to use the modern, official `@ton/core` and `@ton/ton` libraries, ensuring code consistency and stability.
+
 ### Fixed
 - **(KO) BUG-01 (언어 변경 시 메시지 초기화):**
   - **문제:** 게임 진행 중 언어 변경 시, 현재 상태 메시지(예: '50 당첨!')가 번역되지 않고 초기 환영 메시지로 돌아가는 문제.
