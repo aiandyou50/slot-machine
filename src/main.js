@@ -103,6 +103,26 @@ function applyStaticTranslations() {
   messageDisplay.textContent = t('welcome_message');
 }
 
+// --- (EN) Client-side game config for fallback/test spin / (KO) 클라이언트 폴백 스핀 설정 ---
+const SYMBOLS = ['CHERRY', 'LEMON', 'ORANGE', 'PLUM', 'BELL', 'DIAMOND'];
+const REEL_COUNT = 5;
+const ROW_COUNT = 3;
+
+/**
+ * (EN) Generate reel results for the client (used by fallback/test mode).
+ * (KO) 클라이언트용 릴 결과를 생성합니다 (폴백/테스트 모드에서 사용).
+ * @param {string|null} forceResult - if 'jackpot', force top result
+ */
+function generateReelResults(forceResult = null) {
+  if (forceResult === 'jackpot') {
+    return Array(REEL_COUNT).fill(null).map(() => Array(ROW_COUNT).fill('DIAMOND'));
+  }
+  return Array(REEL_COUNT).fill(null).map(() =>
+    Array(ROW_COUNT).fill(null).map(() => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)])
+  );
+}
+
+
 /**
  * (EN) Loads a language file and applies the translations.
  * (KO) 언어 파일을 로드하고 번역을 적용합니다.
