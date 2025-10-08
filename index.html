@@ -2,7 +2,7 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CandleSpinner: The Galactic Casino</title>
   </head>
@@ -14,7 +14,6 @@
           <select id="lang-select">
             <option value="en">English</option>
             <option value="ko">한국어</option>
-            <!-- (KO) 다른 언어는 나중에 추가 -->
           </select>
         </div>
         <div id="wallet-info">
@@ -23,44 +22,42 @@
       </div>
 
       <!-- (KO) 지갑 미연결 시 랜딩 뷰 -->
+      <!-- (EN) Landing view when wallet is not connected -->
       <div id="landing-view" class="view active">
         <h1>CandleSpinner</h1>
         <p data-i18n-key="connect_wallet_prompt">Connect your TON wallet to start playing.</p>
       </div>
 
       <!-- (KO) 지갑 연결 후 게임 뷰 -->
+      <!-- (EN) Game view after wallet connection -->
       <div id="game-view" class="view">
-        <!-- (KO) 슬롯머신 릴 디스플레이 -->
         <div id="reels-container">
           <!-- (KO) JS로 릴이 동적으로 생성될 위치 -->
+          <!-- (EN) Reels will be dynamically generated here by JS -->
         </div>
 
-        <!-- (KO) 게임 결과 및 상태 메시지 -->
-        <div id="message-display">Welcome!</div>
+        <div id="message-display" data-i18n-key="welcome_message">Welcome!</div>
 
-        <!-- (KO) 당첨 후 액션 버튼 (기본 숨김) -->
         <div id="post-win-actions" class="hidden">
             <button id="claim-button" data-i18n-key="claim_button_text">Claim Prize</button>
             <button id="double-up-button" data-i18n-key="double_up_button_text">Double Up (50/50)</button>
         </div>
 
-        <!-- (KO) 더블업 선택 버튼 (기본 숨김) -->
         <div id="double-up-choice" class="hidden">
             <button id="red-choice-button" data-choice="red" data-i18n-key="red_choice_button_text">Red Card</button>
             <button id="black-choice-button" data-choice="black" data-i18n-key="black_choice_button_text">Black Card</button>
         </div>
 
-        <!-- (KO) 게임 컨트롤 -->
         <div id="controls">
             <div id="bet-control">
+              <span data-i18n-key="bet_label">Bet</span>: <span id="bet-amount">10</span>
               <button id="decrease-bet">-</button>
-              <span>Bet: <span id="bet-amount">10</span></span>
               <button id="increase-bet">+</button>
             </div>
-            <button id="spin-button">Spin</button>
+            <button id="spin-button" data-i18n-key="spin_button_text">Spin</button>
         </div>
 
-        <div id="version-display">v2.0.7</div>
+        <div id="version-display"></div>
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>

@@ -1,7 +1,7 @@
 {
   "name": "candlespinner",
   "private": true,
-  "version": "2.0.8",
+  "version": "3.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,10 +16,7 @@
     "@ton/core": "^0.56.3",
     "@ton/crypto": "^3.2.0",
     "@ton/ton": "^13.11.2",
-    "@orbs-network/ton-access": "^2.3.3",
     "@tonconnect/ui": "^2.0.0",
-    "@tonconnect/sdk": "^3.0.0",
-    "jose": "^5.4.1",
-    "tonweb": "^0.0.66"
+    "jose": "^5.4.1"
   }
 }
