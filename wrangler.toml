@@ -1,0 +1,5 @@
+# (EN) Enables Node.js compatibility mode for Cloudflare Functions.
+# (KO) Cloudflare Functions에 Node.js 호환성 모드를 활성화합니다.
+# (EN) This is required for libraries like @ton/core that use Node.js APIs such as Buffer.
+# (KO) @ton/core와 같이 Buffer 등 Node.js API를 사용하는 라이브러리에 필요합니다.
+compatibility_flags = ["nodejs_compat"]
