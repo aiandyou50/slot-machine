@@ -1,3 +1,6 @@
+name = "candlespinner"
+pages_build_output_dir = "dist"
+
 # (EN) Enables Node.js compatibility mode for Cloudflare Functions.
 # (KO) Cloudflare Functions에 Node.js 호환성 모드를 활성화합니다.
 # (EN) This is required for libraries like @ton/core that use Node.js APIs such as Buffer.
