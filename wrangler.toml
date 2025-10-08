@@ -1,5 +1,6 @@
 name = "candlespinner"
 pages_build_output_dir = "dist"
+compatibility_date = "2025-10-08"
 
 # (EN) Enables Node.js compatibility mode for Cloudflare Functions.
 # (KO) Cloudflare Functions에 Node.js 호환성 모드를 활성화합니다.
