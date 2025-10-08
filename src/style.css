@@ -67,17 +67,18 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 1.5rem;
+  padding-top: 5rem; /* (KO) 상단 바와의 공간 확보 */
 }
 
 #top-bar {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
+  top: 2rem; /* (KO) #app의 padding과 일치시킴 */
+  left: 2rem;
+  right: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 95%;
+  /* (KO) width는 left/right로 자동 조절되므로 제거 */
 }
 
 #language-selector select {
@@ -89,10 +90,10 @@ h1 {
   box-shadow: 0 0 5px #00aaff;
 }
 
+/* (KO) wallet-info는 이제 버튼 컨테이너이므로 텍스트 스타일 제거 */
 #wallet-info {
-  font-size: 0.8em;
-  color: #00ddff;
-  text-shadow: 0 0 3px #00ddff;
+  display: flex;
+  align-items: center;
 }
 
 #reels-container {
