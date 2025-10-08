@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.8] - 2025-10-08
+
+### Fixed
+
+#### 프론트엔드 초기화 오류 및 의존성 로딩 전체 수정 (Frontend Initialization and Dependency Loading Overhaul)
+(EN) Error: A multi-faceted issue prevented the application from initializing correctly. The process began with a 404 error for `tonconnect-manifest.json`, and even after fixing the routing, the app would hang indefinitely, unable to load critical libraries from external CDNs.
+(KO) 문제: 여러 문제가 복합적으로 얽혀 애플리케이션이 올바르게 초기화되지 않았습니다. `tonconnect-manifest.json`의 404 오류로 시작하여, 라우팅 수정 후에도 외부 CDN에서 주요 라이브러리를 로드하지 못해 앱이 멈추는 현상이 지속되었습니다.
+(EN) Cause: The root causes were a combination of misconfiguration and unreliable external dependencies:
+1. The `_routes.json` file for Cloudflare Pages lacked a "catch-all" rule to serve static assets.
+2. The CDNs for both `tonweb` and `@tonconnect/ui` proved to be inaccessible or unstable in the testing environment, creating a critical point of failure for the application's startup sequence.
+(KO) 원인: 잘못된 설정과 불안정한 외부 의존성이 결합된 복합적인 문제였습니다.
+1. Cloudflare Pages의 `_routes.json` 파일에 정적 에셋을 처리하기 위한 "catch-all" 규칙이 누락되어 있었습니다.
+2. `tonweb`과 `@tonconnect/ui` 라이브러리의 CDN이 테스트 환경에서 접근 불가능하거나 불안정하여, 애플리케이션 시작 과정에 치명적인 실패 지점을 만들었습니다.
+(EN) Solution: All external library dependencies were removed in favor of a full NPM-based local bundling approach for maximum stability.
+1. The `_routes.json` file was corrected with a catch-all rule (`{ "src": "/(.*)", "dest": "/$1" }`) to ensure all static assets are served correctly.
+2. All CDN `<script>` and `<link>` tags were removed from `index.html`.
+3. `src/main.js` was refactored to import `TonWeb` and `TonConnectUI` directly from their installed NPM packages. All logic related to waiting for global objects (`waitForLibraries`) was removed, streamlining the initialization process.
+(KO) 해결: 안정성을 극대화하기 위해 모든 외부 라이브러리 의존성을 제거하고, 완전한 NPM 기반 로컬 번들링 접근 방식을 채택했습니다.
+1. `_routes.json` 파일에 "catch-all" 규칙 (`{ "src": "/(.*)", "dest": "/$1" }`)을 추가하여 모든 정적 에셋이 올바르게 제공되도록 수정했습니다.
+2. `index.html`에서 모든 CDN `<script>` 및 `<link>` 태그를 제거했습니다.
+3. `src/main.js`를 리팩토링하여 `TonWeb`과 `TonConnectUI`를 설치된 NPM 패키지에서 직접 `import` 하도록 수정했습니다. 전역 객체를 기다리는 `waitForLibraries`와 관련된 모든 로직을 제거하여 초기화 프로세스를 간소화했습니다.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
