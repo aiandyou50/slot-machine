@@ -20,6 +20,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.4] - 2025-10-08
 
+## [2.0.6] - 2025-10-08
+
+### Added
+- **RPC Proxy diagnostics and GET endpoint (rpcProxy):**
+  - (EN) Added a small whitelist-based JSON-RPC proxy function `rpcProxy` to forward JSON-RPC requests to known TON RPC endpoints and to mitigate CORS/proxy/response-format issues observed in some browsers.
+  - (KO) 브라우저 환경에서 발생하는 CORS/프록시/응답 형식 문제를 완화하기 위해 신뢰된 TON RPC 엔드포인트로 JSON-RPC 요청을 전달하는 화이트리스트 기반의 `rpcProxy` Cloudflare Function을 추가했습니다.
+  - (EN) For diagnostics, the proxy now responds to GET requests with a helpful JSON message so that deployed function URLs don't return 405 and provide immediate feedback.
+  - (KO) 진단을 위해 프록시가 GET 요청에 대해 유용한 JSON 메시지를 반환하도록 하여, 배포된 함수 URL이 405를 반환하는 대신 유용한 피드백을 제공하도록 했습니다.
+
+### Changed
+- **Version bump:** Frontend and `package.json` updated to `2.0.6` to reflect the recent changes and comply with documentation/versioning policy.
+
+
 ### Fixed
 - **Jetton 모듈 오류 및 CSPIN 전송 오류 수정 (Jetton Module & CSPIN Transfer Error Fix):**
   - (EN) **Error:** A runtime error `Cannot read properties of undefined (reading 'jetton')` occurred when clicking the "Spin" button, even though the CSPIN contract and wallet addresses were correct and the token was present on the TON network.
