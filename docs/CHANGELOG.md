@@ -10,13 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.4] - 2025-10-08
 
 ### Fixed
-- **프론트엔드 스핀 오류 수정 (Frontend Spin Error Fix):**
-  - (EN) **Error:** A runtime error `Cannot read properties of undefined (reading 'jetton')` occurred again when clicking the "Spin" button.
-  - (KO) **오류:** "스핀" 버튼 클릭 시 `Cannot read properties of undefined (reading 'jetton')` 런타임 오류 재발생.
-  - (EN) **Cause:** It is suspected that `TonWeb.HttpProvider` with a hardcoded URL is unstable in the Vite-polyfilled browser environment, causing the `TonWeb` instance to initialize incorrectly without a `.token` property.
-  - (KO) **원인:** 하드코딩된 URL을 사용하는 `TonWeb.HttpProvider`가 Vite로 폴리필된 브라우저 환경에서 불안정하게 동작하여, `TonWeb` 인스턴스가 `.token` 속성 없이 비정상적으로 초기화되는 것으로 추정됩니다.
-  - (EN) **Solution:** Refactored the `handleSpin` function in `src/main.js` to use `@orbs-network/ton-access` to dynamically fetch a reliable RPC endpoint before initializing `TonWeb`, ensuring a stable provider connection.
-  - (KO) **해결:** `src/main.js`의 `handleSpin` 함수를 리팩토링하여, `TonWeb`을 초기화하기 전에 `@orbs-network/ton-access`를 사용해 안정적인 RPC 엔드포인트를 동적으로 가져오도록 수정함으로써 안정적인 프로바이더 연결을 보장했습니다.
+- **Jetton 모듈 오류 및 CSPIN 전송 오류 수정 (Jetton Module & CSPIN Transfer Error Fix):**
+  - (EN) **Error:** A runtime error `Cannot read properties of undefined (reading 'jetton')` occurred when clicking the "Spin" button, even though the CSPIN contract and wallet addresses were correct and the token was present on the TON network.
+  - (KO) **오류:** CSPIN 컨트랙트 및 게임 지갑 주소가 모두 올바르고, TON 네트워크에 토큰이 정상적으로 존재함에도 "스핀" 버튼 클릭 시 `Cannot read properties of undefined (reading 'jetton')` 오류가 발생함.
+  - (EN) **Cause:** TonWeb library's Jetton module was not properly loaded in the Vite browser environment due to ESM import issues and possible tree-shaking or bundling problems. The Jetton module was undefined when imported via npm, but worked when loaded via CDN and accessed through `window.TonWeb`.
+  - (KO) **원인:** Vite 브라우저 환경에서 TonWeb 라이브러리의 Jetton 모듈이 ESM import 및 번들링 문제로 인해 정상적으로 로드되지 않아, npm import 시 Jetton 모듈이 undefined가 되었음. CDN 방식으로 로드하고 `window.TonWeb`을 통해 접근할 때 정상 동작함을 확인함.
+  - (EN) **Solution:** Updated `index.html` to load TonWeb via CDN and refactored `main.js` to use `window.TonWeb` instead of importing from npm. This ensures the Jetton module is available and resolves the runtime error.
+  - (KO) **해결:** `index.html`에서 TonWeb을 CDN 방식으로 로드하고, `main.js`에서 npm import 대신 `window.TonWeb`을 사용하도록 리팩토링하여 Jetton 모듈이 정상적으로 동작하도록 수정함. 이로써 런타임 오류가 해결됨.
  
 ## [2.0.3] - 2025-10-08
 

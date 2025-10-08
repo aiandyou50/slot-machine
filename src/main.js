@@ -3,7 +3,8 @@
 import { getHttpEndpoint } from "@orbs-network/ton-access";
 import './style.css';
 import { toUserFriendlyAddress } from '@ton/core';
-import TonWeb from 'tonweb';
+// (KO) TonWeb을 window 객체에서 가져옵니다. (CDN 방식)
+const TonWeb = window.TonWeb;
 
 // (EN) English and (KO) Korean comments are mandatory.
 
