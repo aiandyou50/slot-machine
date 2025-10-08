@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.2] - 2025-10-08
+
+### Fixed
+- **프론트엔드 런타임 오류 수정 (Frontend Runtime Error Fix):**
+  - (EN) **Error:** A runtime error `TonWeb$1.token.jetton.JettonWallet.createTransferBody is not a function` occurred when clicking the "Spin" button.
+  - (KO) **오류:** "스핀" 버튼 클릭 시 `TonWeb$1.token.jetton.JettonWallet.createTransferBody is not a function` 런타임 오류 발생.
+  - (EN) **Cause:** The `createTransferBody` method was incorrectly called as if it were a static method. Correct usage requires creating an instance of the `JettonWallet` class and calling the method on that instance.
+  - (KO) **원인:** `createTransferBody` 메소드가 정적 메소드인 것처럼 잘못 호출되었습니다. 올바른 사용법은 `JettonWallet` 클래스의 인스턴스를 생성하고 해당 인스턴스에서 메소드를 호출하는 것입니다.
+  - (EN) **Solution:** After researching the library's documentation, the code in `src/main.js` was refactored to first create an instance of `tonweb`, get the user's jetton wallet address, create a `JettonWallet` instance for that address, and finally call `createTransferBody` on the instance.
+  - (KO) **해결:** 라이브러리 문서 조사를 통해, `src/main.js`의 코드를 리팩토링하여 먼저 `tonweb` 인스턴스를 생성하고 사용자의 제튼 지갑 주소를 가져온 뒤, 해당 주소에 대한 `JettonWallet` 인스턴스를 생성하여 최종적으로 그 인스턴스에서 `createTransferBody`를 호출하도록 수정했습니다.
+
 ## [2.0.1] - 2025-10-08
 
 ### Fixed
