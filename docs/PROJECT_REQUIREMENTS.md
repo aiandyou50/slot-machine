@@ -129,9 +129,3 @@
   - (KO) **문제:** 게임 진행 중 언어 변경 시, 현재 상태 메시지(예: '50 당첨!')가 번역되지 않고 초기 환영 메시지로 돌아갑니다.
   - (EN) **Requirement:** The system must be modified to retain the current game state (last message key and its parameters) and display the correctly translated message when the language is changed.
   - (KO) **개선 요구사항:** 언어를 변경하더라도 현재 게임 상태(마지막 메시지 키와 파라미터)를 유지하고, 해당 상태에 맞는 메시지가 올바른 언어로 번역되어 표시되도록 수정해야 합니다.
-
-- **BUG-02: 언어 선택 드롭다운 UI 겹침 (Language Selector Dropdown UI Overlap)**
-  - (EN) **Problem:** The language selector dropdown menu overlaps with a portion of the slot machine reel area.
-  - (KO) **문제:** 언어 선택 드롭다운 메뉴가 슬롯머신 릴(Reel) 영역 일부를 가립니다.
-  - (EN) **Requirement:** The CSS layout must be adjusted to ensure the dropdown menu does not obstruct other UI elements.
-  - (KO) **개선 요구사항:** 드롭다운 메뉴가 다른 UI 요소를 침범하지 않도록 CSS 레이아웃을 수정해야 합니다.
