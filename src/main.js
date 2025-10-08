@@ -2,11 +2,19 @@ import './style.css';
 import { toUserFriendlyAddress } from '@ton/core';
 
 // (EN) English and (KO) Korean comments are mandatory.
-// (EN) Initialize TonWeb with the correct configuration.
-// (KO) 올바른 설정으로 TonWeb을 초기화합니다.
-const tonweb = new window.TonWeb(
-    new window.TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC')
-);
+let tonweb;
+
+// (EN) Initialize TonWeb after ensuring the library is loaded
+// (KO) 라이브러리가 로드된 후 TonWeb을 초기화합니다
+function initTonWeb() {
+    if (typeof window.TonWeb === 'undefined') {
+        console.error('TonWeb is not loaded yet');
+        return null;
+    }
+    return new window.TonWeb(
+        new window.TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC')
+    );
+}
 
 // --- (EN) State Management / (KO) 상태 관리 ---
 let tonConnectUI;
@@ -149,9 +157,11 @@ async function handleSpin() {
   messageDisplay.textContent = t('creating_transaction_message');
 
   try {
-    // (EN) Initialize TonWeb with a provider. For testnet, we use toncenter.
-    // (KO) 프로바이더와 함께 TonWeb을 초기화합니다. 테스트넷을 위해 toncenter를 사용합니다.
-    const tonweb = new TonWeb(new TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC'));
+    if (!tonweb) {
+      console.error('TonWeb is not initialized');
+      messageDisplay.textContent = t('error_tonweb_not_initialized');
+      return;
+    }
 
     // (EN) Get the Jetton Minter instance for CSPIN token.
     // (KO) CSPIN 토큰의 Jetton Minter 인스턴스를 가져옵니다.
@@ -302,6 +312,29 @@ async function handleDoubleUp(choice) {
  * (KO) 애플리케이션을 초기화합니다.
  */
 async function main() {
+  // (EN) Wait for all required libraries to be loaded
+  // (KO) 필요한 모든 라이브러리가 로드될 때까지 기다립니다
+  await new Promise(resolve => {
+    const checkLibs = () => {
+      if (window.TonWeb && window.TON_CONNECT_UI) {
+        resolve();
+      } else {
+        setTimeout(checkLibs, 100);
+      }
+    };
+    checkLibs();
+  });
+
+  // (EN) Initialize TonWeb
+  // (KO) TonWeb을 초기화합니다
+  tonweb = initTonWeb();
+  if (!tonweb) {
+    console.error('Failed to initialize TonWeb');
+    return;
+  }
+
+  // (EN) Initialize TonConnect UI
+  // (KO) TonConnect UI를 초기화합니다
   tonConnectUI = new window.TON_CONNECT_UI.TonConnectUI({
     manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
     buttonRootId: 'ton-connect-button',

@@ -1,5 +1,3 @@
----
-
 # AI 코딩 에이전트 작업 가이드라인 (AI Coding Agent Work Guidelines)
 
 ## 1. 핵심 원칙 (Core Principles)
@@ -13,7 +11,7 @@ AI 에이전트는 모든 코드 관련 작업을 수행할 때 다음 핵심 �
   NFR-CODE-01 요구사항에 따라, 모든 문서와 코드 내 주석은 한국어와 영어를 병기하여 작성해야 합니다.
 
 - **요구사항 기반 작업 (Requirement-Driven Work)**  
-  모든 작업은 `docs/PROJECT_REQUIREMENTS.md`에 명시된 요구사항에 근거해야 하며, 아키텍처는 `docs/PROJECT_ARCHITECTURE.md`를 따라야 합니다.
+  모든 작업은 `docs/PROJECT_REQUIREMENTS.md`에 명시된 요구사항에 근거해야 하며, 아키텍처는 `docs/PROJECT_ARCHITECTURE.MD`를 따라야 합니다.
 
 - **신규 기능 추가 워크플로 (New Feature Workflow)**
   - **'문서 우선' 원칙 (Documentation-First Principle)**  
@@ -113,8 +111,16 @@ AI 에이전트는 아래 명시된 문서들을 생성하고, 코드 변경 시
 - 버그 수정, 리팩토링 등 하위 호환성을 해치지 않는 모든 코드 수정 후에는 `package.json`의 패치(PATCH) 버전을 1 증가시켜야 합니다.
 
 #### 3.6.2. CHANGELOG 작성
-- 패치 버전 업데이트 시, `docs/CHANGELOG.md` 파일에 해당 버전 릴리즈 노트를 작성해야 합니다.
-- 릴리즈 노트는 소프트웨어 공학적 관점에서 **문제 현상**(Error) → **근본 원인**(Cause) → **해결 방안**(Solution) 형식을 명확히 기술해야 합니다.
+패치 버전 업데이트 시, `docs/CHANGELOG.md` 파일에 해당 버전 릴리즈 노트를 작성해야 합니다.  
+**모든 항목은 영문과 한국문 모두 동일한 3단계 구조를 반드시 따라야 합니다**:
+(EN) Error: [구체적인 오류 메시지 또는 현상]
+(KO) 문제: [구체적인 오류 메시지 또는 현상]
+(EN) Cause: [기술적 근본 원인]
+(KO) 원인: [기술적 근본 원인]
+(EN) Solution: [수행된 해결 조치]
+(KO) 해결: [수행된 해결 조치]
+
+이 구조를 따르지 않은 PR은 자동으로 리뷰 대상에서 제외됩니다.
 
 #### 3.6.3. 프론트엔드 버전 표시
 - `package.json`의 버전이 업데이트되면, `index.html` 또는 관련 UI 스크립트를 수정하여 사용자가 보는 화면에도 반드시 동일한 버전(예: `v2.0.4`)이 표시되도록 업데이트해야 합니다.
@@ -131,6 +137,5 @@ AI 에이전트는 아래 명시된 문서들을 생성하고, 코드 변경 시
   compatibility_flags = ["nodejs_compat"]
   compatibility_date = "2025-10-08"
   pages_build_output_dir = "dist"
-  ```
 
----
+  ---
