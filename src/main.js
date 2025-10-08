@@ -2,8 +2,11 @@ import './style.css';
 import { toUserFriendlyAddress } from '@ton/core';
 
 // (EN) English and (KO) Korean comments are mandatory.
-// (EN) Use TonWeb from CDN / (KO) CDN으로 로드된 TonWeb을 사용합니다.
-const TonWeb = window.TonWeb;
+// (EN) Initialize TonWeb with the correct configuration.
+// (KO) 올바른 설정으로 TonWeb을 초기화합니다.
+const tonweb = new window.TonWeb(
+    new window.TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC')
+);
 
 // --- (EN) State Management / (KO) 상태 관리 ---
 let tonConnectUI;
@@ -150,26 +153,35 @@ async function handleSpin() {
     // (KO) 프로바이더와 함께 TonWeb을 초기화합니다. 테스트넷을 위해 toncenter를 사용합니다.
     const tonweb = new TonWeb(new TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC'));
 
-    // (EN) Get the Jetton Minter for our CSPIN token.
-    // (KO) CSPIN 토큰에 대한 제튼 발행자를 가져옵니다.
-    const jettonMinter = new tonweb.token.jetton.JettonMinter(tonweb.provider, CSPIN_JETTON_ADDRESS);
+    // (EN) Get the Jetton Minter instance for CSPIN token.
+    // (KO) CSPIN 토큰의 Jetton Minter 인스턴스를 가져옵니다.
+    const jettonMinter = new tonweb.token.jetton.JettonMinter(
+        tonweb.provider, 
+        { address: CSPIN_JETTON_ADDRESS }
+    );
 
     // (EN) Get the user's Jetton Wallet address.
-    // (KO) 사용자의 제튼 지갑 주소를 가져옵니다.
-    const userJettonWalletAddress = await jettonMinter.getJettonWalletAddress(walletInfo.account.address);
+    // (KO) 사용자의 Jetton 지갑 주소를 가져옵니다.
+    const userWalletAddress = new window.TonWeb.utils.Address(walletInfo.account.address);
+    const userJettonWalletAddress = await jettonMinter.getJettonWalletAddress(userWalletAddress);
 
     // (EN) Create a JettonWallet instance for the user's wallet.
     // (KO) 사용자의 지갑에 대한 JettonWallet 인스턴스를 생성합니다.
-    const userJettonWallet = new tonweb.token.jetton.JettonWallet(tonweb.provider, userJettonWalletAddress);
+    const userJettonWallet = new tonweb.token.jetton.JettonWallet(
+        tonweb.provider, 
+        { address: userJettonWalletAddress }
+    );
 
     // (EN) Create a payload for the Jetton transfer using the instance method.
     // (KO) 인스턴스 메소드를 사용하여 제튼 전송을 위한 페이로드를 생성합니다.
-    const body = await userJettonWallet.createTransferBody(
-        0, // queryId
-        TonWeb.utils.toNano(currentBet.toString()), // jettonAmount
-        GAME_WALLET_ADDRESS, // toAddress
-        walletInfo.account.address // responseAddress
-    );
+    const body = await userJettonWallet.createTransferBody({
+        queryId: 0,
+        jettonAmount: window.TonWeb.utils.toNano(currentBet.toString()),
+        toAddress: new window.TonWeb.utils.Address(GAME_WALLET_ADDRESS),
+        responseAddress: new window.TonWeb.utils.Address(walletInfo.account.address),
+        forwardTonAmount: window.TonWeb.utils.toNano('0.01'),
+        forwardPayload: new TextEncoder().encode('Bet')
+    });
 
     // (EN) Create the transaction object for TonConnectUI
     // (KO) TonConnectUI를 위한 트랜잭션 객체를 생성합니다.
@@ -178,9 +190,9 @@ async function handleSpin() {
       messages: [
         {
           address: userJettonWalletAddress.toString(true, true, true),
-          amount: TonWeb.utils.toNano('0.1').toString(), // (EN) Value in nanotons for the transaction fee
-                                                                // (KO) 트랜잭션 수수료를 위한 나노톤 단위의 값
-          payload: body.toBoc().toString('base64') // (EN) The BOC of the message payload / (KO) 메시지 페이로드의 BOC
+          amount: window.TonWeb.utils.toNano('0.1'), // (EN) Value for transaction fee / (KO) 트랜잭션 수수료
+          stateInit: null,
+          payload: await body.toBoc().then(boc => boc.toString('base64')),
         }
       ]
     };
