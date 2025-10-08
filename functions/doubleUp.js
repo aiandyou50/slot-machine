@@ -11,26 +11,24 @@ const MAX_DOUBLE_UP_COUNT = 5;
  */
 export async function onRequestPost(context) {
   try {
-    const { winTicket } = await context.request.json();
+    const { winTicket, choice } = await context.request.json();
     const { JWT_SECRET } = context.env;
 
-    if (!winTicket) {
-      return new Response(JSON.stringify({ success: false, message: 'Missing winTicket.' }), { status: 400 });
+    if (!winTicket || !choice) {
+      return new Response(JSON.stringify({ success: false, message: 'Missing winTicket or choice.' }), { status: 400 });
+    }
+    if (choice !== 'red' && choice !== 'black') {
+      return new Response(JSON.stringify({ success: false, message: 'Invalid choice. Must be "red" or "black".' }), { status: 400 });
     }
 
     const secret = new TextEncoder().encode(JWT_SECRET);
-
-    // (EN) Verify the incoming ticket.
-    // (KO) 수신된 티켓을 검증합니다.
     const { payload } = await jwtVerify(winTicket, secret, {
       issuer: 'urn:candlespinner:server',
       audience: 'urn:candlespinner:client',
     });
 
-    const { userAddress, payout, doubleUpCount = 0 } = payload;
+    const { userAddress, payout, spinId, doubleUpCount = 0 } = payload;
 
-    // (EN) Check if the maximum double-up limit has been reached.
-    // (KO) 최대 더블업 한도에 도달했는지 확인합니다.
     if (doubleUpCount >= MAX_DOUBLE_UP_COUNT) {
       return new Response(JSON.stringify({
         success: false,
@@ -38,23 +36,25 @@ export async function onRequestPost(context) {
       }), { status: 403 });
     }
 
-    // (EN) Perform a 50/50 random chance.
-    // (KO) 50/50 확률의 무작위 추첨을 수행합니다.
-    const isWin = Math.random() < 0.5;
+    // (EN) Determine the winning color based on the spinId and double-up count for deterministic results.
+    // (KO) 스핀 ID와 더블업 횟수를 기반으로 승리 색상을 결정하여 결과의 일관성을 보장합니다.
+    const combinedString = `${spinId}-${doubleUpCount}`;
+    const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(combinedString));
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const winningColor = hashArray[0] % 2 === 0 ? 'red' : 'black';
+
+    const isWin = choice === winningColor;
 
     if (isWin) {
-      // (EN) Success: Issue a new ticket with double the payout.
-      // (KO) 성공: 두 배의 상금이 걸린 새 티켓을 발급합니다.
       const newPayout = payout * 2;
       const newDoubleUpCount = doubleUpCount + 1;
-      const spinId = payload.spinId || crypto.randomUUID();
 
       const newTicket = await new SignJWT({ userAddress, payout: newPayout, spinId, doubleUpCount: newDoubleUpCount })
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
         .setIssuer('urn:candlespinner:server')
         .setAudience('urn:candlespinner:client')
-        .setExpirationTime('1h') // (EN) The new ticket is also valid for 1 hour. / (KO) 새 티켓 또한 1시간 동안 유효합니다.
+        .setExpirationTime('1h')
         .sign(secret);
 
       return new Response(JSON.stringify({
@@ -66,8 +66,6 @@ export async function onRequestPost(context) {
       }), { headers: { 'Content-Type': 'application/json' } });
 
     } else {
-      // (EN) Failure: The prize is lost.
-      // (KO) 실패: 상금을 잃었습니다.
       return new Response(JSON.stringify({
         success: true,
         win: false,

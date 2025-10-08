@@ -14,5 +14,12 @@
   "bet_label": "베팅",
   "claim_button_text": "상금 수령",
   "double_up_button_text": "더블업 (50/50)",
-  "spin_button_text": "스핀"
+  "spin_button_text": "스핀",
+  "error_game_wallet_not_configured": "오류: 게임 지갑이 설정되지 않았습니다. 관리자에게 문의하세요.",
+  "creating_transaction_message": "트랜잭션 생성 중...",
+  "confirm_transaction_message": "지갑에서 트랜잭션을 확인해주세요.",
+  "sending_transaction_message": "트랜잭션을 네트워크로 전송 중...",
+  "transaction_cancelled_message": "트랜잭션이 취소되었습니다.",
+  "red_choice_button_text": "레드 카드",
+  "black_choice_button_text": "블랙 카드"
 }

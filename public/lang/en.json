@@ -14,5 +14,12 @@
   "bet_label": "Bet",
   "claim_button_text": "Claim Prize",
   "double_up_button_text": "Double Up (50/50)",
-  "spin_button_text": "Spin"
+  "spin_button_text": "Spin",
+  "error_game_wallet_not_configured": "Error: Game wallet is not configured. Please contact support.",
+  "creating_transaction_message": "Creating transaction...",
+  "confirm_transaction_message": "Please confirm the transaction in your wallet.",
+  "sending_transaction_message": "Sending transaction to the network...",
+  "transaction_cancelled_message": "Transaction was cancelled.",
+  "red_choice_button_text": "Red Card",
+  "black_choice_button_text": "Black Card"
 }
