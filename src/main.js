@@ -308,32 +308,59 @@ async function handleDoubleUp(choice) {
 }
 
 /**
+ * (EN) Wait for necessary external libraries (TonWeb, TON_CONNECT_UI) to be available.
+ * (KO) 필요한 외부 라이브러리(TonWeb, TON_CONNECT_UI)가 준비될 때까지 대기합니다.
+ */
+async function waitForLibraries(timeout = 15000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    if (typeof window.TonWeb !== 'undefined' && typeof window.TON_CONNECT_UI !== 'undefined') return true;
+    await new Promise(r => setTimeout(r, 100));
+  }
+  return false;
+}
+
+/**
  * (EN) Initializes the application.
- * (KO) 애플리케이션을 초기화합니다.
+ * (KO) 애플리케이션을 초기화합니다. 중복 초기화를 방지합니다.
  */
 async function main() {
-  // (EN) Initialize TonConnect UI
-  // (KO) TonConnect UI를 초기화합니다
-  tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
-      buttonRootId: 'ton-connect-button',
-  });
+  // Prevent double initialization if main is called more than once
+  if (window.__CANDLESPINNER_INITIALIZED) return;
+  window.__CANDLESPINNER_INITIALIZED = true;
 
-  // (EN) Initialize TonWeb
-  // (KO) TonWeb을 초기화합니다
-  tonweb = initTonWeb();
+  // Initialize TonConnect UI if not already created and the lib exists
+  if (!tonConnectUI && typeof TON_CONNECT_UI !== 'undefined') {
+    try {
+      tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
+        buttonRootId: 'ton-connect-button',
+      });
+    } catch (error) {
+      console.error('Failed to initialize TonConnect UI:', error);
+    }
+  }
+
+  // Retry TonWeb initialization for a short period to avoid race conditions
+  for (let i = 0; i < 50; i++) {
+    tonweb = initTonWeb();
+    if (tonweb) break;
+    await new Promise(r => setTimeout(r, 100));
+  }
+
   if (!tonweb) {
     console.error('Failed to initialize TonWeb');
-    // (EN) You might want to show an error to the user
-    // (KO) 사용자에게 오류를 표시할 수 있습니다.
     messageDisplay.textContent = t('error_tonweb_not_initialized');
     return;
   }
 
-  tonConnectUI.onStatusChange(wallet => {
-    walletInfo = wallet;
-    updateView(!!wallet);
-  });
+  // Wire status change handler only if tonConnectUI exists
+  if (tonConnectUI && typeof tonConnectUI.onStatusChange === 'function') {
+    tonConnectUI.onStatusChange(wallet => {
+      walletInfo = wallet;
+      updateView(!!wallet);
+    });
+  }
 
   // (EN) Event Listeners / (KO) 이벤트 리스너
   langSelect.addEventListener('change', (e) => loadTranslations(e.target.value));
@@ -349,21 +376,16 @@ async function main() {
   claimButton.addEventListener('click', handleClaim);
 
   // (EN) When Double Up is clicked, show the choice buttons.
-  // (KO) 더블업 버튼을 클릭하면, 선택 버튼들을 표시합니다.
   doubleUpButton.addEventListener('click', () => {
     postWinActions.classList.add('hidden');
     doubleUpChoiceView.classList.remove('hidden');
   });
 
   // (EN) Handle clicks on Red/Black choice buttons.
-  // (KO) 레드/블랙 선택 버튼 클릭을 처리합니다.
   redChoiceButton.addEventListener('click', () => handleDoubleUp('red'));
   blackChoiceButton.addEventListener('click', () => handleDoubleUp('black'));
 
-
-  // (EN) Initial setup / (KO) 초기 설정
-  // (EN) Detect browser language or default to 'en'
-  // (KO) 브라우저 언어를 감지하거나 기본값 'en'으로 설정
+  // (EN) Initial setup
   const initialLang = navigator.language.startsWith('ko') ? 'ko' : 'en';
   langSelect.value = initialLang;
   await loadTranslations(initialLang);
@@ -372,6 +394,11 @@ async function main() {
   renderReels(Array(5).fill(Array(3).fill('?')));
 }
 
-main();
-
-document.addEventListener('DOMContentLoaded', main);
+// Start app once DOM is ready and required libs have loaded
+document.addEventListener('DOMContentLoaded', async () => {
+  const ok = await waitForLibraries();
+  if (!ok) {
+    console.warn('Some external libraries did not load within timeout. Proceeding anyway.');
+  }
+  await main();
+});
