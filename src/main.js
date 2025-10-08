@@ -4,7 +4,41 @@ import { getHttpEndpoint } from "@orbs-network/ton-access";
 import './style.css';
 import { toUserFriendlyAddress } from '@ton/core';
 // (KO) TonWeb을 window 객체에서 가져옵니다. (CDN 방식)
-const TonWeb = window.TonWeb;
+// (KO) TonWeb: CDN으로 로드된 전역 객체를 안전하게 가져오는 헬퍼
+// (EN) Helper to safely obtain TonWeb from the global window (loaded via CDN).
+async function getTonWeb(timeout = 10000) {
+  if (typeof window === 'undefined') throw new Error('Not running in browser');
+  if (window.TonWeb) return window.TonWeb;
+  // Wait for CDN script to set window.TonWeb
+  const interval = 100;
+  let waited = 0;
+  return await new Promise((resolve, reject) => {
+    const iv = setInterval(() => {
+      if (window.TonWeb) {
+        clearInterval(iv);
+        return resolve(window.TonWeb);
+      }
+      waited += interval;
+      if (waited >= timeout) {
+        clearInterval(iv);
+        console.warn('TonWeb CDN not available after', timeout, 'ms — attempting dynamic import("tonweb") fallback');
+        // Fallback: try dynamic import of the npm package
+        import('tonweb').then(mod => {
+          const TonWebModule = mod.default || mod;
+          if (TonWebModule) {
+            console.info('Dynamic import("tonweb") succeeded');
+            return resolve(TonWebModule);
+          }
+          console.error('Dynamic import("tonweb") returned no module');
+          return reject(new Error('TonWeb module import failed'));
+        }).catch(err => {
+          console.error('Dynamic import("tonweb") failed:', err);
+          return reject(new Error('TonWeb CDN not available and dynamic import failed: ' + err.message));
+        });
+      }
+    }, interval);
+  });
+}
 
 // (EN) English and (KO) Korean comments are mandatory.
 
@@ -151,29 +185,96 @@ async function handleSpin() {
   try {
     // (KO) ton-access를 사용해 안정적인 테스트넷 엔드포인트를 가져옵니다.
     // (EN) Get a reliable testnet endpoint using ton-access.
-    const endpoint = await getHttpEndpoint({ network: "testnet" });
-    const tonweb = new TonWeb(new TonWeb.HttpProvider(endpoint));
+  const TonWebLib = await getTonWeb().catch(e => { throw new Error('TonWeb unavailable: ' + e.message); });
+  const endpoint = await getHttpEndpoint({ network: "testnet" });
+  const tonweb = new TonWebLib(new TonWebLib.HttpProvider(endpoint));
 
-    // (EN) Get the Jetton Minter for our CSPIN token.
-    // (KO) CSPIN 토큰에 대한 제튼 발행자를 가져옵니다.
-    const jettonMinter = new tonweb.token.jetton.JettonMinter(tonweb.provider, { address: CSPIN_JETTON_ADDRESS });
+  // Debug info: log TonWeb availability
+  console.debug('TonWebLib loaded:', !!TonWebLib);
+  console.debug('tonweb instance has token?:', !!tonweb.token);
+  console.debug('TonWebLib.token exists?:', !!TonWebLib.token);
+
+  // (EN) Get the Jetton Minter for our CSPIN token.
+  // (KO) CSPIN 토큰에 대한 제튼 발행자를 가져옵니다.
+  try {
+    let tokenNamespace = tonweb.token || TonWebLib.token;
+    if (!tokenNamespace || !tokenNamespace.jetton) {
+      console.error('tokenNamespace or tokenNamespace.jetton missing', { tonwebToken: !!tonweb.token, TonWebLibToken: !!TonWebLib.token });
+      throw new Error('TonWeb Jetton module is not available on instance or constructor');
+    }
+
+    const jettonMinter = new tokenNamespace.jetton.JettonMinter(tonweb.provider, { address: CSPIN_JETTON_ADDRESS });
 
     // (EN) Get the user's Jetton Wallet address.
     // (KO) 사용자의 제튼 지갑 주소를 가져옵니다.
-    const userJettonWalletAddress = await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address(walletInfo.account.address));
+    const userJettonWalletAddress = await jettonMinter.getJettonWalletAddress(new TonWebLib.utils.Address(walletInfo.account.address));
 
     // (EN) Create a JettonWallet instance for the user's wallet.
     // (KO) 사용자의 지갑에 대한 JettonWallet 인스턴스를 생성합니다.
-    const userJettonWallet = new tonweb.token.jetton.JettonWallet(tonweb.provider, { address: userJettonWalletAddress.toString() });
+    const userJettonWallet = new tokenNamespace.jetton.JettonWallet(tonweb.provider, { address: userJettonWalletAddress.toString() });
 
     // (EN) Create a payload for the Jetton transfer using the instance method.
     // (KO) 인스턴스 메소드를 사용하여 제튼 전송을 위한 페이로드를 생성합니다.
     const body = await userJettonWallet.createTransferBody({
-        queryId: 0,
-        jettonAmount: TonWeb.utils.toNano(currentBet.toString()),
-        toAddress: new TonWeb.utils.Address(GAME_WALLET_ADDRESS),
-        responseAddress: new TonWeb.utils.Address(walletInfo.account.address)
+      queryId: 0,
+      jettonAmount: TonWebLib.utils.toNano(currentBet.toString()),
+      toAddress: new TonWebLib.utils.Address(GAME_WALLET_ADDRESS),
+      responseAddress: new TonWebLib.utils.Address(walletInfo.account.address)
     });
+
+    // proceed with TonConnect transaction using 'body' as before
+    const transaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 600,
+      messages: [{
+        address: userJettonWalletAddress.toString(true, true, true),
+        amount: TonWebLib.utils.toNano('0.1').toString(),
+        payload: body.toBoc().toString('base64')
+      }]
+    };
+
+    messageDisplay.textContent = t('confirm_transaction_message');
+    const result = await tonConnectUI.sendTransaction(transaction);
+    messageDisplay.textContent = t('sending_transaction_message');
+
+    // send to backend
+    const response = await fetch('/spin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ boc: result.boc, devKey: localStorage.getItem('DEV_KEY') }),
+    });
+    const data = await response.json();
+    if (data.error) throw new Error(data.details || data.error);
+
+    renderReels(data.reels);
+    if (data.win) {
+      messageDisplay.textContent = t('spin_win_message', { payout: data.payout });
+      currentWinTicket = data.winTicket;
+      postWinActions.classList.remove('hidden');
+    } else {
+      messageDisplay.textContent = t('spin_lose_message');
+      currentWinTicket = null;
+    }
+
+    // end of TonWeb flow
+    setControlsLoading(false);
+    return;
+  } catch (err) {
+    // If Jetton module is unavailable or any TonWeb-related error occurs, offer fallback test-mode spin
+    console.error('TonWeb Jetton flow failed:', err);
+    messageDisplay.textContent = t('generic_error_message', { error: err.message });
+    const tryFallback = confirm('Jetton module unavailable or transfer preparation failed. Run a local test spin instead? (테스트 스핀을 대신 실행하시겠습니까?)');
+    if (tryFallback) {
+      const reels = generateReelResults();
+      renderReels(reels);
+      messageDisplay.textContent = '[Fallback] 테스트 모드 결과입니다.';
+      postWinActions.classList.add('hidden');
+      currentWinTicket = null;
+      setControlsLoading(false);
+      return;
+    }
+    // if not falling back, rethrow to outer catch
+    throw err;
+  }
 
     // (EN) Create the transaction object for TonConnectUI
     // (KO) TonConnectUI를 위한 트랜잭션 객체를 생성합니다.
@@ -182,7 +283,7 @@ async function handleSpin() {
       messages: [
         {
           address: userJettonWalletAddress.toString(true, true, true),
-          amount: TonWeb.utils.toNano('0.1').toString(), // (EN) Value in nanotons for the transaction fee
+          amount: TonWebLib.utils.toNano('0.1').toString(), // (EN) Value in nanotons for the transaction fee
                                                                 // (KO) 트랜잭션 수수료를 위한 나노톤 단위의 값
           payload: body.toBoc().toString('base64') // (EN) The BOC of the message payload / (KO) 메시지 페이로드의 BOC
         }
