@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.2] - 2025-10-08
+
+### Fixed
+- **(KO) 블록체인 RPC 호출 오류 해결 (exit_code: -13):**
+  - **문제:** 스핀 버튼 클릭 시, 프론트엔드에서 `tonClient.runMethod`를 통해 사용자의 Jetton 지갑 주소를 조회하는 과정에서 `exit_code: -13` 오류가 발생하며 트랜잭션이 실패했습니다.
+  - **원인:** 프론트엔드에서 사용하는 공개 RPC 엔드포인트(`toncenter.com`)가 특정 요청에 제한을 두거나, 샌드박스 환경의 네트워크 제약으로 인해 스마트 컨트랙트의 `get` 메소드 호출이 실패했습니다.
+  - **해결:**
+    1.  프론트엔드에서 직접 RPC를 호출하는 대신, 이 호출을 안전하게 중계하는 새로운 백엔드 프록시 함수 `/getJettonWalletAddress`를 구현했습니다.
+    2.  이 백엔드 함수는 Cloudflare 환경 변수에 저장된 API 키를 사용하여 안정적인 RPC 엔드포인트에 요청을 보냅니다.
+    3.  프론트엔드의 `handleSpin` 함수를 리팩토링하여, `tonClient`를 직접 사용하는 대신 새로 만든 백엔드 API를 호출하여 Jetton 지갑 주소를 가져오도록 수정했습니다. 이로써 클라이언트 측의 RPC 호출 문제를 근본적으로 해결했습니다.
+
+- **(EN) Blockchain RPC Call Error Resolved (exit_code: -13):**
+  - **Error:** When clicking the spin button, the transaction failed with an `exit_code: -13` error during the process of fetching the user's Jetton wallet address via `tonClient.runMethod` on the frontend.
+  - **Cause:** The public RPC endpoint (`toncenter.com`) used by the frontend has limitations on certain requests, or network constraints in the sandbox environment caused the smart contract's `get` method call to fail.
+  - **Solution:**
+    1.  Implemented a new backend proxy function, `/getJettonWalletAddress`, to securely relay the RPC call instead of making it directly from the frontend.
+    2.  This backend function uses an API key stored in Cloudflare environment variables to make requests to a reliable RPC endpoint.
+    3.  Refactored the `handleSpin` function in the frontend to call the new backend API to get the Jetton wallet address, instead of using `tonClient` directly. This fundamentally resolves the client-side RPC call issue.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
