@@ -336,22 +336,17 @@ async function main() {
   // (EN) Initialize TonConnect UI
   // (KO) TonConnect UI를 초기화합니다
   try {
-    if (!window.TonConnectUI) {
-      console.error('TonConnect UI library is not loaded');
-      return;
-    }
-    tonConnectUI = new window.TonConnectUI({
+    const connector = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
       buttonRootId: 'ton-connect-button',
-      actionsConfiguration: {
-        tps: 1,
-        retryCount: 3,
-        messageLifetime: 60000,
-      },
       uiPreferences: {
         theme: 'DARK',
+      },
+      walletsListConfiguration: {
+        includeWallets: ['tonkeeper', 'openmask', 'tonhub']
       }
     });
+    tonConnectUI = connector;
     console.log('TonConnect UI initialized successfully');
   } catch (error) {
     console.error('Failed to initialize TonConnect UI:', error);

@@ -17,6 +17,8 @@
     "@ton/crypto": "^3.2.0",
     "@ton/ton": "^13.11.2",
     "@orbs-network/ton-access": "^2.3.3",
+    "@tonconnect/ui": "^2.0.0",
+    "@tonconnect/sdk": "^3.0.0",
     "jose": "^5.4.1",
     "tonweb": "^0.0.66"
   }
