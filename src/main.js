@@ -1,11 +1,10 @@
 import './style.css';
-import { TonConnectUI } from '@tonconnect/ui';
 import { Address, toNano, beginCell } from '@ton/core';
-import { TonClient } from "@ton/ton";
 
 // (KO) English and (KO) Korean comments are mandatory.
 
 // --- (EN) State Management / (KO) 상태 관리 ---
+let tonConnectUI;
 let walletInfo = null;
 let currentBet = 10;
 let currentWinTicket = null;
@@ -13,20 +12,6 @@ let currentLang = 'en';
 let translations = {};
 const BET_STEP = 10;
 let lastMessage = { key: 'welcome_message', params: {} };
-
-// (EN) Initialize libraries from NPM packages
-// (KO) NPM 패키지로부터 라이브러리 초기화
-const tonConnectUI = new TonConnectUI({
-    manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
-    buttonRootId: 'ton-connect-button',
-});
-
-// (EN) Initialize TON Client for reading contract data
-// (KO) 컨트랙트 데이터 조회를 위한 TON 클라이언트 초기화
-const tonClient = new TonClient({
-    endpoint: 'https://testnet.toncenter.com/api/v2/jsonRPC'
-});
-
 
 // --- (EN) DOM Element References / (KO) DOM 요소 참조 ---
 const landingView = document.getElementById('landing-view');
@@ -124,25 +109,21 @@ function setControlsLoading(isLoading) {
 const CSPIN_JETTON_ADDRESS = "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV";
 const GAME_WALLET_ADDRESS = "UQBFPDdSlPgqPrn2XwhpVq0KQExN2kv83_batQ-dptaR8Mtd";
 
-/**
- * (KO) @ton/core를 사용하여 Jetton 전송을 위한 메시지 본문을 생성합니다.
- * (EN) Creates the message body for a Jetton transfer using @ton/core.
- */
 function createJettonTransferPayload(jettonAmount, toAddress, responseAddress) {
     const forwardPayload = beginCell()
-        .storeUint(0, 32) // (KO) 텍스트 주석을 위한 op-code (EN) op-code for a text comment
+        .storeUint(0, 32) // op-code for a text comment
         .storeStringTail("Bet")
         .endCell();
 
     return beginCell()
-        .storeUint(0x0f8a7ea5, 32) // (KO) Jetton 전송 op-code (EN) op-code for jetton transfer
-        .storeUint(0, 64) // (KO) query_id (EN) query_id
+        .storeUint(0x0f8a7ea5, 32) // op-code for jetton transfer
+        .storeUint(0, 64) // query_id
         .storeCoins(toNano(jettonAmount))
         .storeAddress(Address.parse(toAddress))
         .storeAddress(Address.parse(responseAddress))
-        .storeBit(false) // (KO) 커스텀 페이로드 없음 (EN) no custom payload
-        .storeCoins(toNano('0.01')) // (KO) 포워딩 수수료 (EN) forward fee
-        .storeBit(true) // (KO) 포워드 페이로드 포함 (EN) forward payload included
+        .storeBit(false) // no custom payload
+        .storeCoins(toNano('0.01')) // forward fee
+        .storeBit(true) // forward payload included
         .storeRef(forwardPayload)
         .endCell();
 }
@@ -158,19 +139,22 @@ async function handleSpin() {
   showMessage('creating_transaction_message');
 
   try {
-    // (KO) 사용자의 Jetton 지갑 주소를 가져옵니다.
-    // (EN) Get the user's Jetton wallet address.
-    const ownerAddress = Address.parse(walletInfo.account.address);
-    const jettonMinterAddress = Address.parse(CSPIN_JETTON_ADDRESS);
-    const ownerWalletSlice = beginCell().storeAddress(ownerAddress).endCell().asSlice();
+    const response = await fetch('/getJettonWalletAddress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            ownerAddress: walletInfo.account.address,
+            jettonMinterAddress: CSPIN_JETTON_ADDRESS
+        }),
+    });
 
-    const { stack } = await tonClient.runMethod(jettonMinterAddress, 'get_wallet_address', [
-        { type: 'slice', cell: ownerWalletSlice.asCell() }
-    ]);
-    const userJettonWalletAddress = stack.readAddress();
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || 'Failed to get Jetton wallet address.');
+    }
 
-    // (KO) 전송 페이로드 생성
-    // (EN) Create transfer payload
+    const { jettonWalletAddress } = await response.json();
+
     const transferPayload = createJettonTransferPayload(
         currentBet.toString(),
         GAME_WALLET_ADDRESS,
@@ -181,8 +165,8 @@ async function handleSpin() {
       validUntil: Math.floor(Date.now() / 1000) + 600,
       messages: [
         {
-          address: userJettonWalletAddress.toString(),
-          amount: toNano('0.05').toString(), // (KO) 가스비 (EN) Gas fee
+          address: jettonWalletAddress,
+          amount: toNano('0.05').toString(),
           payload: transferPayload.toBoc().toString('base64'),
         }
       ]
@@ -192,13 +176,13 @@ async function handleSpin() {
     const result = await tonConnectUI.sendTransaction(transaction);
     showMessage('sending_transaction_message');
 
-    const response = await fetch('/spin', {
+    const spinResponse = await fetch('/spin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ boc: result.boc, devKey: localStorage.getItem('DEV_KEY') }),
     });
 
-    const data = await response.json();
+    const data = await spinResponse.json();
     if (data.error) throw new Error(data.details || data.error);
 
     renderReels(data.reels);
@@ -276,11 +260,30 @@ async function handleDoubleUp(choice) {
   }
 }
 
+/**
+ * (KO) CDN에서 @tonconnect/ui가 로드될 때까지 기다립니다.
+ * (EN) Waits for @tonconnect/ui to be loaded from the CDN.
+ */
+async function waitForTonConnectUI(timeout = 5000) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    if (window.TonConnectUI) return true;
+    await new Promise(r => setTimeout(r, 100));
+  }
+  return false;
+}
+
+
 async function main() {
   if (window.__CANDLESPINNER_INITIALIZED) return;
   window.__CANDLESPINNER_INITIALIZED = true;
 
   versionDisplay.textContent = `v${import.meta.env.VITE_APP_VERSION}`;
+
+  tonConnectUI = new window.TonConnectUI({
+      manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
+      buttonRootId: 'ton-connect-button',
+  });
 
   tonConnectUI.onStatusChange(wallet => {
     walletInfo = wallet;
@@ -313,4 +316,11 @@ async function main() {
   renderReels(Array(5).fill(Array(3).fill('?')));
 }
 
-document.addEventListener('DOMContentLoaded', main);
+document.addEventListener('DOMContentLoaded', async () => {
+    const loaded = await waitForTonConnectUI();
+    if (!loaded) {
+        document.getElementById('message-display').textContent = 'Error: Could not load wallet connect UI.';
+        return;
+    }
+    main();
+});
