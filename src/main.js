@@ -1,5 +1,6 @@
 import './style.css';
 import { toUserFriendlyAddress } from '@ton/core';
+import TonWeb from 'tonweb';
 
 // (EN) English and (KO) Korean comments are mandatory.
 
@@ -146,18 +147,18 @@ async function handleSpin() {
   try {
     // (EN) Create a payload for the Jetton transfer
     // (KO) 제튼 전송을 위한 페이로드를 생성합니다.
-    const body = await window.TonWeb.token.jetton.JettonWallet.createTransferBody({
+    const body = await TonWeb.token.jetton.JettonWallet.createTransferBody({
         queryId: 0,
-        jettonAmount: window.TonWeb.utils.toNano(currentBet.toString()),
-        toAddress: new window.TonWeb.utils.Address(GAME_WALLET_ADDRESS),
-        responseAddress: new window.TonWeb.utils.Address(walletInfo.account.address)
+        jettonAmount: TonWeb.utils.toNano(currentBet.toString()),
+        toAddress: new TonWeb.utils.Address(GAME_WALLET_ADDRESS),
+        responseAddress: new TonWeb.utils.Address(walletInfo.account.address)
     });
 
     // (EN) Find the user's Jetton wallet address for the CSPIN token
     // (KO) CSPIN 토큰에 대한 사용자의 제튼 지갑 주소를 찾습니다.
-    const tonweb = new window.TonWeb();
+    const tonweb = new TonWeb();
     const jettonMinter = new tonweb.token.jetton.JettonMinter(tonweb.provider, { address: CSPIN_JETTON_ADDRESS });
-    const userJettonWalletAddress = await jettonMinter.getJettonWalletAddress(new window.TonWeb.utils.Address(walletInfo.account.address));
+    const userJettonWalletAddress = await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address(walletInfo.account.address));
 
     // (EN) Create the transaction object for TonConnectUI
     // (KO) TonConnectUI를 위한 트랜잭션 객체를 생성합니다.
@@ -166,7 +167,7 @@ async function handleSpin() {
       messages: [
         {
           address: userJettonWalletAddress.toString(true, true, true),
-          amount: window.TonWeb.utils.toNano('0.1').toString(), // (EN) Value in nanotons for the transaction fee
+          amount: TonWeb.utils.toNano('0.1').toString(), // (EN) Value in nanotons for the transaction fee
                                                                 // (KO) 트랜잭션 수수료를 위한 나노톤 단위의 값
           payload: body.toBoc().toString('base64') // (EN) The BOC of the message payload / (KO) 메시지 페이로드의 BOC
         }

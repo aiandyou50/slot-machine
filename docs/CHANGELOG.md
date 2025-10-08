@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2025-10-08
+
+### Fixed
+- **프론트엔드 런타임 오류 수정 (Frontend Runtime Error Fix):**
+  - (EN) **Error:** A runtime error `Cannot read properties of undefined (reading 'token')` occurred when clicking the "Spin" button.
+  - (KO) **오류:** "스핀" 버튼 클릭 시 `Cannot read properties of undefined (reading 'token')` 런타임 오류 발생.
+  - (EN) **Cause:** The `tonweb` library was used as a global variable (`window.TonWeb`) even though it was installed via npm. It needed to be explicitly imported into `src/main.js`.
+  - (KO) **원인:** `tonweb` 라이브러리가 npm으로 설치되었음에도 불구하고, `src/main.js`에서 명시적으로 `import`하지 않고 전역 변수(`window.TonWeb`)로 잘못 사용되었습니다.
+  - (EN) **Solution:** Added `import TonWeb from 'tonweb';` at the top of `src/main.js` and replaced all instances of `window.TonWeb` with `TonWeb` to correctly reference the imported module.
+  - (KO) **해결:** `src/main.js` 파일 상단에 `import TonWeb from 'tonweb';` 구문을 추가하고, 모든 `window.TonWeb` 참조를 `TonWeb`으로 변경하여 모듈을 올바르게 사용하도록 수정했습니다.
+
 ## [2.0.0] - 2025-10-08
 
 ### Added
