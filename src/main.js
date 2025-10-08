@@ -151,24 +151,24 @@ async function handleSpin() {
 
     // (EN) Get the Jetton Minter for our CSPIN token.
     // (KO) CSPIN 토큰에 대한 제튼 발행자를 가져옵니다.
-    const jettonMinter = new tonweb.token.jetton.JettonMinter(tonweb.provider, { address: CSPIN_JETTON_ADDRESS });
+    const jettonMinter = new tonweb.token.jetton.JettonMinter(tonweb.provider, CSPIN_JETTON_ADDRESS);
 
     // (EN) Get the user's Jetton Wallet address.
     // (KO) 사용자의 제튼 지갑 주소를 가져옵니다.
-    const userJettonWalletAddress = await jettonMinter.getJettonWalletAddress(new TonWeb.utils.Address(walletInfo.account.address));
+    const userJettonWalletAddress = await jettonMinter.getJettonWalletAddress(walletInfo.account.address);
 
     // (EN) Create a JettonWallet instance for the user's wallet.
     // (KO) 사용자의 지갑에 대한 JettonWallet 인스턴스를 생성합니다.
-    const userJettonWallet = new tonweb.token.jetton.JettonWallet(tonweb.provider, { address: userJettonWalletAddress.toString() });
+    const userJettonWallet = new tonweb.token.jetton.JettonWallet(tonweb.provider, userJettonWalletAddress);
 
     // (EN) Create a payload for the Jetton transfer using the instance method.
     // (KO) 인스턴스 메소드를 사용하여 제튼 전송을 위한 페이로드를 생성합니다.
-    const body = await userJettonWallet.createTransferBody({
-        queryId: 0,
-        jettonAmount: TonWeb.utils.toNano(currentBet.toString()),
-        toAddress: new TonWeb.utils.Address(GAME_WALLET_ADDRESS),
-        responseAddress: new TonWeb.utils.Address(walletInfo.account.address)
-    });
+    const body = await userJettonWallet.createTransferBody(
+        0, // queryId
+        TonWeb.utils.toNano(currentBet.toString()), // jettonAmount
+        GAME_WALLET_ADDRESS, // toAddress
+        walletInfo.account.address // responseAddress
+    );
 
     // (EN) Create the transaction object for TonConnectUI
     // (KO) TonConnectUI를 위한 트랜잭션 객체를 생성합니다.

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Jetton API 호환성 개선 (Jetton API Compatibility Improvement):**
+  - (EN) **Error:** The `Cannot read properties of undefined (reading 'jetton')` error persisted after the CDN fix, indicating a deeper API compatibility issue.
+  - (KO) **오류:** CDN 수정 이후에도 `Cannot read properties of undefined (reading 'jetton')` 오류가 지속되어 API 호환성 문제가 있음을 확인함.
+  - (EN) **Cause:** The code was using an outdated format for initializing and calling Jetton-related APIs, which didn't match the current TonWeb library's structure.
+  - (KO) **원인:** Jetton 관련 API를 초기화하고 호출하는 방식이 현재 TonWeb 라이브러리의 구조와 맞지 않는 구형 형식을 사용하고 있었음.
+  - (EN) **Solution:** Updated the Jetton API calls to match the current TonWeb library structure:
+    - Modified JettonMinter initialization to use direct address string
+    - Updated getJettonWalletAddress call to use simpler address format
+    - Simplified JettonWallet initialization
+    - Changed createTransferBody to use positional parameters instead of object
+  - (KO) **해결:** 현재 TonWeb 라이브러리 구조에 맞게 Jetton API 호출 방식을 업데이트함:
+    - JettonMinter 초기화 시 주소 문자열 직접 사용하도록 수정
+    - getJettonWalletAddress 호출 시 단순화된 주소 형식 사용
+    - JettonWallet 초기화 방식 단순화
+    - createTransferBody에서 객체 대신 위치 매개변수 사용
+
 ## [2.0.5] - 2025-10-08
 
 ### Fixed
