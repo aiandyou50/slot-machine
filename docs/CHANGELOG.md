@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.4] - 2025-10-08
+
+### Fixed
+- **프론트엔드 스핀 오류 수정 (Frontend Spin Error Fix):**
+  - (EN) **Error:** A runtime error `Cannot read properties of undefined (reading 'jetton')` occurred again when clicking the "Spin" button.
+  - (KO) **오류:** "스핀" 버튼 클릭 시 `Cannot read properties of undefined (reading 'jetton')` 런타임 오류 재발생.
+  - (EN) **Cause:** It is suspected that `TonWeb.HttpProvider` with a hardcoded URL is unstable in the Vite-polyfilled browser environment, causing the `TonWeb` instance to initialize incorrectly without a `.token` property.
+  - (KO) **원인:** 하드코딩된 URL을 사용하는 `TonWeb.HttpProvider`가 Vite로 폴리필된 브라우저 환경에서 불안정하게 동작하여, `TonWeb` 인스턴스가 `.token` 속성 없이 비정상적으로 초기화되는 것으로 추정됩니다.
+  - (EN) **Solution:** Refactored the `handleSpin` function in `src/main.js` to use `@orbs-network/ton-access` to dynamically fetch a reliable RPC endpoint before initializing `TonWeb`, ensuring a stable provider connection.
+  - (KO) **해결:** `src/main.js`의 `handleSpin` 함수를 리팩토링하여, `TonWeb`을 초기화하기 전에 `@orbs-network/ton-access`를 사용해 안정적인 RPC 엔드포인트를 동적으로 가져오도록 수정함으로써 안정적인 프로바이더 연결을 보장했습니다.
+ 
 ## [2.0.3] - 2025-10-08
 
 ### Fixed
