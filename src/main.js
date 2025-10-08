@@ -312,17 +312,11 @@ async function handleDoubleUp(choice) {
  * (KO) 애플리케이션을 초기화합니다.
  */
 async function main() {
-  // (EN) Wait for all required libraries to be loaded
-  // (KO) 필요한 모든 라이브러리가 로드될 때까지 기다립니다
-  await new Promise(resolve => {
-    const checkLibs = () => {
-      if (window.TonWeb && window.TON_CONNECT_UI) {
-        resolve();
-      } else {
-        setTimeout(checkLibs, 100);
-      }
-    };
-    checkLibs();
+  // (EN) Initialize TonConnect UI
+  // (KO) TonConnect UI를 초기화합니다
+  tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
+      buttonRootId: 'ton-connect-button',
   });
 
   // (EN) Initialize TonWeb
@@ -330,26 +324,10 @@ async function main() {
   tonweb = initTonWeb();
   if (!tonweb) {
     console.error('Failed to initialize TonWeb');
+    // (EN) You might want to show an error to the user
+    // (KO) 사용자에게 오류를 표시할 수 있습니다.
+    messageDisplay.textContent = t('error_tonweb_not_initialized');
     return;
-  }
-
-  // (EN) Initialize TonConnect UI
-  // (KO) TonConnect UI를 초기화합니다
-  try {
-    const connector = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
-      buttonRootId: 'ton-connect-button',
-      uiPreferences: {
-        theme: 'DARK',
-      },
-      walletsListConfiguration: {
-        includeWallets: ['tonkeeper', 'openmask', 'tonhub']
-      }
-    });
-    tonConnectUI = connector;
-    console.log('TonConnect UI initialized successfully');
-  } catch (error) {
-    console.error('Failed to initialize TonConnect UI:', error);
   }
 
   tonConnectUI.onStatusChange(wallet => {
