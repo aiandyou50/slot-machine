@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.3] - 2025-10-08
+
+### Fixed
+- **프론트엔드 런타임 오류 수정 (Frontend Runtime Error Fix):**
+  - (EN) **Error:** A runtime error `Cannot read properties of undefined (reading 'jetton')` occurred when clicking the "Spin" button.
+  - (KO) **오류:** "스핀" 버튼 클릭 시 `Cannot read properties of undefined (reading 'jetton')` 런타임 오류 발생.
+  - (EN) **Cause:** The `TonWeb` instance was created without an `HttpProvider`. This resulted in the instance not being connected to the TON network, making properties like `tonweb.token` undefined.
+  - (KO) **원인:** `TonWeb` 인스턴스가 `HttpProvider` 없이 생성되었습니다. 이로 인해 인스턴스가 TON 네트워크에 연결되지 않아 `tonweb.token`과 같은 속성이 `undefined`가 되었습니다.
+  - (EN) **Solution:** After researching the library's documentation, the `TonWeb` constructor in `src/main.js` was updated to include an `HttpProvider` pointing to the public Toncenter API for the testnet (`new TonWeb(new TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC'))`).
+  - (KO) **해결:** 라이브러리 문서 조사를 통해, `src/main.js`의 `TonWeb` 생성자를 테스트넷용 Toncenter 공개 API를 가리키는 `HttpProvider`를 포함하도록 업데이트했습니다 (`new TonWeb(new TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC'))`).
+
 ## [2.0.2] - 2025-10-08
 
 ### Fixed

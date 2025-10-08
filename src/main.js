@@ -145,7 +145,9 @@ async function handleSpin() {
   messageDisplay.textContent = t('creating_transaction_message');
 
   try {
-    const tonweb = new TonWeb();
+    // (EN) Initialize TonWeb with a provider. For testnet, we use toncenter.
+    // (KO) 프로바이더와 함께 TonWeb을 초기화합니다. 테스트넷을 위해 toncenter를 사용합니다.
+    const tonweb = new TonWeb(new TonWeb.HttpProvider('https://testnet.toncenter.com/api/v2/jsonRPC'));
 
     // (EN) Get the Jetton Minter for our CSPIN token.
     // (KO) CSPIN 토큰에 대한 제튼 발행자를 가져옵니다.
