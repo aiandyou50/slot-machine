@@ -207,7 +207,93 @@ async function handleSpin() {
     // (EN) Get a reliable testnet endpoint using ton-access.
   const TonWebLib = await getTonWeb().catch(e => { throw new Error('TonWeb unavailable: ' + e.message); });
   const endpoint = await getHttpEndpoint({ network: "testnet" });
-  const tonweb = new TonWebLib(new TonWebLib.HttpProvider(endpoint));
+  // Alternative endpoints to try if the dynamic endpoint returns invalid responses
+  // Prefer using the local RPC proxy endpoint to forward JSON-RPC requests to the whitelist
+  // This helps avoid CORS/proxy/response-format issues in some browsers.
+  const ALT_RPC_ENDPOINTS = [
+    `${window.location.origin}/.netlify/functions/rpcProxy`, // Cloudflare Pages/Netlify style fallback if hosting rewrites are configured
+    `${window.location.origin}/api/rpcProxy`, // another possible hosting path
+    // Direct endpoints as ultimate fallback
+    'https://testnet.toncenter.com/api/v2/jsonRPC',
+    'https://net.ton.dev',
+    'https://mainnet.toncenter.com/api/v2/jsonRPC'
+  ];
+
+  // Helper: test an RPC endpoint by sending a minimal JSON-RPC request
+  async function testRpcEndpoint(endpoint, timeout = 4000) {
+    try {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+
+      // If endpoint is our proxy path, call it with ?use=index to map to whitelist
+      let url = endpoint;
+      let body = {};
+      if (endpoint.startsWith(window.location.origin)) {
+        // Use ?use=0 by default; we can override by index when calling
+        url = endpoint + '?use=0';
+        // Proxy expects raw JSON-RPC or wrapper. We'll send a basic net.getTime or version call
+        body = { jsonrpc: '2.0', method: 'net.getVersion', params: [], id: 1 };
+      } else {
+        body = { jsonrpc: '2.0', method: 'net.getVersion', params: [], id: 1 };
+      }
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+      clearTimeout(id);
+      const text = await res.text();
+      // Basic sanity: should be JSON and not an HTML error page
+      if (!text || text.trim().length === 0) return false;
+      if (text.trim().startsWith('<')) return false; // HTML -> likely error page
+      try { JSON.parse(text); return true; } catch { return false; }
+    } catch (err) {
+      return false;
+    }
+  }
+
+  // Choose a working RPC endpoint. Try dynamic endpoint first, then proxy/direct alternates.
+  let chosenEndpoint = endpoint;
+  let tonweb = null;
+
+  try {
+    // Test the dynamic endpoint first
+    const dynamicOk = await testRpcEndpoint(endpoint).catch(() => false);
+    if (dynamicOk) {
+      chosenEndpoint = endpoint;
+      tonweb = new TonWebLib(new TonWebLib.HttpProvider(chosenEndpoint));
+      console.info('Using dynamic endpoint from ton-access:', chosenEndpoint);
+    } else {
+      // Try alternates in order
+      let found = false;
+      for (let i = 0; i < ALT_RPC_ENDPOINTS.length; i++) {
+        const alt = ALT_RPC_ENDPOINTS[i];
+        console.info('Testing alternate RPC endpoint:', alt);
+        const ok = await testRpcEndpoint(alt).catch(() => false);
+        if (ok) {
+          chosenEndpoint = alt;
+          tonweb = new TonWebLib(new TonWebLib.HttpProvider(chosenEndpoint));
+          console.info('Selected alternate RPC endpoint:', chosenEndpoint);
+          found = true;
+          break;
+        } else {
+          console.warn('Endpoint failed quick test:', alt);
+        }
+      }
+      if (!found) {
+        // As a last resort, still try dynamic endpoint and hope for the best
+        chosenEndpoint = endpoint;
+        tonweb = new TonWebLib(new TonWebLib.HttpProvider(chosenEndpoint));
+        console.warn('No alternate endpoint passed quick tests; falling back to dynamic endpoint:', chosenEndpoint);
+      }
+    }
+  } catch (err) {
+    console.error('Error while selecting RPC endpoint:', err);
+    // create a provider with the original endpoint to let TonWeb attempt its own requests
+    tonweb = new TonWebLib(new TonWebLib.HttpProvider(endpoint));
+  }
 
   // Debug info: log TonWeb availability
   console.debug('TonWebLib loaded:', !!TonWebLib);
@@ -225,9 +311,59 @@ async function handleSpin() {
 
     const jettonMinter = new tokenNamespace.jetton.JettonMinter(tonweb.provider, { address: CSPIN_JETTON_ADDRESS });
 
-    // (EN) Get the user's Jetton Wallet address.
-    // (KO) 사용자의 제튼 지갑 주소를 가져옵니다.
-    const userJettonWalletAddress = await jettonMinter.getJettonWalletAddress(new TonWebLib.utils.Address(walletInfo.account.address));
+    // (EN) Get the user's Jetton Wallet address. Try alternative RPC endpoints if parsing fails.
+    // (KO) 사용자의 제튼 지갑 주소를 가져옵니다. 파싱 오류 발생 시 대체 RPC 엔드포인트를 시도합니다.
+    let userJettonWalletAddress;
+    try {
+      userJettonWalletAddress = await jettonMinter.getJettonWalletAddress(new TonWebLib.utils.Address(walletInfo.account.address));
+    } catch (jetErr) {
+      console.warn('TonWeb Jetton flow primary endpoint failed:', jetErr.message);
+      // If provider parse response error, try alternatives
+      if (jetErr.message && jetErr.message.toLowerCase().includes('http provider parse response error')) {
+        let success = false;
+        for (const alt of ALT_RPC_ENDPOINTS) {
+          try {
+            console.info('Attempting alternative RPC endpoint:', alt);
+            // If the alt looks like a local proxy path, instruct the provider to use it directly.
+            if (alt.startsWith(window.location.origin)) {
+              // Our rpcProxy expects a POST body with { endpoint, payload } - but TonWeb HttpProvider
+              // expects a URL. We'll still construct an HttpProvider pointing to the proxy, which will
+              // forward the JSON-RPC requests to the whitelisted endpoints on the server side.
+              tonweb = new TonWebLib(new TonWebLib.HttpProvider(alt));
+            } else {
+              tonweb = new TonWebLib(new TonWebLib.HttpProvider(alt));
+            }
+            const altTokenNamespace = tonweb.token || TonWebLib.token;
+            if (!altTokenNamespace || !altTokenNamespace.jetton) continue;
+            const altMinter = new altTokenNamespace.jetton.JettonMinter(tonweb.provider, { address: CSPIN_JETTON_ADDRESS });
+            userJettonWalletAddress = await altMinter.getJettonWalletAddress(new TonWebLib.utils.Address(walletInfo.account.address));
+            // replace tokenNamespace/jetton with altTokenNamespace for subsequent calls
+            tokenNamespace = altTokenNamespace;
+            success = true;
+            console.info('Alternative RPC endpoint succeeded:', alt);
+            break;
+          } catch (altErr) {
+            console.warn('Alternative endpoint failed:', alt, altErr.message);
+            try {
+              // Attempt to fetch a small JSON-RPC response snippet for diagnostics
+              const probe = await fetch(alt, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ jsonrpc: '2.0', method: 'net.getVersion', params: [], id: 1 }),
+              });
+              const probeText = await probe.text();
+              console.warn('Alternative endpoint probe response snippet:', probeText.slice(0, 400));
+            } catch (probeErr) {
+              console.warn('Alternative endpoint probe failed:', probeErr.message);
+            }
+            continue;
+          }
+        }
+        if (!success) throw jetErr;
+      } else {
+        throw jetErr;
+      }
+    }
 
     // (EN) Create a JettonWallet instance for the user's wallet.
     // (KO) 사용자의 지갑에 대한 JettonWallet 인스턴스를 생성합니다.
@@ -281,6 +417,7 @@ async function handleSpin() {
   } catch (err) {
     // If Jetton module is unavailable or any TonWeb-related error occurs, offer fallback test-mode spin
     console.error('TonWeb Jetton flow failed:', err);
+    try { console.error('Chosen RPC endpoint during failure:', chosenEndpoint); } catch(e) { /* ignore */ }
     messageDisplay.textContent = t('generic_error_message', { error: err.message });
     const tryFallback = confirm('Jetton module unavailable or transfer preparation failed. Run a local test spin instead? (테스트 스핀을 대신 실행하시겠습니까?)');
     if (tryFallback) {

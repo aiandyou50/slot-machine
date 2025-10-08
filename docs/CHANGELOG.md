@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.5] - 2025-10-08
+
+### Fixed
+- **TonWeb HTTP provider parse error handling and RPC retry (TonWeb RPC Parse Error Fix):**
+  - (EN) **Error:** A runtime error `http provider parse response error` was observed in the browser console when attempting to resolve the user's Jetton wallet address via the dynamically fetched RPC endpoint. This caused the frontend Jetton flow to fail and fall back to a local test spin.
+  - (KO) **오류:** 동적으로 가져온 RPC 엔드포인트를 통해 사용자의 제튼 지갑 주소를 가져오는 과정에서 브라우저 콘솔에 `http provider parse response error` 런타임 오류가 발생했습니다. 이로 인해 프론트엔드의 제튼 플로우가 실패하고 로컬 테스트 스핀으로 폴백되었습니다.
+  - (EN) **Cause:** The dynamic RPC endpoint returned a response that the TonWeb HttpProvider couldn't parse (in some environments this can happen due to proxies, CORS, or endpoint-specific response formats). Relying on a single dynamic endpoint made the flow brittle.
+  - (KO) **원인:** 동적 RPC 엔드포인트가 TonWeb `HttpProvider`가 파싱할 수 없는 응답을 반환했습니다(프록시, CORS 또는 엔드포인트의 응답 형식 차이로 인해 발생 가능). 단일 동적 엔드포인트에 의존하면 흐름이 불안정해집니다.
+  - (EN) **Solution:** Implemented a robust retry strategy in the frontend `handleSpin` flow: if `JettonMinter.getJettonWalletAddress` fails with a parse error, the frontend now iterates a small list of known alternative RPC endpoints (e.g., `https://testnet.toncenter.com/api/v2/jsonRPC`, `https://net.ton.dev`) and retries the same operation until one succeeds. If all attempts fail, the user is offered a safe local test spin fallback. Added detailed console logging and increased TonWeb load timeout to aid debugging.
+  - (KO) **해결:** 프론트엔드의 `handleSpin` 흐름에 재시도 전략을 구현했습니다: `JettonMinter.getJettonWalletAddress`가 파싱 오류로 실패하면 프론트엔드는 미리 정의된 대체 RPC 엔드포인트 목록(예: `https://testnet.toncenter.com/api/v2/jsonRPC`, `https://net.ton.dev`)을 순차 시도하여 성공할 때까지 재시도합니다. 모든 시도가 실패하면 사용자에게 안전한 로컬 테스트 스핀 폴백을 제공합니다. 디버깅을 돕기 위해 상세 콘솔 로그와 TonWeb 로드 타임아웃도 늘렸습니다.
+
 ## [2.0.4] - 2025-10-08
 
 ### Fixed
