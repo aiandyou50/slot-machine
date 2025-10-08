@@ -89,19 +89,15 @@ async function verifyTransaction(boc, gameWalletAddress, client) {
         throw new Error("Invalid operation code. Not a Jetton transfer.");
     }
     bodySlice.skip(64); // query_id
-    const amount = fromNano(bodySlice.loadCoins());
-    const to = bodySlice.loadAddress();
+  const amount = fromNano(bodySlice.loadCoins());
+  const to = bodySlice.loadAddress();
 
-    if (to.toString() !== gameWalletAddress.toString()) {
-        throw new Error(`Invalid recipient. Expected ${gameWalletAddress.toString()}, got ${to.toString()}`);
-    }
+  if (to.toString() !== gameWalletAddress.toString()) {
+    throw new Error(`Invalid recipient. Expected ${gameWalletAddress.toString()}, got ${to.toString()}`);
+  }
 
-    // (EN) We can't easily verify the Jetton contract address from the BOC alone without more context.
-    // (KO) 더 많은 컨텍스트 없이는 BOC만으로 제튼 컨트랙트 주소를 쉽게 확인할 수 없습니다.
-    // (EN) For now, we trust the 'destination' is the user's correct jetton wallet.
-    // (KO) 현재로서는 'destination'이 사용자의 올바른 제튼 지갑이라고 신뢰합니다.
-
-    return { betAmount: Number(amount) };
+  // Return both the jetton bet amount and the originating jetton wallet (destination in outer message)
+  return { betAmount: Number(amount), userJettonWalletAddress: destination.toString() };
 }
 
 
@@ -133,22 +129,16 @@ export async function onRequestPost(context) {
     // parsing the stateInit and message body correctly.
     // const { betAmount, userAddress } = await verifyTransaction(boc, gameWalletAddress, client);
 
-    // (EN) Since BOC verification is complex, we will skip it for now and extract the info from the JWT on the client side in a real scenario
-    // (KO) BOC 검증이 복잡하므로, 지금은 건너뛰고 실제 시나리오에서는 클라이언트 측 JWT에서 정보를 추출합니다.
-    // (EN) THIS IS A TEMPORARY WORKAROUND. A real implementation MUST verify the BOC.
-    // (KO) 이것은 임시 해결책입니다. 실제 구현에서는 반드시 BOC를 검증해야 합니다.
-    const decodedBoc = Cell.fromBase64(boc);
-    const messageCell = decodedBoc.refs[0];
-    const messageSlice = messageCell.beginParse();
-    const messageHeader = messageSlice.loadUint(4);
-    const senderAddress = messageSlice.loadAddress();
-    const userAddress = senderAddress.toString();
-
-    // (EN) WARNING: We are not validating the bet amount from the BOC. This is insecure.
-    // (KO) 경고: BOC에서 베팅 금액을 검증하지 않고 있습니다. 이것은 안전하지 않습니다.
-    // (EN) We will assume a fixed bet amount for now. This MUST be fixed.
-    // (KO) 현재로서는 고정된 베팅 금액을 가정합니다. 이 부분은 반드시 수정되어야 합니다.
-    const betAmount = 10; // Placeholder
+    // Verify the incoming BOC and extract the bet amount and the user's jetton wallet address
+    let betAmount = 0;
+    let userAddress = null;
+    try {
+      const verified = await verifyTransaction(boc, gameWalletAddress, client);
+      betAmount = verified.betAmount;
+      userAddress = verified.userJettonWalletAddress || null;
+    } catch (verErr) {
+      return new Response(JSON.stringify({ error: 'BOC verification failed', details: verErr.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
 
 
     // (EN) Broadcast the transaction to the network
@@ -163,8 +153,8 @@ export async function onRequestPost(context) {
       forceResult = 'jackpot';
     }
 
-    const reels = generateReelResults(forceResult);
-    const { win, payout, winDetails } = calculateWinnings(reels, betAmount);
+  const reels = generateReelResults(forceResult);
+  const { win, payout, winDetails } = calculateWinnings(reels, betAmount);
 
     let winTicket = null;
     if (win && payout > 0) {
