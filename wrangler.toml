@@ -16,5 +16,5 @@ pages_build_output_dir = "dist"
 # (EN) Defines the KV namespace to be used for the Commit-Reveal scheme.
 [[kv_namespaces]]
 binding = "SPIN_COMMITMENTS"
-id = "your-production-namespace-id" # (KO) 중요: 실제 프로덕션 배포 시 이 값을 Cloudflare 대시보드의 ID로 교체해야 합니다. (EN) IMPORTANT: This must be replaced with the ID from the Cloudflare dashboard for production deployment.
+id = "101174f2d41740f3a2f64374d95fc347" # (KO) 사용자로부터 제공받은 프로덕션 ID로 업데이트되었습니다. (EN) Updated with the production ID provided by the user.
 preview_id = "preview_namespace_for_commitments" # (KO) `wrangler dev`를 위한 미리보기 ID입니다. (EN) This is the preview ID for `wrangler dev`.
