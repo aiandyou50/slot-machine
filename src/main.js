@@ -69,12 +69,12 @@ function showMessage(key, params = {}) {
 }
 
 function applyStaticTranslations() {
-  document.querySelectorAll('[data-i18n-key]').forEach((el) => {
-    const key = el.getAttribute('data-i18n-key');
-    if (el.id !== 'message-display') {
+  document
+    .querySelectorAll('[data-i18n-key]:not(#message-display)')
+    .forEach((el) => {
+      const key = el.getAttribute('data-i18n-key');
       el.textContent = t(key);
-    }
-  });
+    });
   showMessage(lastMessage.key, lastMessage.params);
 }
 
