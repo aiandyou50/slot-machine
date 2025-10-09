@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.4] - 2025-10-09
+
+### Fixed
+
+- **(KO) BUG-01 (언어 변경 시 메시지 초기화) 근본 원인 해결:**
+  - **문제:** 게임 플레이 중 언어를 변경하면, 동적으로 표시되던 상태 메시지(예: "50 당첨!")가 초기 환영 메시지로 돌아가는 문제가 지속되었습니다.
+  - **원인:** 이전 버전(3.0.1)의 수정은 JavaScript 로직으로 문제를 회피하려 했으나, 근본 원인은 `index.html`의 동적 메시지 표시 영역 (`<div id="message-display">`)에 정적 번역을 위한 `data-i18n-key` 속성이 잘못 지정되어 있었기 때문입니다. 이로 인해 언어 변경 시 항상 정적 "환영" 메시지로 덮어써졌습니다.
+  - **해결:** `index.html`에서 `<div id="message-display">` 요소의 `data-i18n-key="welcome_message"` 속성을 완전히 제거했습니다. 이를 통해 해당 영역이 정적 번역 프로세스에서 제외되도록 하여, JavaScript의 동적 상태(`lastMessage`)에 의해서만 메시지가 올바르게 관리되도록 수정했습니다.
+
+- **(EN) BUG-01 (Message Reset on Language Change) Root Cause Fix:**
+  - **Error:** When changing the language during gameplay, the dynamic status message (e.g., "You won 50!") continued to revert to the initial welcome message.
+  - **Cause:** The fix in version 3.0.1 attempted to work around the issue with JavaScript logic, but the root cause was that the dynamic message display area (`<div id="message-display">`) in `index.html` was incorrectly assigned a `data-i18n-key` attribute intended for static translation. This caused it to always be overwritten with the static "welcome" message on language change.
+  - **Solution:** Completely removed the `data-i18n-key="welcome_message"` attribute from the `<div id="message-display">` element in `index.html`. This excludes the area from the static translation process, ensuring that the message is correctly managed solely by the dynamic state (`lastMessage`) in JavaScript.
+
 ## [3.0.3] - 2025-10-08
 
 ### Fixed
