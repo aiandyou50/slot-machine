@@ -58,13 +58,10 @@ export function createJettonTransferPayload(
   toAddress,
   responseAddress
 ) {
-  // (KO) 이 함수는 이제 순수하게 데이터 변환 책임만 가집니다.
-  // (EN) This function now purely holds the responsibility for data transformation.
-  const forwardPayload = beginCell()
-    .storeUint(0, 32) // (KO) 텍스트 주석을 위한 op-code (EN) op-code for a text comment
-    .storeStringTail('Bet')
-    .endCell();
-
+  // (KO) 'Invalid CRC32C' 오류를 해결하기 위해, 데이터 손상을 유발하는 것으로 의심되는
+  // (KO) 불필요한 forward_payload('Bet' 주석) 부분을 완전히 제거합니다.
+  // (EN) To resolve the 'Invalid CRC32C' error, the unnecessary forward_payload
+  // (EN) (the 'Bet' comment), which is suspected of causing data corruption, is completely removed.
   return beginCell()
     .storeUint(0x0f8a7ea5, 32) // (KO) Jetton 전송 op-code (EN) op-code for jetton transfer
     .storeUint(0, 64) // (KO) query_id (EN) query_id
@@ -73,8 +70,7 @@ export function createJettonTransferPayload(
     .storeAddress(Address.parse(responseAddress))
     .storeBit(false) // (KO) 커스텀 페이로드 없음 (EN) no custom payload
     .storeCoins(toNano('0.01')) // (KO) 포워딩 수수료 (EN) forward fee
-    .storeBit(true) // (KO) 포워드 페이로드 포함 (EN) forward payload included
-    .storeRef(forwardPayload)
+    .storeBit(false) // (KO) 포워드 페이로드 없음 (EN) no forward payload
     .endCell();
 }
 
