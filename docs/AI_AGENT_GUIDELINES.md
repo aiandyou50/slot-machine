@@ -175,7 +175,7 @@ AI 에이전트는 새로운 기능을 추가하거나 중요한 리팩토링을
 
 -----
 
-## 5\. Pull Request(PR) 가이드라인 (Pull Request Guidelines) `[개선 사항]`
+## 5\. Pull Request(PR) 가이드라인 (Pull Request Guidelines)
 
 모든 Pull Request의 설명문은 아래 템플릿을 사용하여 작성해야 합니다.
 
@@ -199,7 +199,7 @@ AI 에이전트는 새로운 기능을 추가하거나 중요한 리팩토링을
 
 -----
 
-## 6\. 금지 조항 (Forbidden Actions / Anti-patterns) `[개선 사항]`
+## 6\. 금지 조항 (Forbidden Actions / Anti-patterns)
 
 AI 에이전트는 다음 행동을 절대 수행해서는 안 됩니다.
 
