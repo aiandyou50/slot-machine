@@ -10,20 +10,25 @@
  * @param {string} jettonMinterAddress - (KO) Jetton 마스터 컨트랙트 주소 (EN) The Jetton master contract address.
  * @returns {Promise<string>} The user's Jetton wallet address.
  */
-export async function getJettonWalletAddress(ownerAddress, jettonMinterAddress) {
-    const response = await fetch('/getJettonWalletAddress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ownerAddress, jettonMinterAddress }),
-    });
+export async function getJettonWalletAddress(
+  ownerAddress,
+  jettonMinterAddress
+) {
+  const response = await fetch('/getJettonWalletAddress', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ownerAddress, jettonMinterAddress }),
+  });
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to get Jetton wallet address.');
-    }
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(
+      errorData.message || 'Failed to get Jetton wallet address.'
+    );
+  }
 
-    const { jettonWalletAddress } = await response.json();
-    return jettonWalletAddress;
+  const { jettonWalletAddress } = await response.json();
+  return jettonWalletAddress;
 }
 
 /**
@@ -35,18 +40,18 @@ export async function getJettonWalletAddress(ownerAddress, jettonMinterAddress) 
  * @returns {Promise<object>} The spin result from the backend.
  */
 export async function callSpinApi(boc, betAmount, userAddress) {
-    const devKey = localStorage.getItem('DEV_KEY');
-    const response = await fetch('/spin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ boc, betAmount, userAddress, devKey }),
-    });
+  const devKey = localStorage.getItem('DEV_KEY');
+  const response = await fetch('/spin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ boc, betAmount, userAddress, devKey }),
+  });
 
-    const data = await response.json();
-    if (!data.success) {
-        throw new Error(data.message || 'Spin API call failed.');
-    }
-    return data;
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.message || 'Spin API call failed.');
+  }
+  return data;
 }
 
 /**
@@ -56,17 +61,17 @@ export async function callSpinApi(boc, betAmount, userAddress) {
  * @returns {Promise<object>} The claim result from the backend.
  */
 export async function callClaimApi(winTicket) {
-    const response = await fetch('/claimPrize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ winTicket }),
-    });
+  const response = await fetch('/claimPrize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ winTicket }),
+  });
 
-    const data = await response.json();
-    if (!data.success) {
-        throw new Error(data.message || 'Claim prize API call failed.');
-    }
-    return data;
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.message || 'Claim prize API call failed.');
+  }
+  return data;
 }
 
 /**
@@ -77,15 +82,15 @@ export async function callClaimApi(winTicket) {
  * @returns {Promise<object>} The double up result from the backend.
  */
 export async function callDoubleUpApi(winTicket, choice) {
-    const response = await fetch('/doubleUp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ winTicket, choice }),
-    });
+  const response = await fetch('/doubleUp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ winTicket, choice }),
+  });
 
-    const data = await response.json();
-    if (!data.success) {
-        throw new Error(data.message || 'Double up API call failed.');
-    }
-    return data;
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.message || 'Double up API call failed.');
+  }
+  return data;
 }

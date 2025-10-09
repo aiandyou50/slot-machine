@@ -1,4 +1,5 @@
 # CandleSpinner: 코드 진단 및 개선 계획
+
 **(EN) CandleSpinner: Code Diagnostics and Improvement Plan**
 
 **작성자 (Author):** 줄스 AI (Jules AI)
@@ -22,6 +23,7 @@
   (EN) Explicitly check for the existence of the `JWT_SECRET` environment variable at the beginning of each function. If the variable is not present, immediately throw an error to halt execution. This prevents the service from running in an insecure state and forces developers to configure environment variables correctly. For local development convenience, the guidelines should enforce the use of a `.dev.vars` file.
 
 - **코드 예시 (Code Example):**
+
   ```javascript
   // (KO) 개선 전: 하드코딩된 폴백 존재
   // (EN) Before: Hardcoded fallback exists
@@ -33,8 +35,10 @@
     const { request, env } = context;
 
     if (!env.JWT_SECRET) {
-      console.error("CRITICAL: JWT_SECRET environment variable is not set.");
-      return new Response(JSON.stringify({ error: "CONFIGURATION_ERROR" }), { status: 500 });
+      console.error('CRITICAL: JWT_SECRET environment variable is not set.');
+      return new Response(JSON.stringify({ error: 'CONFIGURATION_ERROR' }), {
+        status: 500,
+      });
     }
     const JWT_SECRET = new TextEncoder().encode(env.JWT_SECRET);
 
@@ -60,6 +64,7 @@
       - `package-lock.json`이 손상될 경우, `rm -rf node_modules package-lock.json && npm install`을 통해 깨끗한 상태에서 재설치하는 절차를 표준 복구 절차로 문서화합니다.
 
 - **코드 예시 (Code Example):**
+
   ```bash
   # (KO) 유령 의존성 트리 확인 명령어
   # (EN) Command to check for phantom dependency trees
@@ -93,6 +98,7 @@
   (EN) Introduce a **Backend-for-Frontend (BFF) / Proxy Pattern**. All `get` method calls that read data from the blockchain will be routed through a dedicated backend function (e.g., `/getJettonWalletAddress`) instead of being made directly from the frontend. This backend function will use a protected API key (from environment variables) to query a more reliable RPC endpoint and return the result to the frontend.
 
 - **코드 예시 (Code Example):**
+
   ```javascript
   // src/main.js (Before)
   // const { stack } = await tonClient.runMethod(jettonMinterAddress, 'get_wallet_address', ...);
@@ -100,12 +106,12 @@
 
   // src/main.js (After)
   const response = await fetch('/getJettonWalletAddress', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-          ownerAddress: walletInfo.account.address,
-          jettonMinterAddress: CSPIN_JETTON_ADDRESS
-      }),
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ownerAddress: walletInfo.account.address,
+      jettonMinterAddress: CSPIN_JETTON_ADDRESS,
+    }),
   });
   const { jettonWalletAddress } = await response.json();
 
@@ -132,6 +138,7 @@
   (EN) Standardize the error response structure for the backend API. All error responses will include `success: false`, a machine-readable `errorCode`, and a human-readable `message`. The frontend will then use this `errorCode` to display a predefined, internationalized error message to the user.
 
 - **코드 예시 (Code Example):**
+
   ```javascript
   // functions/claimPrize.js (After)
   // ...
@@ -163,12 +170,13 @@
   1.  **`src/services/blockchain.js`**: 블록체인과 직접 상호작용하는 모든 로직(페이로드 생성, Jetton 지갑 주소 조회 API 호출 등)을 이관합니다.
   2.  **`src/services/api.js`**: `/spin`, `/claimPrize` 등 백엔드 API를 호출하는 모든 `fetch` 로직을 이관합니다.
   3.  **`src/main.js`**: UI 이벤트를 수신하고, 각 서비스 모듈의 함수를 조립하여 호출하며, 그 결과에 따라 UI를 업데이트하는 '컨트롤러' 또는 '오케스트레이터'의 역할만 수행하도록 리팩토링합니다.
-  (EN) Create service modules within the `src/` directory to separate responsibilities.
-  1.  **`src/services/blockchain.js`**: Move all logic that directly interacts with the blockchain (e.g., payload creation, calling the API to get Jetton wallet address).
-  2.  **`src/services/api.js`**: Move all `fetch` logic for calling backend APIs like `/spin` and `/claimPrize`.
-  3.  **`src/main.js`**: Refactor to act solely as a 'controller' or 'orchestrator' that listens for UI events, composes and calls functions from the service modules, and updates the UI based on the results.
+      (EN) Create service modules within the `src/` directory to separate responsibilities.
+  4.  **`src/services/blockchain.js`**: Move all logic that directly interacts with the blockchain (e.g., payload creation, calling the API to get Jetton wallet address).
+  5.  **`src/services/api.js`**: Move all `fetch` logic for calling backend APIs like `/spin` and `/claimPrize`.
+  6.  **`src/main.js`**: Refactor to act solely as a 'controller' or 'orchestrator' that listens for UI events, composes and calls functions from the service modules, and updates the UI based on the results.
 
 - **코드 예시 (Code Example):**
+
   ```javascript
   // src/services/api.js (New)
   // export async function callSpinApi(boc, userAddress, betAmount) { /* ... fetch logic ... */ }
@@ -207,12 +215,12 @@
   1.  **수신자 주소:** 트랜잭션의 수신자가 올바른 `GAME_WALLET_ADDRESS`인지 확인합니다.
   2.  **전송된 금액:** 트랜잭션에 기록된 실제 토큰 양이 API 요청에 포함된 `betAmount`와 일치하는지 확인합니다.
   3.  **토큰 종류:** (선택적이지만 권장) 트랜잭션이 올바른 Jetton(CSPIN)에 대한 것인지 확인합니다.
-  이 검증을 통과한 경우에만 스핀 로직을 실행하고, 검증 실패 시 `INVALID_TRANSACTION` 오류를 반환합니다.
-  (EN) Implement a `verifyTransaction` function within the `/spin` function to parse the received `boc` on the server-side. This function will verify:
-  1.  **Recipient Address:** Ensure the transaction recipient is the correct `GAME_WALLET_ADDRESS`.
-  2.  **Transferred Amount:** Confirm that the actual token amount in the transaction matches the `betAmount` included in the API request.
-  3.  **Token Type:** (Optional but recommended) Verify the transaction is for the correct Jetton (CSPIN).
-  Only if this verification passes should the spin logic be executed. Otherwise, return an `INVALID_TRANSACTION` error.
+      이 검증을 통과한 경우에만 스핀 로직을 실행하고, 검증 실패 시 `INVALID_TRANSACTION` 오류를 반환합니다.
+      (EN) Implement a `verifyTransaction` function within the `/spin` function to parse the received `boc` on the server-side. This function will verify:
+  4.  **Recipient Address:** Ensure the transaction recipient is the correct `GAME_WALLET_ADDRESS`.
+  5.  **Transferred Amount:** Confirm that the actual token amount in the transaction matches the `betAmount` included in the API request.
+  6.  **Token Type:** (Optional but recommended) Verify the transaction is for the correct Jetton (CSPIN).
+      Only if this verification passes should the spin logic be executed. Otherwise, return an `INVALID_TRANSACTION` error.
 
 - **코드 예시 (Code Example):**
   ```javascript
@@ -249,9 +257,9 @@
 - **해결 전략 (Solution Strategy):**
   (KO) **장기적 개선 과제**로, 검증 가능한 랜덤 함수(Verifiable Random Function - VRF)를 도입하는 것을 제안합니다.
   1.  **(1단계) Commit-Reveal 스킴 도입:**
-      -   **Commit:** `/spin` API는 랜덤 결과를 즉시 반환하는 대신, `hash(결과 + 서버 시크릿)` 형태의 '결과 해시'와 '트랜잭션 ID'를 먼저 반환합니다.
-      -   **Reveal:** 프론트엔드는 블록체인에서 해당 트랜잭션이 포함된 블록의 `blockhash`를 가져옵니다.
-      -   **Verification:** 프론트엔드는 '결과 해시', '서버 시크릿' (서버가 나중에 공개), 그리고 `blockhash`를 모두 사용하여 결과가 유효한지 클라이언트 측에서 검증할 수 있습니다.
+      - **Commit:** `/spin` API는 랜덤 결과를 즉시 반환하는 대신, `hash(결과 + 서버 시크릿)` 형태의 '결과 해시'와 '트랜잭션 ID'를 먼저 반환합니다.
+      - **Reveal:** 프론트엔드는 블록체인에서 해당 트랜잭션이 포함된 블록의 `blockhash`를 가져옵니다.
+      - **Verification:** 프론트엔드는 '결과 해시', '서버 시크릿' (서버가 나중에 공개), 그리고 `blockhash`를 모두 사용하여 결과가 유효한지 클라이언트 측에서 검증할 수 있습니다.
   2.  **(2단계) 완전한 온체인 VRF 도입:** 더 나아가, Chainlink VRF와 같은 온체인 랜덤 소스를 사용하여 게임 결과를 생성하는 방식으로 아키텍처를 발전시킬 수 있습니다.
 
 - **코드 예시 (Conceptual Flow):**
@@ -315,12 +323,12 @@
 
 - **해결 전략 (Solution Strategy):**
   1.  **테스트 프레임워크 도입:**
-      -   `vitest`: Vite와 완벽하게 통합되는 단위/통합 테스트 프레임워크를 도입합니다.
-      -   `Playwright`: 최종 사용자 관점의 E2E(End-to-End) 테스트를 위해 도입합니다.
+      - `vitest`: Vite와 완벽하게 통합되는 단위/통합 테스트 프레임워크를 도입합니다.
+      - `Playwright`: 최종 사용자 관점의 E2E(End-to-End) 테스트를 위해 도입합니다.
   2.  **기본 테스트 작성:**
-      -   **Unit Tests:** 순수 함수(예: `calculatePayoutMultiplier`, `createJettonTransferPayload`)에 대한 단위 테스트를 작성합니다.
-      -   **Integration Tests:** 백엔드 함수가 예상된 요청에 대해 올바른 응답(성공/실패)을 반환하는지 테스트합니다.
-      -   **E2E Tests:** '지갑 연결 → 스핀 → 결과 확인'으로 이어지는 핵심 사용자 시나리오에 대한 Playwright 테스트를 작성합니다.
+      - **Unit Tests:** 순수 함수(예: `calculatePayoutMultiplier`, `createJettonTransferPayload`)에 대한 단위 테스트를 작성합니다.
+      - **Integration Tests:** 백엔드 함수가 예상된 요청에 대해 올바른 응답(성공/실패)을 반환하는지 테스트합니다.
+      - **E2E Tests:** '지갑 연결 → 스핀 → 결과 확인'으로 이어지는 핵심 사용자 시나리오에 대한 Playwright 테스트를 작성합니다.
 
 - **코드 예시 (File Structure):**
   ```

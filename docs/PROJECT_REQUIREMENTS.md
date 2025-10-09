@@ -129,7 +129,7 @@
 - **NFR-DOC-02: 로드맵 관리 (Roadmap Management)**  
   프로젝트의 장기적인 개발 목표는 `roadmap.md`에 문서화하고, `roadmap.html`을 통해 시각적으로 표현해야 한다.
 
-- **NFR-DOC-03: 살아있는 아키텍처 문서 관리 (Living Architecture Documentation Management)**  
+- **NFR-DOC-03: 살아있는 아키텍처 문서 관리 (Living Architecture Documentation Management)**
   - **목표 **(Goal): 프로젝트의 기술적 방향성에 대한 **단일 진실 공급원**(Single Source of Truth)을 유지하고, 신규 참여자의 적응을 돕고, 코드와 문서 간의 불일치를 최소화하는 것을 목표로 한다.
   - **문서 범위 **(Scope): `PROJECT_ARCHITECTURE.MD` 문서는 다음 내용을 반드시 포함해야 한다:
     - 핵심 아키텍처 사상 (Core Philosophy)
@@ -141,7 +141,7 @@
     - 아키텍처에 영향을 미치는 변경사항(예: 신규 라이브러리 도입, API 엔드포인트 구조 변경, 핵심 데이터 흐름 수정 등)이 포함된 풀 리퀘스트(Pull Request)는 반드시 `PROJECT_ARCHITECTURE.MD` 문서의 관련 내용 수정을 포함해야 한다.
     - 코드 리뷰 시, 리뷰어는 코드 변경사항뿐만 아니라 아키텍처 문서가 함께 업데이트되었는지 확인할 의무를 가진다.
 
-- **NFR-DOC-04: 아키텍처 결정 기록 관리 (Architecture Decision Record Management)**  
+- **NFR-DOC-04: 아키텍처 결정 기록 관리 (Architecture Decision Record Management)**
   - **목표 **(Goal): 중요한 아키텍처 결정의 **"이유"**와 **"결과"**를 명시적으로 기록하여, 기술 부채의 발생을 추적하고, 과거의 의사결정 과정을 투명하게 공유하며, 향후 발생할 실수를 예방하는 것을 목표로 한다.
   - **기록 대상 **(Targets for Recording): 다음을 포함하되 이에 국한되지 않는 중요한 기술적 결정이 내려질 때마다 ADR을 작성해야 한다:
     - 새로운 기술, 프레임워크, 라이브러리의 도입 또는 제거

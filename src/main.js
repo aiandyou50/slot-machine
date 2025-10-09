@@ -1,5 +1,10 @@
 import './style.css';
-import { getJettonWalletAddress, callSpinApi, callClaimApi, callDoubleUpApi } from './services/api.js';
+import {
+  getJettonWalletAddress,
+  callSpinApi,
+  callClaimApi,
+  callDoubleUpApi,
+} from './services/api.js';
 import { createSpinTransaction } from './services/blockchain.js';
 
 // (KO) English and (KO) Korean comments are mandatory.
@@ -43,7 +48,10 @@ function t(key, params = {}) {
       try {
         value = new Intl.NumberFormat(currentLang).format(pValue);
       } catch (e) {
-        console.warn(`Could not format number ${pValue} for locale ${currentLang}. Falling back to default.`, e);
+        console.warn(
+          `Could not format number ${pValue} for locale ${currentLang}. Falling back to default.`,
+          e
+        );
         value = pValue.toString();
       }
     }
@@ -53,15 +61,15 @@ function t(key, params = {}) {
 }
 
 function showMessage(key, params = {}) {
-    lastMessage = { key, params };
-    messageDisplay.textContent = t(key, params);
+  lastMessage = { key, params };
+  messageDisplay.textContent = t(key, params);
 }
 
 function applyStaticTranslations() {
-  document.querySelectorAll('[data-i18n-key]').forEach(el => {
+  document.querySelectorAll('[data-i18n-key]').forEach((el) => {
     const key = el.getAttribute('data-i18n-key');
     if (el.id !== 'message-display') {
-        el.textContent = t(key);
+      el.textContent = t(key);
     }
   });
   showMessage(lastMessage.key, lastMessage.params);
@@ -98,7 +106,15 @@ function renderReels(reelsData) {
     for (const symbol of reelData) {
       const symbolDiv = document.createElement('div');
       symbolDiv.className = 'symbol';
-      symbolDiv.textContent = {'CHERRY': '🍒', 'LEMON': '🍋', 'ORANGE': '🍊', 'PLUM': '🍇', 'BELL': '🔔', 'DIAMOND': '💎'}[symbol] || symbol;
+      symbolDiv.textContent =
+        {
+          CHERRY: '🍒',
+          LEMON: '🍋',
+          ORANGE: '🍊',
+          PLUM: '🍇',
+          BELL: '🔔',
+          DIAMOND: '💎',
+        }[symbol] || symbol;
       reelDiv.appendChild(symbolDiv);
     }
     reelsContainer.appendChild(reelDiv);
@@ -133,14 +149,24 @@ async function handleSpin() {
 
   try {
     showMessage('creating_transaction_message');
-    const jettonWalletAddress = await getJettonWalletAddress(walletInfo.account.address);
-    const transaction = createSpinTransaction(jettonWalletAddress, currentBet, walletInfo.account.address);
+    const jettonWalletAddress = await getJettonWalletAddress(
+      walletInfo.account.address
+    );
+    const transaction = createSpinTransaction(
+      jettonWalletAddress,
+      currentBet,
+      walletInfo.account.address
+    );
 
     showMessage('confirm_transaction_message');
     const result = await tonConnectUI.sendTransaction(transaction);
 
     showMessage('sending_transaction_message');
-    const data = await callSpinApi(result.boc, currentBet, walletInfo.account.address);
+    const data = await callSpinApi(
+      result.boc,
+      currentBet,
+      walletInfo.account.address
+    );
 
     renderReels(data.reels);
 
@@ -153,10 +179,10 @@ async function handleSpin() {
       currentWinTicket = null;
     }
   } catch (error) {
-     if (error.message.includes('Transaction was rejected')) {
-        showMessage('transaction_cancelled_message');
+    if (error.message.includes('Transaction was rejected')) {
+      showMessage('transaction_cancelled_message');
     } else {
-        showMessage('generic_error_message', { error: error.message });
+      showMessage('generic_error_message', { error: error.message });
     }
   } finally {
     setControlsLoading(false);
@@ -187,13 +213,13 @@ async function handleDoubleUp(choice) {
   try {
     const data = await callDoubleUpApi(currentWinTicket, choice);
     if (data.win) {
-        showMessage('double_up_success_message', { payout: data.newPayout });
-        currentWinTicket = data.newTicket;
-        postWinActions.classList.remove('hidden');
+      showMessage('double_up_success_message', { payout: data.newPayout });
+      currentWinTicket = data.newTicket;
+      postWinActions.classList.remove('hidden');
     } else {
-        showMessage('double_up_failed_message');
-        currentWinTicket = null;
-        postWinActions.classList.add('hidden');
+      showMessage('double_up_failed_message');
+      currentWinTicket = null;
+      postWinActions.classList.add('hidden');
     }
   } catch (error) {
     showMessage('double_up_error_message', { error: error.message });
@@ -215,16 +241,18 @@ async function main() {
   versionDisplay.textContent = `v${import.meta.env.VITE_APP_VERSION}`;
 
   tonConnectUI = new TonConnectUI({
-      manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
-      buttonRootId: 'ton-connect-button',
+    manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
+    buttonRootId: 'ton-connect-button',
   });
 
-  tonConnectUI.onStatusChange(wallet => {
+  tonConnectUI.onStatusChange((wallet) => {
     walletInfo = wallet;
     updateView(!!wallet);
   });
 
-  langSelect.addEventListener('change', (e) => loadTranslations(e.target.value));
+  langSelect.addEventListener('change', (e) =>
+    loadTranslations(e.target.value)
+  );
   decreaseBetButton.addEventListener('click', () => {
     currentBet = Math.max(BET_STEP, currentBet - BET_STEP);
     updateBetDisplay();
