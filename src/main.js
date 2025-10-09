@@ -1,5 +1,7 @@
 import './style.css';
 import { Address, toNano, beginCell } from '@ton/core';
+// (KO) TonClient는 백엔드 프록시로 이전되었으므로 프론트엔드에서 더 이상 필요하지 않습니다.
+// (EN) TonClient is no longer needed on the frontend as it has been moved to a backend proxy.
 
 // (KO) English and (KO) Korean comments are mandatory.
 

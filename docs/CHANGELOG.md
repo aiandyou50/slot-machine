@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.3] - 2025-10-08
+
+### Fixed
+- **(KO) TON Connect UI 렌더링 오류 해결:**
+  - **문제:** NPM으로 `@tonconnect/ui` 라이브러리를 설치했을 때, 지갑 연결 버튼(위젯)이 프론트엔드에 전혀 렌더링되지 않았습니다.
+  - **원인:** `@tonconnect/ui` 패키지는 NPM을 통해 로컬로 번들링될 때 안정적으로 UI를 렌더링하지 못하는 고질적인 문제가 있었습니다. 이는 라이브러리의 내부 구조 또는 Vite와의 호환성 문제로 추정됩니다.
+  - **해결:** 안정적인 UI 렌더링을 보장하기 위해, `@tonconnect/ui` 라이브러리를 다시 CDN을 통해 로드하는 방식으로 전환했습니다. `package.json`에서 해당 의존성을 제거하고, `index.html`에 CDN 스크립트와 CSS 링크를 다시 추가했습니다. `main.js`는 CDN으로 로드된 전역 `window.TonConnectUI` 객체를 사용하도록 수정하여 문제를 해결했습니다.
+
+- **(EN) TON Connect UI Rendering Error Fix:**
+  - **Error:** When the `@tonconnect/ui` library was installed via NPM, the wallet connection button (widget) failed to render on the frontend.
+  - **Cause:** The `@tonconnect/ui` package has a persistent issue where it does not reliably render its UI when bundled locally via NPM, likely due to its internal structure or compatibility issues with Vite.
+  - **Solution:** To ensure stable UI rendering, the project reverted to loading the `@tonconnect/ui` library via CDN. The dependency was removed from `package.json`, and the CDN script and CSS links were re-added to `index.html`. `main.js` was updated to use the global `window.TonConnectUI` object loaded from the CDN, resolving the issue.
+
 ## [3.0.2] - 2025-10-08
 
 ### Fixed
