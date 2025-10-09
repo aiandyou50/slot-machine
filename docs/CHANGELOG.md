@@ -6,21 +6,23 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- **(KO) 스핀 실행 시 Jetton 지갑 주소 조회 실패 오류 해결:**
-  - **문제 (Error):** 스핀 버튼을 클릭하면 `Failed to get Jetton wallet address` 오류가 발생하며 게임이 진행되지 않았습니다. 브라우저 개발자 콘솔에는 `/getJettonWalletAddress` API 요청이 400 (Bad Request) 상태 코드로 실패한 기록이 있었습니다.
-  - **원인 (Cause):** 프론트엔드(`src/services/api.js`)에서 `/getJettonWalletAddress` 백엔드 API를 호출할 때, 필수 파라미터인 `jettonMinterAddress`를 누락한 채 요청을 보냈습니다. 백엔드 함수(`functions/getJettonWalletAddress.js`)는 해당 파라미터가 없으면 400 오류를 반환하도록 설계되어 있었습니다.
+- **(KO) Jetton 지갑 주소 조회 오류의 근본적 해결 (클라이언트 측 계산으로 전환):**
+  - **문제 (Error):** 스핀 버튼 클릭 시 `Failed to get Jetton wallet address` 오류가 발생하며 게임 진행이 불가능했습니다.
+  - **원인 (Cause):** 초기 해결책은 `Toncenter` API를 통해 백엔드에서 Jetton 지갑 주소를 조회하는 방식이었습니다. 하지만 이 API의 무료 버전은 스마트 컨트랙트의 `get` 메소드 실행을 지원하지 않아, 지속적인 서버 오류(500, 403)를 유발했습니다. 근본적인 문제는 외부 API의 정책적 제약이었습니다.
   - **해결 (Solution):**
-    1. `docs/PROJECT_REQUIREMENTS.md` 문서에서 공식 CSPIN 토큰 컨트랙트 주소(`EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV`)가 `jettonMinterAddress`임을 확인했습니다.
-    2. `src/services/api.js`의 `getJettonWalletAddress` 함수가 `jettonMinterAddress`를 추가 인자로 받도록 수정했습니다.
-    3. `src/main.js`의 `handleSpin` 함수에서 `getJettonWalletAddress`를 호출하는 부분에 확인된 컨트랙트 주소를 두 번째 인자로 전달하도록 코드를 수정하여 문제를 해결했습니다.
+    1.  **백엔드 API 의존성 완전 제거:** 외부 API 호출 방식 자체를 폐기하고, `@ton/core` 라이브러리를 사용하여 **클라이언트 측에서 직접 Jetton 지갑 주소를 계산**하는 방식으로 아키텍처를 변경했습니다.
+    2.  `src/services/blockchain.js`에 표준 Jetton 컨트랙트 사양에 따라 주소를 오프라인으로 계산하는 `calculateJettonWalletAddress` 함수를 새로 구현했습니다.
+    3.  `src/main.js`의 스핀 로직을 수정하여, 새로 구현된 클라이언트 측 계산 함수를 사용하도록 변경했습니다.
+    4.  이로 인해 불필요해진 백엔드 함수 `functions/getJettonWalletAddress.js`와 관련 API 호출 코드를 프로젝트에서 완전히 삭제하여, 코드의 안정성과 속도를 크게 향상시켰습니다.
 
-- **(EN) Fixed Jetton wallet address fetch failure on spin:**
-  - **Error:** Clicking the spin button caused a `Failed to get Jetton wallet address` error, preventing the game from proceeding. The browser's developer console showed the `/getJettonWalletAddress` API request failing with a 400 (Bad Request) status code.
-  - **Cause:** The frontend (`src/services/api.js`) was calling the `/getJettonWalletAddress` backend API without including the required `jettonMinterAddress` parameter. The backend function (`functions/getJettonWalletAddress.js`) was designed to return a 400 error if this parameter was missing.
+- **(EN) Fundamentally Resolved Jetton Wallet Address Fetch Error (Switched to Client-Side Calculation):**
+  - **Error:** Clicking the spin button caused a `Failed to get Jetton wallet address` error, making the game unplayable.
+  - **Cause:** The initial attempt to fix this involved a backend function querying the `Toncenter` API. However, the free tier of this API does not support the required `get` method execution on smart contracts, leading to persistent server errors (500, 403). The root issue was a policy limitation of the external API.
   - **Solution:**
-    1. Identified the official CSPIN token contract address (`EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV`) as the `jettonMinterAddress` from the `docs/PROJECT_REQUIREMENTS.md` document.
-    2. Modified the `getJettonWalletAddress` function in `src/services/api.js` to accept `jettonMinterAddress` as an additional argument.
-    3. Updated the code in `src/main.js` where `getJettonWalletAddress` is called within the `handleSpin` function, passing the identified contract address as the second argument to resolve the issue.
+    1.  **Completely Removed Backend API Dependency:** Abandoned the external API call approach entirely and changed the architecture to **calculate the Jetton wallet address directly on the client-side** using the `@ton/core` library.
+    2.  Implemented a new `calculateJettonWalletAddress` function in `src/services/blockchain.js` that calculates the address offline according to standard Jetton contract specifications.
+    3.  Modified the spin logic in `src/main.js` to use the new client-side calculation function.
+    4.  Completely removed the now-obsolete backend function `functions/getJettonWalletAddress.js` and its related API call code, significantly improving the application's stability and speed.
 
 ## [3.1.0] - 2025-10-09
 

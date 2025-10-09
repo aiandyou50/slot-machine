@@ -4,13 +4,15 @@ window.Buffer = Buffer;
 import './style.css';
 import { TonConnectUI } from '@tonconnect/ui';
 import {
-  getJettonWalletAddress,
   callCommitApi,
   callRevealApi,
   callClaimApi,
   callDoubleUpApi,
 } from './services/api.js';
-import { createSpinTransaction } from './services/blockchain.js';
+import {
+  createSpinTransaction,
+  calculateJettonWalletAddress,
+} from './services/blockchain.js';
 
 // (KO) English and (KO) Korean comments are mandatory.
 
@@ -162,13 +164,20 @@ async function handleSpin() {
     const clientSeed = crypto.randomUUID();
 
     showMessage('creating_transaction_message');
-    // (KO) Jetton Minter 주소는 docs/PROJECT_REQUIREMENTS.md 에 정의되어 있습니다.
-    // (EN) The Jetton Minter address is defined in docs/PROJECT_REQUIREMENTS.md.
-    const jettonWalletAddress = await getJettonWalletAddress(
+    // (KO) 클라이언트 측에서 Jetton 지갑 주소를 직접 계산합니다. API 호출이 필요 없습니다.
+    // (EN) Calculate the Jetton wallet address directly on the client-side. No API call needed.
+    const jettonMinterAddress =
+      'EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV'; // (KO) CSPIN 토큰 컨트랙트 주소 (EN) CSPIN Token Contract Address
+    const userJettonWalletAddress = calculateJettonWalletAddress(
       walletInfo.account.address,
-      'EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV' // (KO) CSPIN 토큰 컨트랙트 주소 (EN) CSPIN Token Contract Address
+      jettonMinterAddress
     );
-    const transaction = createSpinTransaction(jettonWalletAddress, currentBet, walletInfo.account.address);
+
+    const transaction = createSpinTransaction(
+      userJettonWalletAddress.toString(),
+      currentBet,
+      walletInfo.account.address
+    );
 
     showMessage('confirm_transaction_message');
     const sentTransaction = await tonConnectUI.sendTransaction(transaction);
