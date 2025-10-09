@@ -166,8 +166,3 @@
 
 ## 4.1. 식별된 버그 (Identified Bugs)
 
-- **BUG-01: 스핀 후 언어 변경 시 메시지 초기화 (Message Reset on Language Change After Spin)**
-  - (EN) **Problem:** When changing the language during gameplay, the current status message (e.g., 'You won 50!') resets to the initial welcome message instead of being translated.
-  - (KO) **문제:** 게임 진행 중 언어 변경 시, 현재 상태 메시지(예: '50 당첨!')가 번역되지 않고 초기 환영 메시지로 돌아갑니다.
-  - (EN) **Requirement:** The system must be modified to retain the current game state (last message key and its parameters) and display the correctly translated message when the language is changed.
-  - (KO) **개선 요구사항:** 언어를 변경하더라도 현재 게임 상태(마지막 메시지 키와 파라미터)를 유지하고, 해당 상태에 맞는 메시지가 올바른 언어로 번역되어 표시되도록 수정해야 합니다.
