@@ -159,6 +159,7 @@
 - **NFR-LANG-01: 커뮤니케이션 언어 (Communication Language)**
   사용자와의 모든 소통은 한국어로 진행해야 한다.
 
+
 ---
 
 # 4. v2 수정 및 개선사항 (v2 Fixes & Enhancements)

@@ -45,6 +45,9 @@ AI 에이전트는 아래 명시된 문서들을 생성하고, 코드 변경 시
   - **작성 지침 (Instructions):**
       - 이 문서는 AI 에이전트 작업의 가장 최상위 근거가 됩니다.
       - 요구사항의 변경이나 추가가 필요한 경우, 코드 작업에 앞서 이 문서에 대한 수정 제안(PR)을 먼저 생성해야 합니다.
+      - **해결된 버그 관리 (Resolved Bug Management):**
+          - (KO) `PROJECT_REQUIREMENTS.md`에 명시된 버그가 해결되면, 해당 버그 항목을 문서에서 삭제해야 합니다. 이 문서는 현재 시스템의 '살아있는 명세'를 반영하며, 과거 버그의 역사는 `CHANGELOG.md`를 통해 추적합니다.
+          - (EN) When a bug specified in `PROJECT_REQUIREMENTS.md` is fixed, the corresponding bug item must be deleted from the document. This document reflects the 'living specification' of the current system; the history of past bugs is tracked through `CHANGELOG.md`.
 
 ### 3.2. 소프트웨어 아키텍처 문서 (Software Architecture Document)
 
