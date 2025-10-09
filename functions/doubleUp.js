@@ -1,13 +1,21 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-// (KO) 환경 변수에서 JWT 비밀 키를 가져옵니다.
-// (EN) Source the JWT secret key from environment variables.
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-default-super-secret-key-for-local-dev');
+// (KO) 최대 더블업 횟수 상수
+// (EN) Constant for the maximum number of double-ups.
 const MAX_DOUBLE_UP = 5;
 
 export async function onRequestPost(context) {
   try {
     const { request, env } = context;
+
+    // (KO) Fail-Safe: JWT 시크릿 키가 설정되지 않았으면 즉시 실패
+    // (EN) Fail-Safe: Fail immediately if JWT_SECRET is not set
+    if (!env.JWT_SECRET) {
+      console.error("CRITICAL: JWT_SECRET environment variable is not set.");
+      return new Response(JSON.stringify({ success: false, message: "CONFIGURATION_ERROR" }), { status: 500 });
+    }
+    const JWT_SECRET = new TextEncoder().encode(env.JWT_SECRET);
+
     const { winTicket, choice } = await request.json();
 
     if (!winTicket || !choice || !['red', 'black'].includes(choice)) {
@@ -27,8 +35,8 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ success: false, message: "INVALID_TICKET" }), { status: 401 });
     }
 
-    // (KO) TODO: 티켓 재사용 방지 로직 구현
-    // (EN) TODO: Implement ticket reuse prevention logic
+    // (KO) TODO: 티켓 재사용 방지 로직 구현 (Cloudflare KV 사용)
+    // (EN) TODO: Implement ticket reuse prevention logic (using Cloudflare KV)
 
     const doubleUpCount = (payload.doubleUpCount || 0) + 1;
 
