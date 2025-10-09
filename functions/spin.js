@@ -66,14 +66,15 @@ export async function onRequestPost(context) {
 
     if (!env.JWT_SECRET) {
       console.error("CRITICAL: JWT_SECRET environment variable is not set.");
-      return new Response(JSON.stringify({ error: "CONFIGURATION_ERROR", message: "Server configuration is incomplete." }), { status: 500 });
+      return new Response(JSON.stringify({ success: false, errorCode: "CONFIGURATION_ERROR", message: "Server configuration is incomplete." }), { status: 500 });
     }
     const JWT_SECRET = new TextEncoder().encode(env.JWT_SECRET);
 
-    const { boc, betAmount, devKey } = await request.json();
+    const body = await request.json();
+    const { boc, betAmount, devKey } = body;
 
     if (!boc || !betAmount) {
-      return new Response(JSON.stringify({ error: "INVALID_REQUEST", message: "boc and betAmount are required." }), { status: 400 });
+      return new Response(JSON.stringify({ success: false, errorCode: "INVALID_REQUEST", message: "boc and betAmount are required." }), { status: 400 });
     }
 
     let userAddress;
@@ -81,15 +82,13 @@ export async function onRequestPost(context) {
     if (!isDevMode) {
         const { isValid, error, senderAddress } = await verifyTransaction(boc, betAmount);
         if (!isValid) {
-            return new Response(JSON.stringify({ error: "INVALID_TRANSACTION", message: `BOC verification failed: ${error}` }), { status: 400 });
+            return new Response(JSON.stringify({ success: false, errorCode: "INVALID_TRANSACTION", message: `BOC verification failed: ${error}` }), { status: 400 });
         }
         userAddress = senderAddress;
     } else {
-        // (KO) 개발 모드에서는 요청에서 주소를 가져옵니다.
-        // (EN) In dev mode, get the address from the request.
-        userAddress = (await request.json()).userAddress;
+        userAddress = body.userAddress;
         if (!userAddress) {
-             return new Response(JSON.stringify({ error: "INVALID_REQUEST", message: "userAddress is required for dev mode." }), { status: 400 });
+             return new Response(JSON.stringify({ success: false, errorCode: "INVALID_REQUEST", message: "userAddress is required for dev mode." }), { status: 400 });
         }
     }
 
@@ -115,17 +114,17 @@ export async function onRequestPost(context) {
         .setExpirationTime('5m')
         .sign(JWT_SECRET);
 
-      return new Response(JSON.stringify({ reels, win, payout, winTicket }), {
+      return new Response(JSON.stringify({ success: true, reels, win, payout, winTicket }), {
         headers: { 'Content-Type': 'application/json' },
       });
     } else {
-      return new Response(JSON.stringify({ reels, win, payout }), {
+      return new Response(JSON.stringify({ success: true, reels, win, payout }), {
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
   } catch (e) {
     console.error(e);
-    return new Response(JSON.stringify({ error: "INTERNAL_SERVER_ERROR", message: e.message }), { status: 500 });
+    return new Response(JSON.stringify({ success: false, errorCode: "INTERNAL_SERVER_ERROR", message: e.message }), { status: 500 });
   }
 }
