@@ -1,5 +1,5 @@
 {
-  "url": "https://aiandyou.me/",
+  "url": "http://localhost:5173",
   "name": "CandleSpinner",
-  "iconUrl": "https://aiandyou.me/icon.png"
+  "iconUrl": "https://raw.githubusercontent.com/ton-connect/demo-dapp-with-wallet/main/public/icon.png"
 }

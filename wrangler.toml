@@ -11,3 +11,10 @@ compatibility_flags = ["nodejs_compat"]
 # (KO) Vite의 빌드 출력 디렉토리를 지정합니다.
 # (EN) Specifies the build output directory for Vite.
 pages_build_output_dir = "dist"
+
+# (KO) Commit-Reveal 스킴을 위해 사용할 KV 네임스페이스를 정의합니다.
+# (EN) Defines the KV namespace to be used for the Commit-Reveal scheme.
+[[kv_namespaces]]
+binding = "SPIN_COMMITMENTS"
+id = "your-production-namespace-id" # (KO) 중요: 실제 프로덕션 배포 시 이 값을 Cloudflare 대시보드의 ID로 교체해야 합니다. (EN) IMPORTANT: This must be replaced with the ID from the Cloudflare dashboard for production deployment.
+preview_id = "preview_namespace_for_commitments" # (KO) `wrangler dev`를 위한 미리보기 ID입니다. (EN) This is the preview ID for `wrangler dev`.

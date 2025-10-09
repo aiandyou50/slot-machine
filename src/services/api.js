@@ -7,17 +7,13 @@
  * (KO) 사용자의 Jetton 지갑 주소를 백엔드 프록시를 통해 조회합니다.
  * (EN) Fetches the user's Jetton wallet address via the backend proxy.
  * @param {string} ownerAddress - (KO) 사용자 지갑 주소 (EN) The user's wallet address.
- * @param {string} jettonMinterAddress - (KO) Jetton 마스터 컨트랙트 주소 (EN) The Jetton master contract address.
  * @returns {Promise<string>} The user's Jetton wallet address.
  */
-export async function getJettonWalletAddress(
-  ownerAddress,
-  jettonMinterAddress
-) {
+export async function getJettonWalletAddress(ownerAddress) {
   const response = await fetch('/getJettonWalletAddress', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ownerAddress, jettonMinterAddress }),
+    body: JSON.stringify({ ownerAddress }),
   });
 
   if (!response.ok) {
@@ -32,24 +28,44 @@ export async function getJettonWalletAddress(
 }
 
 /**
- * (KO) 스핀 API를 호출합니다.
- * (EN) Calls the spin API.
- * @param {string} boc - (KO) 서명된 트랜잭션 BOC (EN) The signed transaction BOC.
- * @param {number} betAmount - (KO) 베팅 금액 (EN) The bet amount.
- * @param {string | null} userAddress - (KO) 개발자 모드용 사용자 주소 (EN) User address for dev mode.
- * @returns {Promise<object>} The spin result from the backend.
+ * (KO) Commit API를 호출하여 서버로부터 commitment를 받습니다.
+ * (EN) Calls the commit API to get a commitment from the server.
+ * @returns {Promise<string>} The commitment hash.
  */
-export async function callSpinApi(boc, betAmount, userAddress) {
-  const devKey = localStorage.getItem('DEV_KEY');
-  const response = await fetch('/spin', {
-    method: 'POST',
+export async function callCommitApi() {
+  const response = await fetch('/commitSpin', {
+    method: 'GET',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ boc, betAmount, userAddress, devKey }),
   });
 
   const data = await response.json();
   if (!data.success) {
-    throw new Error(data.message || 'Spin API call failed.');
+    throw new Error(data.message || 'Commit API call failed.');
+  }
+  return data.commitment;
+}
+
+/**
+ * (KO) Reveal API를 호출하여 스핀 결과를 받습니다.
+ * (EN) Calls the reveal API to get the spin result.
+ * @param {object} payload - The reveal payload.
+ * @param {string} payload.commitment - The commitment from the commit phase.
+ * @param {string} payload.clientSeed - The client-generated seed.
+ * @param {string} payload.boc - The signed transaction BOC.
+ * @param {number} payload.betAmount - The bet amount.
+ * @param {string} payload.userAddress - The user's wallet address.
+ * @returns {Promise<object>} The spin result from the backend.
+ */
+export async function callRevealApi(payload) {
+  const response = await fetch('/revealSpin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.message || 'Reveal API call failed.');
   }
   return data;
 }

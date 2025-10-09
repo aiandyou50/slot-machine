@@ -1,10 +1,9 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
-export default defineConfig(({ mode }) => {
-  // (KO) .env 파일에서 환경 변수를 로드합니다.
-  // (EN) Load env file based on `mode`.
-  const env = loadEnv(mode, process.cwd(), '');
+export default defineConfig(() => {
+  // (KO) .env 파일 로딩은 현재 필요하지 않으므로 관련 코드를 제거했습니다.
+  // (EN) Removed env loading as it's not currently needed.
 
   return {
     plugins: [
@@ -23,7 +22,7 @@ export default defineConfig(({ mode }) => {
       ),
     },
     optimizeDeps: {
-      include: ['tonweb', 'buffer'], // (KO) tonweb과 buffer를 명시적으로 포함 (EN) Explicitly include tonweb and buffer
+      include: ['buffer'], // (KO) buffer를 명시적으로 포함 (EN) Explicitly include buffer
     },
     resolve: {
       alias: {

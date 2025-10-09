@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0] - 2025-10-09
+
+### Added
+
+- **(KO) 검증 가능한 공정성(Provable Fairness)을 위한 Commit-Reveal 스킴 도입:**
+  - **원인:** 기존 스핀 로직은 `Math.random()`을 사용하여 서버를 신뢰해야만 하는 중앙화된 방식이었으며, 이는 프로젝트의 핵심 요구사항인 '투명성'과 '공정성'을 위반했습니다.
+  - **해결:**
+    1.  기존 `/spin` API를 폐기하고, 2단계 API (`GET /commitSpin`, `POST /revealSpin`)를 새로 구현했습니다.
+    2.  서버는 `serverSeed`의 해시(`commitment`)를 먼저 사용자에게 제공하고, 스핀이 실행된 후에 `serverSeed` 원본을 공개합니다.
+    3.  프론트엔드는 `serverSeed`를 직접 해시하여 게임 시작 전 받은 `commitment`와 일치하는지 자동으로 검증하여, 결과가 조작되지 않았음을 암호학적으로 증명합니다.
+    4.  이를 통해 사용자는 더 이상 서버를 신뢰할 필요 없이 모든 게임 결과의 공정성을 직접 검증할 수 있습니다.
+
+- **(EN) Implemented Commit-Reveal Scheme for Provable Fairness:**
+  - **Cause:** The previous spin logic used `Math.random()`, a centralized approach that required trusting the server and violated the project's core requirements for 'transparency' and 'fairness'.
+  - **Solution:**
+    1.  Deprecated the old `/spin` API and implemented a new two-phase API (`GET /commitSpin`, `POST /revealSpin`).
+    2.  The server now provides a hash of its `serverSeed` (the `commitment`) to the user before the spin, and only reveals the original `serverSeed` after the spin is executed.
+    3.  The frontend automatically verifies that the revealed `serverSeed` matches the initial `commitment` by hashing it, cryptographically proving that the result was not manipulated.
+    4.  This allows users to verify the fairness of every game outcome themselves, removing the need to trust the server.
+
 ## [3.0.4] - 2025-10-09
 
 ### Fixed
