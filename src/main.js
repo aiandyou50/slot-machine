@@ -162,7 +162,12 @@ async function handleSpin() {
     const clientSeed = crypto.randomUUID();
 
     showMessage('creating_transaction_message');
-    const jettonWalletAddress = await getJettonWalletAddress(walletInfo.account.address);
+    // (KO) Jetton Minter 주소는 docs/PROJECT_REQUIREMENTS.md 에 정의되어 있습니다.
+    // (EN) The Jetton Minter address is defined in docs/PROJECT_REQUIREMENTS.md.
+    const jettonWalletAddress = await getJettonWalletAddress(
+      walletInfo.account.address,
+      'EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV' // (KO) CSPIN 토큰 컨트랙트 주소 (EN) CSPIN Token Contract Address
+    );
     const transaction = createSpinTransaction(jettonWalletAddress, currentBet, walletInfo.account.address);
 
     showMessage('confirm_transaction_message');
