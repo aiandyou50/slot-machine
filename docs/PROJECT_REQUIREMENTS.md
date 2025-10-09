@@ -1,3 +1,5 @@
+---
+
 # 1. 개요 (Overview)
 
 ## 1.1. 프로젝트 명칭 (Project Name)
@@ -51,7 +53,7 @@
   - (KO) 사용자는 **'게임 뷰'**에서 베팅 금액을 조절할 수 있어야 합니다.
   - (EN) Upon spinning, an on-chain transaction must be initiated to transfer the bet amount of **CSPIN** tokens from the user's wallet to the **Game Wallet**. This process must be explicitly approved by the user.
   - (KO) 스핀 시, 사용자의 지갑에서 **게임 지갑**으로 베팅 금액만큼의 **CSPIN 토큰**을 전송하는 실제 온체인 트랜잭션이 발생해야 합니다. 이 과정은 사용자의 명시적인 승인을 거쳐야 합니다.
-  - (EN) The frontend must wait for the transaction to be included on-chain (e.g., via `tonweb.provider.waitForTransaction`) before calling the `/spin` API.
+  - (EN) The frontend must wait for the transaction to be included on-chain before calling the `/spin` API.
   - (KO) 프론트엔드는 `/spin` API 호출 전, 트랜잭션이 블록체인에 포함되었음을 확인해야 합니다.
 
 - **FR-GAME-03: 스핀 실행 (Spin Execution)**
@@ -107,56 +109,56 @@
 
 # 3. 비기능 요구사항 (Non-Functional Requirements)
 
-- **NFR-SYS-01: 서버리스 아키텍처 (Serverless Architecture)**  
+- **NFR-SYS-01: 서버리스 아키텍처 (Serverless Architecture)**
   프론트엔드는 Cloudflare Pages, 백엔드는 Cloudflare Functions를 사용하여 완전한 서버리스 환경으로 구축되어야 한다.
 
-- **NFR-SYS-02: 탈중앙성 (Decentralization)**  
+- **NFR-SYS-02: 탈중앙성 (Decentralization)**
   사용자의 자산은 항상 사용자 자신의 지갑에 보관되어야 하며, 게임 플레이 과정은 비수탁형(Non-Custodial)으로 이루어져야 한다.
 
-- **NFR-SEC-01: 보안 (Security)**  
+- **NFR-SEC-01: 보안 (Security)**
   게임 지갑의 니모닉, JWT 비밀 키 등 민감 정보는 Cloudflare 환경 변수를 통해 안전하게 관리되어야 한다.
 
-- **NFR-CODE-01: 주석 정책 (Commenting Policy)**  
+- **NFR-GAME-01: 검증 가능한 공정성 (Provable Fairness) `[신규 추가]`**
+    - (KO) 모든 게임 결과(예: 스핀, 더블업)는 중앙화된 서버의 신뢰에만 의존해서는 안 되며, 사용자가 그 결과가 조작되지 않았음을 암호학적으로 검증할 수 있어야 한다.
+    - (EN) All game outcomes (e.g., spins, double-ups) must not rely solely on the trust of a centralized server; users must be able to cryptographically verify that the results have not been manipulated.
+    - (KO) 이를 위해 `Math.random()`과 같은 예측 불가능한 랜덤 소스 사용을 지양하고, 장기적으로 Commit-Reveal 스킴 또는 온체인 VRF(검증 가능한 랜덤 함수)와 같은 기술 도입을 목표로 한다.
+    - (EN) To achieve this, the use of non-deterministic random sources like `Math.random()` shall be avoided, with the long-term goal of adopting techniques such as a Commit-Reveal scheme or an on-chain Verifiable Random Function (VRF).
+
+- **NFR-CODE-01: 주석 정책 (Commenting Policy)**
   모든 코드의 주요 기능 및 복잡한 로직에는 한국어와 영어를 병기하여 주석을 작성해야 한다.
 
-- **NFR-CODE-02: 버전 관리 (Versioning)**  
+- **NFR-CODE-02: 버전 관리 (Versioning)**
   모든 릴리즈는 시맨틱 버저닝 (`MAJOR.MINOR.PATCH`) 규칙을 엄격히 준수해야 한다.
 
-- **NFR-DOC-01: 변경 이력 관리 (Changelog Management)**  
-  모든 버전에 대한 변경 사항은 `CHANGELOG.md` 파일에 **'Keep a Changelog'** 형식에 따라 상세히 기록해야 한다.  
+- **NFR-DOC-01: 변경 이력 관리 (Changelog Management)**
+  모든 버전에 대한 변경 사항은 `CHANGELOG.md` 파일에 **'Keep a Changelog'** 형식에 따라 상세히 기록해야 한다.
   특히, **문제 현상**(Error) → **근본 원인**(Cause) → **해결 방안**(Solution) 구조로 작성해야 한다.
 
-- **NFR-DOC-02: 로드맵 관리 (Roadmap Management)**  
+- **NFR-DOC-02: 로드맵 관리 (Roadmap Management)**
   프로젝트의 장기적인 개발 목표는 `roadmap.md`에 문서화하고, `roadmap.html`을 통해 시각적으로 표현해야 한다.
 
 - **NFR-DOC-03: 살아있는 아키텍처 문서 관리 (Living Architecture Documentation Management)**
-  - **목표 **(Goal): 프로젝트의 기술적 방향성에 대한 **단일 진실 공급원**(Single Source of Truth)을 유지하고, 신규 참여자의 적응을 돕고, 코드와 문서 간의 불일치를 최소화하는 것을 목표로 한다.
-  - **문서 범위 **(Scope): `PROJECT_ARCHITECTURE.MD` 문서는 다음 내용을 반드시 포함해야 한다:
-    - 핵심 아키텍처 사상 (Core Philosophy)
-    - 시스템 구성도 (System Diagram)
-    - 각 기술 스택을 선택한 이유 (Rationale for Tech Stack Choices)
-    - 주요 데이터 흐름도 (Key Data Flow Diagram, 예: 스핀 요청부터 상금 수령까지)
-    - 디렉터리 구조와 각 모듈의 역할 (Directory Structure and Module Responsibilities)
-  - **업데이트 프로세스 **(Update Process):
-    - 아키텍처에 영향을 미치는 변경사항(예: 신규 라이브러리 도입, API 엔드포인트 구조 변경, 핵심 데이터 흐름 수정 등)이 포함된 풀 리퀘스트(Pull Request)는 반드시 `PROJECT_ARCHITECTURE.MD` 문서의 관련 내용 수정을 포함해야 한다.
-    - 코드 리뷰 시, 리뷰어는 코드 변경사항뿐만 아니라 아키텍처 문서가 함께 업데이트되었는지 확인할 의무를 가진다.
+  - **목표 (Goal):** 프로젝트의 기술적 방향성에 대한 **단일 진실 공급원**(Single Source of Truth)을 유지하고, 코드와 문서 간의 불일치를 최소화하는 것을 목표로 한다.
+  - **문서 범위 (Scope):** `PROJECT_ARCHITECTURE.MD` 문서는 시스템 구성도, 기술 스택, 데이터 흐름, API 명세 등을 포함해야 한다.
+  - **업데이트 프로세스 (Update Process):**
+    - (KO) 아키텍처에 영향을 미치는 모든 변경사항은 **반드시 `PROJECT_ARCHITECTURE.MD` 문서의 관련 내용 수정을 포함**하는 단일 Pull Request로 제출되어야 한다.
+    - (EN) All changes affecting the architecture **must be submitted as a single Pull Request that includes corresponding updates to the `PROJECT_ARCHITECTURE.MD` document**.
+    - (KO) 코드 리뷰 시, 리뷰어는 코드 변경사항뿐만 아니라 아키텍처 문서가 함께 업데이트되었는지 확인할 의무를 가진다.
+    - (EN) During code review, reviewers are responsible for ensuring that the architecture document is updated along with the code changes.
 
 - **NFR-DOC-04: 아키텍처 결정 기록 관리 (Architecture Decision Record Management)**
-  - **목표 **(Goal): 중요한 아키텍처 결정의 **"이유"**와 **"결과"**를 명시적으로 기록하여, 기술 부채의 발생을 추적하고, 과거의 의사결정 과정을 투명하게 공유하며, 향후 발생할 실수를 예방하는 것을 목표로 한다.
-  - **기록 대상 **(Targets for Recording): 다음을 포함하되 이에 국한되지 않는 중요한 기술적 결정이 내려질 때마다 ADR을 작성해야 한다:
-    - 새로운 기술, 프레임워크, 라이브러리의 도입 또는 제거
-    - 핵심적인 디자인 패턴 또는 코딩 표준의 채택
-    - API의 공개 인터페이스에 대한 중대한 변경
-    - 데이터 지속성, 캐싱, 보안 정책 등 비기능적 요구사항에 영향을 미치는 결정
-  - **프로세스 및 형식 **(Process & Format):
-    - 모든 ADR은 `/docs/adr` 디렉터리 내에 `YYYYMMDD-decision-title.md` 형식의 파일로 생성한다.
-    - 각 ADR 파일은 상태(Status), 배경(Context), 결정(Decision), 결과(Consequences) 항목을 포함하는 표준화된 템플릿을 따라야 한다.
-    - 새로운 ADR의 작성 및 기존 ADR의 상태 변경(예: '제안됨'에서 '채택됨'으로)은 팀의 논의를 거쳐야 하며, 관련 풀 리퀘스트에 해당 ADR이 링크되어야 한다.
+  - **목표 (Goal):** 중요한 아키텍처 결정의 **"이유"**와 **"결과"**를 명시적으로 기록하여, 기술 부채의 발생을 추적하고, 과거의 의사결정 과정을 투명하게 공유한다.
+  - **기록 대상 (Targets for Recording):** 새로운 기술 도입, 핵심 디자인 패턴 변경, API 인터페이스의 중대한 변경 등 중요한 기술적 결정이 내려질 때마다 ADR을 작성해야 한다.
+  - **프로세스 및 형식 (Process & Format):**
+    - (KO) 모든 ADR은 `/docs/adr` 디렉터리 내에 `YYYYMMDD-decision-title.md` 형식의 파일로 생성하며, 표준화된 템플릿(상태, 배경, 결정, 결과)을 따라야 한다.
+    - (EN) All ADRs shall be created in the `/docs/adr` directory using the format `YYYYMMDD-decision-title.md` and must follow a standardized template (Status, Context, Decision, Consequences).
+    - (KO) 새로운 ADR의 작성 및 기존 ADR의 상태 변경은 **반드시 팀의 논의를 거쳐야 하며, 관련 Pull Request에 해당 ADR이 링크**되어야 한다.
+    - (EN) The creation of a new ADR or a status change to an existing one **must be discussed by the team and linked in the relevant Pull Request**.
 
-- **NFR-UI-01: 시각적 테마 (Visual Theme)**  
+- **NFR-UI-01: 시각적 테마 (Visual Theme)**
   애플리케이션은 "Cosmic Gemstone" 테마를 가지며, 네온 스타일 UI 요소와 동적인 별 배경 효과를 포함해야 한다.
 
-- **NFR-LANG-01: 커뮤니케이션 언어 (Communication Language)**  
+- **NFR-LANG-01: 커뮤니케이션 언어 (Communication Language)**
   사용자와의 모든 소통은 한국어로 진행해야 한다.
 
 ---
