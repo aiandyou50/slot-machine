@@ -1,4 +1,42 @@
-import { Address, toNano, beginCell } from '@ton/core';
+import { Address, toNano, beginCell, contractAddress, Cell } from '@ton/core';
+
+/**
+ * (KO) 사용자의 Jetton 지갑 주소를 클라이언트 측에서 직접 계산합니다.
+ * (EN) Calculates the user's Jetton wallet address directly on the client-side.
+ * @param {string} ownerAddress - (KO) 사용자 지갑 주소 (EN) The user's wallet address.
+ * @param {string} jettonMinterAddress - (KO) Jetton 마스터 컨트랙트 주소 (EN) The Jetton master contract address.
+ * @returns {Address} The calculated user's Jetton wallet address.
+ */
+export function calculateJettonWalletAddress(ownerAddress, jettonMinterAddress) {
+  const owner = Address.parse(ownerAddress);
+  const minter = Address.parse(jettonMinterAddress);
+
+  // (KO) 표준 Jetton 지갑의 코드 셀입니다.
+  // (EN) The code cell for a standard Jetton wallet.
+  const JETTON_WALLET_CODE_BOC = 'te6cckEBAQEAVwACNBQCAQoYAAAIBnDtR3G82PQ5y8e339F3gW81OD8fK5a219k6DD8wZ4B4O1Iin6j/2W1A44a9v55OcfhG8y2aGceUvUgVscE3s823vO64wBwP+O7a34AgwBYmDA4B9Uer1gBwX8D+kDAxyM+DA4B9VgDAxyM+DyAM+gDR+ED6Y+gDiKM+gDR+ECAoQz6ANEBAJgB6AHqAfoA9AQwAXoA9AIBIBQNAgEgCQ4CAVgKCwB1MAA4AIBIAwPAgEgCBEABfAy+CpzADACASASEQABgBw+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oBwBw+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oBwA4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAw';
+  const walletCode = Cell.fromBase64(JETTON_WALLET_CODE_BOC);
+
+  // (KO) Jetton 지갑의 초기 데이터 셀을 구성합니다.
+  // (EN) Construct the initial data cell for the Jetton wallet.
+  const data = beginCell()
+    .storeCoins(0) // balance
+    .storeAddress(owner)
+    .storeAddress(minter)
+    .endCell();
+
+  // (KO) stateInit 객체는 코드와 데이터를 포함합니다.
+  // (EN) The stateInit object contains the code and data.
+  const stateInit = {
+    code: walletCode,
+    data: data,
+  };
+
+  // (KO) workchain 0에서 컨트랙트 주소를 계산합니다.
+  // (EN) Calculate the contract address on workchain 0.
+  const jettonWalletAddress = contractAddress(0, stateInit);
+
+  return jettonWalletAddress;
+}
 
 /**
  * (KO) 블록체인 관련 유틸리티 함수 모음

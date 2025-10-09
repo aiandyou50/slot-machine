@@ -4,31 +4,6 @@
  */
 
 /**
- * (KO) 사용자의 Jetton 지갑 주소를 백엔드 프록시를 통해 조회합니다.
- * (EN) Fetches the user's Jetton wallet address via the backend proxy.
- * @param {string} ownerAddress - (KO) 사용자 지갑 주소 (EN) The user's wallet address.
- * @param {string} jettonMinterAddress - (KO) Jetton 마스터 컨트랙트 주소 (EN) The Jetton master contract address.
- * @returns {Promise<string>} The user's Jetton wallet address.
- */
-export async function getJettonWalletAddress(ownerAddress, jettonMinterAddress) {
-  const response = await fetch('/getJettonWalletAddress', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ownerAddress, jettonMinterAddress }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(
-      errorData.message || 'Failed to get Jetton wallet address.'
-    );
-  }
-
-  const { jettonWalletAddress } = await response.json();
-  return jettonWalletAddress;
-}
-
-/**
  * (KO) Commit API를 호출하여 서버로부터 commitment를 받습니다.
  * (EN) Calls the commit API to get a commitment from the server.
  * @returns {Promise<string>} The commitment hash.
