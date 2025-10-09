@@ -2,27 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.1.1] - 2025-10-09
+## [3.1.2] - 2025-10-09
 
 ### Fixed
 
-- **(KO) Jetton 지갑 주소 조회 오류의 근본적 해결 (클라이언트 측 계산으로 전환):**
-  - **문제 (Error):** 스핀 버튼 클릭 시 `Failed to get Jetton wallet address` 오류가 발생하며 게임 진행이 불가능했습니다.
-  - **원인 (Cause):** 초기 해결책은 `Toncenter` API를 통해 백엔드에서 Jetton 지갑 주소를 조회하는 방식이었습니다. 하지만 이 API의 무료 버전은 스마트 컨트랙트의 `get` 메소드 실행을 지원하지 않아, 지속적인 서버 오류(500, 403)를 유발했습니다. 근본적인 문제는 외부 API의 정책적 제약이었습니다.
+- **(KO) `Invalid CRC32C` 오류 및 Jetton 지갑 조회 오류 근본 해결:**
+  - **문제 (Error):** 스핀 실행 시, 외부 API 의존으로 인한 서버 오류(403, 500)와 손상된 거래 정보로 인한 `Invalid CRC32C` 오류가 복합적으로 발생했습니다.
+  - **원인 (Cause):** 1) `Toncenter` API의 `runMethod` 기능이 유료 플랜에서만 제공되어 주소 조회가 실패했습니다. 2) Jetton 전송 정보에 포함된 불필요한 주석(forward payload)이 데이터 구조를 손상시켜 `Invalid CRC32C` 오류를 유발했습니다.
   - **해결 (Solution):**
-    1.  **백엔드 API 의존성 완전 제거:** 외부 API 호출 방식 자체를 폐기하고, `@ton/core` 라이브러리를 사용하여 **클라이언트 측에서 직접 Jetton 지갑 주소를 계산**하는 방식으로 아키텍처를 변경했습니다.
-    2.  `src/services/blockchain.js`에 표준 Jetton 컨트랙트 사양에 따라 주소를 오프라인으로 계산하는 `calculateJettonWalletAddress` 함수를 새로 구현했습니다.
-    3.  `src/main.js`의 스핀 로직을 수정하여, 새로 구현된 클라이언트 측 계산 함수를 사용하도록 변경했습니다.
-    4.  이로 인해 불필요해진 백엔드 함수 `functions/getJettonWalletAddress.js`와 관련 API 호출 코드를 프로젝트에서 완전히 삭제하여, 코드의 안정성과 속도를 크게 향상시켰습니다.
+    1.  **거래 정보 단순화:** `src/services/blockchain.js`에서 데이터 손상의 원인이었던 불필요한 주석(forward payload) 부분을 완전히 제거하여, 깨끗하고 표준적인 거래 정보(BOC)를 생성하도록 수정했습니다.
+    2.  **클라이언트 측 주소 계산:** 외부 API 의존성을 완전히 제거하고, `@ton/core` 라이브러리를 사용하여 클라이언트 측에서 Jetton 지갑 주소를 직접 계산하는 안정적인 방식으로 아키텍처를 변경했습니다.
+    3.  이 두 가지 수정을 통해 모든 알려진 오류를 근본적으로 해결하고, 코드의 안정성과 속도를 크게 향상시켰습니다.
 
-- **(EN) Fundamentally Resolved Jetton Wallet Address Fetch Error (Switched to Client-Side Calculation):**
-  - **Error:** Clicking the spin button caused a `Failed to get Jetton wallet address` error, making the game unplayable.
-  - **Cause:** The initial attempt to fix this involved a backend function querying the `Toncenter` API. However, the free tier of this API does not support the required `get` method execution on smart contracts, leading to persistent server errors (500, 403). The root issue was a policy limitation of the external API.
+- **(EN) Fundamentally Resolved `Invalid CRC32C` and Jetton Wallet Fetch Errors:**
+  - **Error:** When executing a spin, a combination of server errors (403, 500) due to external API dependency and an `Invalid CRC32C` error from corrupted transaction data occurred.
+  - **Cause:** 1) The `runMethod` feature of the `Toncenter` API is only available on paid plans, causing the address lookup to fail. 2) An unnecessary comment (forward payload) included in the Jetton transfer message was corrupting the data structure, leading to the `Invalid CRC32C` error.
   - **Solution:**
-    1.  **Completely Removed Backend API Dependency:** Abandoned the external API call approach entirely and changed the architecture to **calculate the Jetton wallet address directly on the client-side** using the `@ton/core` library.
-    2.  Implemented a new `calculateJettonWalletAddress` function in `src/services/blockchain.js` that calculates the address offline according to standard Jetton contract specifications.
-    3.  Modified the spin logic in `src/main.js` to use the new client-side calculation function.
-    4.  Completely removed the now-obsolete backend function `functions/getJettonWalletAddress.js` and its related API call code, significantly improving the application's stability and speed.
+    1.  **Simplified Transaction Data:** The unnecessary comment (forward payload), which was the source of data corruption, was completely removed from the transaction creation logic in `src/services/blockchain.js` to generate a clean, standard BOC.
+    2.  **Client-Side Address Calculation:** The architecture was changed to a more stable model by completely removing the external API dependency and calculating the Jetton wallet address directly on the client-side using the `@ton/core` library.
+    3.  These two fixes fundamentally resolve all known errors and significantly improve the application's stability and speed.
 
 ## [3.1.0] - 2025-10-09
 
