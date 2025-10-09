@@ -1,5 +1,3 @@
----
-
 # 1. 개요 (Overview)
 
 ## 1.1. 프로젝트 명칭 (Project Name)
