@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.1] - 2025-10-09
+
+### Fixed
+
+- **(KO) 스핀 실행 시 Jetton 지갑 주소 조회 실패 오류 해결:**
+  - **문제 (Error):** 스핀 버튼을 클릭하면 `Failed to get Jetton wallet address` 오류가 발생하며 게임이 진행되지 않았습니다. 브라우저 개발자 콘솔에는 `/getJettonWalletAddress` API 요청이 400 (Bad Request) 상태 코드로 실패한 기록이 있었습니다.
+  - **원인 (Cause):** 프론트엔드(`src/services/api.js`)에서 `/getJettonWalletAddress` 백엔드 API를 호출할 때, 필수 파라미터인 `jettonMinterAddress`를 누락한 채 요청을 보냈습니다. 백엔드 함수(`functions/getJettonWalletAddress.js`)는 해당 파라미터가 없으면 400 오류를 반환하도록 설계되어 있었습니다.
+  - **해결 (Solution):**
+    1. `docs/PROJECT_REQUIREMENTS.md` 문서에서 공식 CSPIN 토큰 컨트랙트 주소(`EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV`)가 `jettonMinterAddress`임을 확인했습니다.
+    2. `src/services/api.js`의 `getJettonWalletAddress` 함수가 `jettonMinterAddress`를 추가 인자로 받도록 수정했습니다.
+    3. `src/main.js`의 `handleSpin` 함수에서 `getJettonWalletAddress`를 호출하는 부분에 확인된 컨트랙트 주소를 두 번째 인자로 전달하도록 코드를 수정하여 문제를 해결했습니다.
+
+- **(EN) Fixed Jetton wallet address fetch failure on spin:**
+  - **Error:** Clicking the spin button caused a `Failed to get Jetton wallet address` error, preventing the game from proceeding. The browser's developer console showed the `/getJettonWalletAddress` API request failing with a 400 (Bad Request) status code.
+  - **Cause:** The frontend (`src/services/api.js`) was calling the `/getJettonWalletAddress` backend API without including the required `jettonMinterAddress` parameter. The backend function (`functions/getJettonWalletAddress.js`) was designed to return a 400 error if this parameter was missing.
+  - **Solution:**
+    1. Identified the official CSPIN token contract address (`EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV`) as the `jettonMinterAddress` from the `docs/PROJECT_REQUIREMENTS.md` document.
+    2. Modified the `getJettonWalletAddress` function in `src/services/api.js` to accept `jettonMinterAddress` as an additional argument.
+    3. Updated the code in `src/main.js` where `getJettonWalletAddress` is called within the `handleSpin` function, passing the identified contract address as the second argument to resolve the issue.
+
 ## [3.1.0] - 2025-10-09
 
 ### Added
