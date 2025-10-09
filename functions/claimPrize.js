@@ -3,8 +3,8 @@ import { TonClient, WalletContractV4 } from "@ton/ton";
 import { mnemonicToWalletKey } from "@ton/crypto";
 import { Address, toNano, beginCell } from '@ton/core';
 
-// (KO) 환경 변수에서 민감한 정보를 가져옵니다.
-// (EN) Source sensitive information from environment variables.
+// (KO) 이 상수는 여러 곳에서 사용될 수 있으므로 전역에 둡니다.
+// (EN) This constant can be used in multiple places, so it remains global.
 const CSPIN_JETTON_ADDRESS = "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV";
 
 /**
@@ -33,9 +33,10 @@ function createJettonTransferPayload(jettonAmount, toAddress, responseAddress) {
  * @returns {Promise<string>} A confirmation string indicating success.
  */
 async function sendTransaction(userAddress, amount, env) {
-    const GAME_WALLET_SEED = env.GAME_WALLET_SEED;
-    if (!GAME_WALLET_SEED) {
-        throw new Error("GAME_WALLET_SEED is not configured in environment variables.");
+    // (KO) Fail-Safe: 게임 지갑 시드 구문이 없으면 즉시 실패 처리
+    // (EN) Fail-Safe: Immediately fail if the game wallet seed phrase is missing.
+    if (!env.GAME_WALLET_SEED) {
+        throw new Error("CRITICAL: GAME_WALLET_SEED is not configured in environment variables.");
     }
 
     const client = new TonClient({
@@ -43,7 +44,7 @@ async function sendTransaction(userAddress, amount, env) {
         apiKey: env.TONCENTER_API_KEY,
     });
 
-    const keys = await mnemonicToWalletKey(GAME_WALLET_SEED.split(" "));
+    const keys = await mnemonicToWalletKey(env.GAME_WALLET_SEED.split(" "));
     const wallet = WalletContractV4.create({ publicKey: keys.publicKey, workchain: 0 });
 
     if (!await client.isContractDeployed(wallet.address)) {
@@ -97,8 +98,16 @@ async function sendTransaction(userAddress, amount, env) {
 export async function onRequestPost(context) {
   try {
     const { request, env } = context;
+
+    // (KO) Fail-Safe: JWT 시크릿 키가 설정되지 않았으면 즉시 실패
+    // (EN) Fail-Safe: Fail immediately if JWT_SECRET is not set
+    if (!env.JWT_SECRET) {
+      console.error("CRITICAL: JWT_SECRET environment variable is not set.");
+      return new Response(JSON.stringify({ success: false, message: "CONFIGURATION_ERROR" }), { status: 500 });
+    }
+    const JWT_SECRET = new TextEncoder().encode(env.JWT_SECRET);
+
     const { winTicket } = await request.json();
-    const JWT_SECRET = new TextEncoder().encode(env.JWT_SECRET || 'your-default-super-secret-key-for-local-dev');
 
     if (!winTicket) {
       return new Response(JSON.stringify({ success: false, message: "INVALID_TICKET" }), { status: 400 });
@@ -123,6 +132,11 @@ export async function onRequestPost(context) {
     }
 
     const txHash = await sendTransaction(userAddress, payout, env);
+
+    // (KO) TODO: 티켓 재사용 방지 로직 구현 (Cloudflare KV 사용)
+    // (EN) TODO: Implement ticket reuse prevention logic (using Cloudflare KV)
+    // const ticketId = payload.spinId;
+    // await env.USED_TICKETS.put(ticketId, "true", { expirationTtl: 3600 });
 
     return new Response(JSON.stringify({
       success: true,
