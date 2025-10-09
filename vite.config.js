@@ -18,7 +18,9 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     define: {
-      'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.npm_package_version),
+      'import.meta.env.VITE_APP_VERSION': JSON.stringify(
+        process.env.npm_package_version
+      ),
     },
     optimizeDeps: {
       include: ['tonweb', 'buffer'], // (KO) tonweb과 buffer를 명시적으로 포함 (EN) Explicitly include tonweb and buffer

@@ -3,16 +3,16 @@
 **(EN) CandleSpinner: Code Diagnostics and Improvement Plan**
 
 **작성자 (Author):** 줄스 AI (Jules AI)
-**작성일 (Date):** 2025년 10월 08일
-**상태 (Status):** 채택됨 (Accepted)
+**작성일 (Date):** 2025년 10월 09일
+**상태 (Status):** 제안됨 (Proposed)
 
 ---
 
 ## 1. 백엔드 보안 강화: JWT 시크릿 키 관리 (Backend Security Hardening: JWT Secret Key Management)
 
 - **문제 진단 (Problem Diagnosis):**
-  (KO) 현재 백엔드 함수들(`spin.js`, `claimPrize.js` 등)은 `process.env.JWT_SECRET` 환경 변수가 없을 경우, 소스 코드에 하드코딩된 예측 가능한 기본값(`'your-default-super-secret-key-for-local-dev'`)을 폴백(fallback)으로 사용하고 있습니다. 이는 배포 환경에서 환경 변수 설정이 누락될 경우, 누구나 JWT를 위조할 수 있는 심각한 보안 취약점(OWASP A05:2021 - Security Misconfiguration)으로 이어집니다.
-  (EN) The backend functions (`spin.js`, `claimPrize.js`, etc.) currently use a predictable, hardcoded fallback value (`'your-default-super-secret-key-for-local-dev'`) if the `process.env.JWT_SECRET` environment variable is missing. This constitutes a critical security vulnerability (OWASP A05:2021 - Security Misconfiguration) if the environment variable is not set in a production environment, as anyone could forge JWTs.
+  (KO) 현재 백엔드 함수들은 `JWT_SECRET` 환경 변수가 없을 경우, 소스 코드에 하드코딩된 예측 가능한 기본값을 폴백(fallback)으로 사용하고 있습니다. 이는 배포 환경에서 환경 변수 설정이 누락될 경우, 누구나 JWT를 위조할 수 있는 심각한 보안 취약점(OWASP A05:2021 - Security Misconfiguration)으로 이어집니다.
+  (EN) The backend functions currently use a predictable, hardcoded fallback value for `JWT_SECRET` if the environment variable is missing. This constitutes a critical security vulnerability (OWASP A05:2021 - Security Misconfiguration) if the environment variable is not set in a production environment, as anyone could forge JWTs.
 
 - **근거 및 원칙 (Rationale & Principles):**
   - **Fail-Safe 원칙:** 설정 오류는 조용한 실패(silent failure)가 아닌, 즉각적이고 명시적인 실패(loud failure)로 이어져야 합니다. 특히 보안과 관련된 설정은 더욱 그렇습니다.

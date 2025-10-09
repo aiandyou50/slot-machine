@@ -6,16 +6,28 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write .",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "vite": "^5.2.0",
-    "vite-plugin-node-polyfills": "^0.22.0"
+    "vite-plugin-node-polyfills": "^0.22.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.2"
+  },
+  "lint-staged": {
+    "*.{js,css,md}": "prettier --write"
   },
   "dependencies": {
     "@ton/core": "^0.56.3",
     "@ton/crypto": "^3.2.0",
     "@ton/ton": "^13.11.2",
+    "buffer": "^6.0.3",
     "jose": "^5.4.1"
   }
 }

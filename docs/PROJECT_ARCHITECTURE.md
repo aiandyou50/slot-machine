@@ -1,10 +1,13 @@
 # 1. 아키텍처 개요 (Architecture Overview)
+
 ## 1.1. 핵심 사상 (Core Philosophy)
+
 - **서버리스 (Serverless-first):** Cloudflare 인프라를 최대한 활용하여 별도의 서버 관리 없이 높은 확장성과 낮은 유지보수 비용을 달성한다.
 - **탈중앙화 (Decentralized):** 사용자의 자산 통제권을 보장하기 위해 비수탁형(Non-Custodial) 지갑 연동 방식을 채택하고, 모든 베팅과 상금 지급은 온체인(On-chain)에서 투명하게 이루어진다.
 - **Vite 기반 순수 JS (Vanilla JS with Vite):** React/Vue와 같은 프레임워크 없이 순수 JavaScript, HTML, CSS를 사용하여 가볍고 빠른 사용자 경험을 제공하며, Vite를 통해 모던 웹 개발 환경을 구축한다.
 
 ## 1.2. 시스템 구성도 (System Diagram)
+
 ```
 +------------------+      (1. Send TX)      +--------------------+
 |                  | ---------------------> |                    |
@@ -30,7 +33,9 @@
 ```
 
 # 2. 프론트엔드 아키텍처 (Frontend Architecture)
+
 ## 2.1. 기술 스택 (Tech Stack)
+
 - **빌드 도구 (Build Tool):** Vite
 - **언어 (Language):** HTML, CSS, JavaScript (ESM, 순수 JS)
 - **핵심 라이브러리 (Core Libraries):**
@@ -39,6 +44,7 @@
   - `jose`: JWT(당첨 티켓) 디코딩 및 검증 (클라이언트에서는 주로 디코딩에 사용).
 
 ## 2.2. 디렉터리 구조 (Directory Structure)
+
 - `src/`: 모든 프론트엔드 소스 코드가 위치한다.
   - `main.js`: 애플리케이션의 메인 진입점. UI 렌더링, 이벤트 리스너 설정, 상태 관리 등 핵심 로직 포함.
   - `style.css`: 애플리케이션의 모든 스타일 시트.
@@ -48,6 +54,7 @@
 - `dist/`: `npm run build` 실행 시 생성되는 프로덕션 빌드 결과물 디렉터리.
 
 ## 2.3. 주요 로직 흐름 (Key Logic Flow)
+
 1.  **초기화 (`main.js`):**
     - `TonConnectUI` 객체를 초기화하고, `onStatusChange` 콜백을 등록하여 지갑 연결/해제 상태를 감지하고 UI(뷰 전환, 주소 표시)를 업데이트한다.
 2.  **스핀 (Spin):**
@@ -59,13 +66,16 @@
     - 언어 변경 시, 이 저장된 상태를 이용해 메시지를 다시 번역하여 표시함으로써 UI의 일관성을 유지한다.
 
 # 3. 백엔드 아키텍처 (Backend Architecture)
+
 ## 3.1. 기술 스택 (Tech Stack)
+
 - **런타임 (Runtime):** Cloudflare Functions (Node.js 호환 모드)
 - **핵심 라이브러리 (Core Libraries):**
   - `@ton/ton`, `@ton/core`, `@ton/crypto`: TON 블록체인 상호작용, 트랜잭션 생성/전송, `boc` 파싱.
   - `jose`: JWT("당첨 티켓") 서명 및 검증.
 
 ## 3.2. API 엔드포인트 (API Endpoints)
+
 - **`POST /spin` (`functions/spin.js`):**
   - **역할:** 사용자의 베팅 트랜잭션을 검증하고, 스핀 결과를 생성하며, 당첨 시 JWT 티켓을 발급한다.
   - **입력:** `{ boc: string }`
@@ -92,7 +102,9 @@
     4.  실패 시, 당첨금이 0이 되었음을 알리는 응답을 반환한다.
 
 # 4. 배포 및 운영 (Deployment & Operations)
+
 ## 4.1. 배포 프로세스 (Deployment Process)
+
 - **플랫폼:** Cloudflare Pages
 - **트리거:** GitHub `main` 브랜치에 푸시(Push) 발생 시 자동 배포
 - **빌드 설정:**
@@ -106,6 +118,7 @@
   - `DEV_KEY`: (선택사항) 개발 및 테스트 시 특정 게임 결과를 강제하기 위한 비밀 키.
 
 ## 4.2. 설정 파일 (Configuration Files)
+
 - **`wrangler.toml`:** (현재 사용 안함. 향후 로컬 테스트 환경 구성 시 사용될 수 있음)
 - **`vite.config.js`:** Vite 개발 서버 및 빌드 관련 설정을 포함한다. 특히 `vite-plugin-node-polyfills`를 사용하여 `Buffer` 등 Node.js 모듈 호환성 문제를 해결한다.
 - **`package.json`:** 프로젝트 의존성 및 실행 스크립트(`dev`, `build`)를 정의한다.

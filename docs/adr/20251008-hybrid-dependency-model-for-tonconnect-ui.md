@@ -14,12 +14,14 @@ When attempting to switch all external libraries to NPM packages for local bundl
 ## 결정 (Decision)
 
 (KO)
+
 1.  **하이브리드 의존성 모델을 채택합니다.**
 2.  UI 렌더링 안정성을 최우선으로 고려하여, **`@tonconnect/ui` 라이브러리(CSS 포함)는 검증된 방식인 CDN을 통해 로드**하도록 `index.html`에서 직접 참조합니다.
 3.  `@tonconnect/ui`를 제외한 다른 모든 라이브러리(`@ton/core`, `jose` 등)는 **NPM을 통해 설치하고 Vite 번들에 포함**시켜, `tonweb`이 야기했던 유령 의존성 문제를 방지하고 안정적인 의존성 관리를 유지합니다.
 4.  프론트엔드 `main.js`의 초기화 로직은, `DOMContentLoaded` 이벤트 발생 후 CDN 스크립트가 `window.TonConnectUI` 객체를 생성할 때까지 안전하게 기다린 후 애플리케이션을 시작하도록 구현합니다.
 
 (EN)
+
 1.  **Adopt a hybrid dependency model.**
 2.  To prioritize UI rendering stability, the **`@tonconnect/ui` library (including its CSS) will be loaded directly via CDN** by referencing it in `index.html`, which is the proven stable method.
 3.  All other libraries (e.g., `@ton/core`, `jose`), excluding `@tonconnect/ui`, will be **installed via NPM and included in the Vite bundle**. This maintains stable dependency management and prevents the phantom dependency issues previously caused by `tonweb`.
@@ -28,6 +30,7 @@ When attempting to switch all external libraries to NPM packages for local bundl
 ## 결과 (Consequences)
 
 ### 긍정적 (Positive)
+
 - **(KO) UI 렌더링 안정성 확보:** `@tonconnect/ui`의 고질적인 NPM 통합 문제를 회피하고, 지갑 연결 버튼이 항상 안정적으로 표시되도록 보장합니다.
 - **(EN) Ensured UI Rendering Stability:** Bypasses the persistent NPM integration issues with `@tonconnect/ui`, ensuring the wallet connection button renders reliably.
 - **(KO) 의존성 관리 개선:** `tonweb`과 같은 핵심 라이브러리는 NPM으로 관리하여, 유령 의존성 문제를 방지하고 대부분의 의존성을 통제된 환경에 둡니다.
@@ -36,6 +39,7 @@ When attempting to switch all external libraries to NPM packages for local bundl
 - **(EN) Clear Separation of Concerns:** Adopts a pragmatic approach by separating loading strategies based on library characteristics, leveraging the benefits of both methods.
 
 ### 부정적 (Negative)
+
 - **(KO) 외부 의존성 잔존:** `@tonconnect/ui` 라이브러리에 대한 외부 CDN 의존성이 남아있어, CDN 서비스 장애 시 잠재적인 단일 실패점이 될 수 있습니다.
 - **(EN) Remaining External Dependency:** An external CDN dependency for `@tonconnect/ui` remains, which could be a single point of failure if the CDN service experiences an outage.
 - **(KO) 아키텍처의 비일관성:** 모든 의존성을 단일 방식으로 관리하지 않아, 아키텍처의 일관성이 다소 저하됩니다. 하지만 이는 안정성을 위한 의도적인 기술적 트레이드오프입니다.

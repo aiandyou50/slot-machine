@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [3.0.3] - 2025-10-08
 
 ### Fixed
+
 - **(KO) TON Connect UI 렌더링 오류 해결:**
   - **문제:** NPM으로 `@tonconnect/ui` 라이브러리를 설치했을 때, 지갑 연결 버튼(위젯)이 프론트엔드에 전혀 렌더링되지 않았습니다.
   - **원인:** `@tonconnect/ui` 패키지는 NPM을 통해 로컬로 번들링될 때 안정적으로 UI를 렌더링하지 못하는 고질적인 문제가 있었습니다. 이는 라이브러리의 내부 구조 또는 Vite와의 호환성 문제로 추정됩니다.
@@ -18,6 +19,7 @@ All notable changes to this project will be documented in this file.
 ## [3.0.2] - 2025-10-08
 
 ### Fixed
+
 - **(KO) 블록체인 RPC 호출 오류 해결 (exit_code: -13):**
   - **문제:** 스핀 버튼 클릭 시, 프론트엔드에서 `tonClient.runMethod`를 통해 사용자의 Jetton 지갑 주소를 조회하는 과정에서 `exit_code: -13` 오류가 발생하며 트랜잭션이 실패했습니다.
   - **원인:** 프론트엔드에서 사용하는 공개 RPC 엔드포인트(`toncenter.com`)가 특정 요청에 제한을 두거나, 샌드박스 환경의 네트워크 제약으로 인해 스마트 컨트랙트의 `get` 메소드 호출이 실패했습니다.
@@ -40,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.1] - 2025-10-08
 
 ### Added
+
 - **(KO) 전체 기능 구현:** `PROJECT_REQUIREMENTS.md`에 명시된 모든 기능적/비기능적 요구사항에 따라 프로젝트를 재구축했습니다.
   - 프론트엔드 (UI, 게임 로직, 다국어 지원, 버전 표시)
   - 백엔드 (Cloudflare Functions: /spin, /claimPrize, /doubleUp)
@@ -50,10 +53,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - JWT-based delayed payout system and Double Up minigame.
 
 ### Changed
+
 - **(KO) 의존성 구조 현대화:** 배포 안정성을 저해하던 `tonweb` 라이브러리를 프로젝트에서 완전히 제거했습니다. 프론트엔드와 백엔드의 모든 블록체인 상호작용 로직을 최신 공식 라이브러리인 `@ton/core`와 `@ton/ton`을 사용하도록 전면 리팩토링하여 코드의 일관성과 안정성을 확보했습니다.
 - **(EN) Modernized Dependency Structure:** Completely removed the `tonweb` library, which was causing deployment instability. All blockchain interaction logic in both the frontend and backend was refactored to use the modern, official `@ton/core` and `@ton/ton` libraries, ensuring code consistency and stability.
 
 ### Fixed
+
 - **(KO) BUG-01 (언어 변경 시 메시지 초기화):**
   - **문제:** 게임 진행 중 언어 변경 시, 현재 상태 메시지(예: '50 당첨!')가 번역되지 않고 초기 환영 메시지로 돌아가는 문제.
   - **원인:** 언어 변경 시 현재 게임 상태(마지막 메시지 키, 파라미터)를 유지하는 로직 부재.
@@ -68,6 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### BREAKING CHANGE
 
 #### 프로젝트 초기화 (Project Reset)
+
 (EN) Error: The project was in an unrecoverable state due to persistent, conflicting dependency and environment issues that prevented successful deployment and verification.
 (KO) 문제: 지속적이고 상충하는 의존성 및 환경 문제로 인해 성공적인 배포 및 검증이 불가능한, 회복 불가능한 상태에 있었습니다.
 (EN) Cause: Multiple attempts to resolve issues with CDN instability, NPM package integration, and `package-lock.json` corruption failed to produce a stable, verifiable build.

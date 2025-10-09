@@ -1,12 +1,19 @@
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
+
 import './style.css';
-import { Address, toNano, beginCell } from '@ton/core';
-// (KO) TonClient는 백엔드 프록시로 이전되었으므로 프론트엔드에서 더 이상 필요하지 않습니다.
-// (EN) TonClient is no longer needed on the frontend as it has been moved to a backend proxy.
+import {
+  getJettonWalletAddress,
+  callSpinApi,
+  callClaimApi,
+  callDoubleUpApi,
+} from './services/api.js';
+import { createSpinTransaction } from './services/blockchain.js';
 
 // (KO) English and (KO) Korean comments are mandatory.
 
 // --- (EN) State Management / (KO) 상태 관리 ---
-let tonConnectUI;
+let tonConnectUI; // (KO) DOM 로드 후 초기화 (EN) Initialized after DOM loads
 let walletInfo = null;
 let currentBet = 10;
 let currentWinTicket = null;
@@ -37,21 +44,35 @@ const versionDisplay = document.getElementById('version-display');
 function t(key, params = {}) {
   let str = translations[key] || key;
   for (const [pKey, pValue] of Object.entries(params)) {
-    str = str.replace(`{${pKey}}`, pValue);
+    let value = pValue;
+    // (KO) 파라미터가 숫자일 경우, 현재 언어의 로케일에 맞게 숫자 서식을 적용합니다.
+    // (EN) If the parameter is a number, format it according to the current language's locale.
+    if (typeof pValue === 'number') {
+      try {
+        value = new Intl.NumberFormat(currentLang).format(pValue);
+      } catch (e) {
+        console.warn(
+          `Could not format number ${pValue} for locale ${currentLang}. Falling back to default.`,
+          e
+        );
+        value = pValue.toString();
+      }
+    }
+    str = str.replace(`{${pKey}}`, value);
   }
   return str;
 }
 
 function showMessage(key, params = {}) {
-    lastMessage = { key, params };
-    messageDisplay.textContent = t(key, params);
+  lastMessage = { key, params };
+  messageDisplay.textContent = t(key, params);
 }
 
 function applyStaticTranslations() {
-  document.querySelectorAll('[data-i18n-key]').forEach(el => {
+  document.querySelectorAll('[data-i18n-key]').forEach((el) => {
     const key = el.getAttribute('data-i18n-key');
     if (el.id !== 'message-display') {
-        el.textContent = t(key);
+      el.textContent = t(key);
     }
   });
   showMessage(lastMessage.key, lastMessage.params);
@@ -69,7 +90,7 @@ async function loadTranslations(lang) {
   }
 }
 
-// --- (EN) Core Application Logic / (KO) 핵심 애플리케이션 로직 ---
+// --- (EN) UI Update Functions / (KO) UI 업데이트 함수 ---
 function updateView(isConnected) {
   if (isConnected) {
     landingView.classList.remove('active');
@@ -88,7 +109,15 @@ function renderReels(reelsData) {
     for (const symbol of reelData) {
       const symbolDiv = document.createElement('div');
       symbolDiv.className = 'symbol';
-      symbolDiv.textContent = {'CHERRY': '🍒', 'LEMON': '🍋', 'ORANGE': '🍊', 'PLUM': '🍇', 'BELL': '🔔', 'DIAMOND': '💎'}[symbol] || symbol;
+      symbolDiv.textContent =
+        {
+          CHERRY: '🍒',
+          LEMON: '🍋',
+          ORANGE: '🍊',
+          PLUM: '🍇',
+          BELL: '🔔',
+          DIAMOND: '💎',
+        }[symbol] || symbol;
       reelDiv.appendChild(symbolDiv);
     }
     reelsContainer.appendChild(reelDiv);
@@ -105,30 +134,12 @@ function setControlsLoading(isLoading) {
   doubleUpButton.disabled = isLoading;
   redChoiceButton.disabled = isLoading;
   blackChoiceButton.disabled = isLoading;
-  showMessage(isLoading ? 'processing_message' : lastMessage.key, lastMessage.params);
+  if (isLoading) {
+    showMessage('processing_message');
+  }
 }
 
-const CSPIN_JETTON_ADDRESS = "EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV";
-const GAME_WALLET_ADDRESS = "UQBFPDdSlPgqPrn2XwhpVq0KQExN2kv83_batQ-dptaR8Mtd";
-
-function createJettonTransferPayload(jettonAmount, toAddress, responseAddress) {
-    const forwardPayload = beginCell()
-        .storeUint(0, 32) // op-code for a text comment
-        .storeStringTail("Bet")
-        .endCell();
-
-    return beginCell()
-        .storeUint(0x0f8a7ea5, 32) // op-code for jetton transfer
-        .storeUint(0, 64) // query_id
-        .storeCoins(toNano(jettonAmount))
-        .storeAddress(Address.parse(toAddress))
-        .storeAddress(Address.parse(responseAddress))
-        .storeBit(false) // no custom payload
-        .storeCoins(toNano('0.01')) // forward fee
-        .storeBit(true) // forward payload included
-        .storeRef(forwardPayload)
-        .endCell();
-}
+// --- (EN) Game Logic Handlers / (KO) 게임 로직 핸들러 ---
 
 async function handleSpin() {
   if (!walletInfo) {
@@ -138,54 +149,27 @@ async function handleSpin() {
 
   setControlsLoading(true);
   postWinActions.classList.add('hidden');
-  showMessage('creating_transaction_message');
 
   try {
-    const response = await fetch('/getJettonWalletAddress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            ownerAddress: walletInfo.account.address,
-            jettonMinterAddress: CSPIN_JETTON_ADDRESS
-        }),
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || 'Failed to get Jetton wallet address.');
-    }
-
-    const { jettonWalletAddress } = await response.json();
-
-    const transferPayload = createJettonTransferPayload(
-        currentBet.toString(),
-        GAME_WALLET_ADDRESS,
-        walletInfo.account.address
+    showMessage('creating_transaction_message');
+    const jettonWalletAddress = await getJettonWalletAddress(
+      walletInfo.account.address
     );
-
-    const transaction = {
-      validUntil: Math.floor(Date.now() / 1000) + 600,
-      messages: [
-        {
-          address: jettonWalletAddress,
-          amount: toNano('0.05').toString(),
-          payload: transferPayload.toBoc().toString('base64'),
-        }
-      ]
-    };
+    const transaction = createSpinTransaction(
+      jettonWalletAddress,
+      currentBet,
+      walletInfo.account.address
+    );
 
     showMessage('confirm_transaction_message');
     const result = await tonConnectUI.sendTransaction(transaction);
+
     showMessage('sending_transaction_message');
-
-    const spinResponse = await fetch('/spin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ boc: result.boc, devKey: localStorage.getItem('DEV_KEY') }),
-    });
-
-    const data = await spinResponse.json();
-    if (data.error) throw new Error(data.details || data.error);
+    const data = await callSpinApi(
+      result.boc,
+      currentBet,
+      walletInfo.account.address
+    );
 
     renderReels(data.reels);
 
@@ -198,10 +182,10 @@ async function handleSpin() {
       currentWinTicket = null;
     }
   } catch (error) {
-     if (error.message.includes('Transaction was rejected')) {
-        showMessage('transaction_cancelled_message');
+    if (error.message.includes('Transaction was rejected')) {
+      showMessage('transaction_cancelled_message');
     } else {
-        showMessage('generic_error_message', { error: error.message });
+      showMessage('generic_error_message', { error: error.message });
     }
   } finally {
     setControlsLoading(false);
@@ -213,13 +197,7 @@ async function handleClaim() {
   setControlsLoading(true);
 
   try {
-    const response = await fetch('/claimPrize', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ winTicket: currentWinTicket }),
-    });
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
+    const data = await callClaimApi(currentWinTicket);
     showMessage('claim_success_message', { amount: data.transaction.amount });
   } catch (error) {
     showMessage('claim_failed_message', { error: error.message });
@@ -236,22 +214,15 @@ async function handleDoubleUp(choice) {
   doubleUpChoiceView.classList.add('hidden');
 
   try {
-    const response = await fetch('/doubleUp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ winTicket: currentWinTicket, choice }),
-    });
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
-
+    const data = await callDoubleUpApi(currentWinTicket, choice);
     if (data.win) {
-        showMessage('double_up_success_message', { payout: data.newPayout });
-        currentWinTicket = data.newTicket;
-        postWinActions.classList.remove('hidden');
+      showMessage('double_up_success_message', { payout: data.newPayout });
+      currentWinTicket = data.newTicket;
+      postWinActions.classList.remove('hidden');
     } else {
-        showMessage('double_up_failed_message');
-        currentWinTicket = null;
-        postWinActions.classList.add('hidden');
+      showMessage('double_up_failed_message');
+      currentWinTicket = null;
+      postWinActions.classList.add('hidden');
     }
   } catch (error) {
     showMessage('double_up_error_message', { error: error.message });
@@ -263,36 +234,28 @@ async function handleDoubleUp(choice) {
 }
 
 /**
- * (KO) CDN에서 @tonconnect/ui가 로드될 때까지 기다립니다.
- * (EN) Waits for @tonconnect/ui to be loaded from the CDN.
+ * (KO) 애플리케이션 초기화 함수
+ * (EN) Initializes the application
  */
-async function waitForTonConnectUI(timeout = 5000) {
-  const start = Date.now();
-  while (Date.now() - start < timeout) {
-    if (window.TonConnectUI) return true;
-    await new Promise(r => setTimeout(r, 100));
-  }
-  return false;
-}
-
-
 async function main() {
   if (window.__CANDLESPINNER_INITIALIZED) return;
   window.__CANDLESPINNER_INITIALIZED = true;
 
   versionDisplay.textContent = `v${import.meta.env.VITE_APP_VERSION}`;
 
-  tonConnectUI = new window.TonConnectUI({
-      manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
-      buttonRootId: 'ton-connect-button',
+  tonConnectUI = new TonConnectUI({
+    manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
+    buttonRootId: 'ton-connect-button',
   });
 
-  tonConnectUI.onStatusChange(wallet => {
+  tonConnectUI.onStatusChange((wallet) => {
     walletInfo = wallet;
     updateView(!!wallet);
   });
 
-  langSelect.addEventListener('change', (e) => loadTranslations(e.target.value));
+  langSelect.addEventListener('change', (e) =>
+    loadTranslations(e.target.value)
+  );
   decreaseBetButton.addEventListener('click', () => {
     currentBet = Math.max(BET_STEP, currentBet - BET_STEP);
     updateBetDisplay();
@@ -318,11 +281,4 @@ async function main() {
   renderReels(Array(5).fill(Array(3).fill('?')));
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const loaded = await waitForTonConnectUI();
-    if (!loaded) {
-        document.getElementById('message-display').textContent = 'Error: Could not load wallet connect UI.';
-        return;
-    }
-    main();
-});
+document.addEventListener('DOMContentLoaded', main);

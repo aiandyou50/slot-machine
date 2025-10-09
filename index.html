@@ -9,7 +9,10 @@
       (KO) @tonconnect/ui는 NPM 통합 문제 및 렌더링 안정성을 위해 CDN으로 로드합니다.
       (EN) @tonconnect/ui is loaded via CDN for rendering stability and to avoid NPM integration issues.
     -->
-    <link href="https://unpkg.com/@tonconnect/ui@2.0.0/dist/tonconnect-ui.css" rel="stylesheet">
+    <link
+      href="https://unpkg.com/@tonconnect/ui@2.0.0/dist/tonconnect-ui.css"
+      rel="stylesheet"
+    />
     <script src="https://unpkg.com/@tonconnect/ui@2.0.0/dist/tonconnect-ui.min.js"></script>
   </head>
   <body>
@@ -31,7 +34,9 @@
       <!-- (EN) Landing view when wallet is not connected -->
       <div id="landing-view" class="view active">
         <h1>CandleSpinner</h1>
-        <p data-i18n-key="connect_wallet_prompt">Connect your TON wallet to start playing.</p>
+        <p data-i18n-key="connect_wallet_prompt">
+          Connect your TON wallet to start playing.
+        </p>
       </div>
 
       <!-- (KO) 지갑 연결 후 게임 뷰 -->
@@ -45,22 +50,41 @@
         <div id="message-display" data-i18n-key="welcome_message">Welcome!</div>
 
         <div id="post-win-actions" class="hidden">
-            <button id="claim-button" data-i18n-key="claim_button_text">Claim Prize</button>
-            <button id="double-up-button" data-i18n-key="double_up_button_text">Double Up (50/50)</button>
+          <button id="claim-button" data-i18n-key="claim_button_text">
+            Claim Prize
+          </button>
+          <button id="double-up-button" data-i18n-key="double_up_button_text">
+            Double Up (50/50)
+          </button>
         </div>
 
         <div id="double-up-choice" class="hidden">
-            <button id="red-choice-button" data-choice="red" data-i18n-key="red_choice_button_text">Red Card</button>
-            <button id="black-choice-button" data-choice="black" data-i18n-key="black_choice_button_text">Black Card</button>
+          <button
+            id="red-choice-button"
+            data-choice="red"
+            data-i18n-key="red_choice_button_text"
+          >
+            Red Card
+          </button>
+          <button
+            id="black-choice-button"
+            data-choice="black"
+            data-i18n-key="black_choice_button_text"
+          >
+            Black Card
+          </button>
         </div>
 
         <div id="controls">
-            <div id="bet-control">
-              <span data-i18n-key="bet_label">Bet</span>: <span id="bet-amount">10</span>
-              <button id="decrease-bet">-</button>
-              <button id="increase-bet">+</button>
-            </div>
-            <button id="spin-button" data-i18n-key="spin_button_text">Spin</button>
+          <div id="bet-control">
+            <span data-i18n-key="bet_label">Bet</span>:
+            <span id="bet-amount">10</span>
+            <button id="decrease-bet">-</button>
+            <button id="increase-bet">+</button>
+          </div>
+          <button id="spin-button" data-i18n-key="spin_button_text">
+            Spin
+          </button>
         </div>
 
         <div id="version-display"></div>

@@ -14,12 +14,14 @@ During the execution of the `handleSpin` function, the transaction failed with a
 ## 결정 (Decision)
 
 (KO)
+
 1.  **백엔드 프록시 패턴 (Backend for Frontend)을 도입합니다.** 프론트엔드에서 직접 블록체인의 `get` 메소드를 호출하는 모든 로직을 제거합니다.
 2.  이러한 호출을 안전하게 중계하는 새로운 백엔드 API 엔드포인트 `/getJettonWalletAddress`를 생성합니다.
 3.  이 백엔드 함수는 Cloudflare 환경 변수를 통해 보호되는 API 키를 사용하여, 더 안정적이고 속도 제한이 없는 RPC 엔드포인트에 요청을 보냅니다.
 4.  프론트엔드는 이제 블록체인에 직접 요청하는 대신, 이 백엔드 프록시 API를 호출하여 필요한 데이터를 가져옵니다.
 
 (EN)
+
 1.  **Introduce a Backend for Frontend (BFF) / Proxy Pattern.** Remove all logic from the frontend that directly calls blockchain `get` methods.
 2.  Create a new backend API endpoint, `/getJettonWalletAddress`, to securely proxy these calls.
 3.  This backend function will use a protected API key, sourced from Cloudflare environment variables, to make requests to a more reliable, non-rate-limited RPC endpoint.
@@ -28,6 +30,7 @@ During the execution of the `handleSpin` function, the transaction failed with a
 ## 결과 (Consequences)
 
 ### 긍정적 (Positive)
+
 - **(KO) 안정성 및 신뢰성 향상:** 공개 RPC의 불안정성이나 속도 제한 문제로부터 프론트엔드를 분리하여, 핵심 기능의 성공률을 크게 높였습니다.
 - **(EN) Improved Stability and Reliability:** Decoupling the frontend from the volatility and rate limits of public RPCs significantly increases the success rate of core functions.
 - **(KO) 보안 강화:** 민감한 `TONCENTER_API_KEY`와 같은 자격 증명을 클라이언트 측에 노출하지 않고, 안전하게 서버 측에서만 관리할 수 있게 되었습니다.
@@ -36,6 +39,7 @@ During the execution of the `handleSpin` function, the transaction failed with a
 - **(EN) Centralized Logic Management:** Blockchain interaction logic is centralized in the backend, simplifying future maintenance, such as changing RPC endpoints or modifying related logic.
 
 ### 부정적 (Negative)
+
 - **(KO) 아키텍처 복잡성 증가:** 새로운 백엔드 함수가 추가되어 전체 시스템의 구성 요소가 늘어났습니다.
 - **(EN) Increased Architectural Complexity:** The addition of a new backend function increases the number of components in the overall system.
 - **(KO) 약간의 지연 시간 추가:** 프론트엔드 → 백엔드 → 블록체인으로 이어지는 추가적인 네트워크 홉(hop)으로 인해, 데이터 조회에 미세한 지연 시간이 추가될 수 있습니다. 하지만 이는 안정성 확보의 대가로 감수할 수 있는 수준입니다.

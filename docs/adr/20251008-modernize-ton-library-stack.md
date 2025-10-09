@@ -14,11 +14,13 @@ The initial version of the project used the `tonweb` library for interacting wit
 ## 결정 (Decision)
 
 (KO)
+
 1.  **`tonweb` 라이브러리를 프로젝트에서 완전히 제거합니다.**
 2.  모든 블록체인 상호작용(주소 변환, 트랜잭션 페이로드 생성, 컨트랙트 `get` 메소드 호출 등) 로직을 최신 공식 라이브러리인 **`@ton/core`**와 **`@ton/ton`**을 사용하여 전면 재작성합니다.
 3.  이를 통해 불필요하고 거대한 유령 의존성을 제거하고, 프로젝트의 의존성 트리를 깨끗하고 예측 가능하게 만듭니다.
 
 (EN)
+
 1.  **Completely remove the `tonweb` library from the project.**
 2.  Refactor all blockchain interaction logic (address conversion, transaction payload creation, contract `get` method calls, etc.) to exclusively use the modern, official libraries: **`@ton/core`** and **`@ton/ton`**.
 3.  This will eliminate the unnecessary and large phantom dependency, resulting in a clean and predictable dependency tree for the project.
@@ -26,6 +28,7 @@ The initial version of the project used the `tonweb` library for interacting wit
 ## 결과 (Consequences)
 
 ### 긍정적 (Positive)
+
 - **(KO) 배포 안정성 확보:** `package-lock.json` 불일치 문제를 근본적으로 해결하여, CI/CD 환경에서 안정적인 배포가 가능해졌습니다.
 - **(EN) Deployment Stability:** Fundamentally resolves the `package-lock.json` inconsistency, enabling stable deployments in the CI/CD environment.
 - **(KO) 의존성 최소화:** 프로젝트에 불필요한 `expo` 관련 패키지들이 모두 제거되어 번들 사이즈가 감소하고 의존성 관리가 용이해졌습니다.
@@ -34,6 +37,7 @@ The initial version of the project used the `tonweb` library for interacting wit
 - **(EN) Code Modernization:** By using the latest official libraries, the project's tech stack is modernized, making it easier to leverage new features of the TON network in the future.
 
 ### 부정적 (Negative)
+
 - **(KO) 초기 리팩토링 비용:** 기존 `tonweb` 기반 코드를 `@ton/core` 기반으로 전환하는 데 초기 개발 시간이 소요되었습니다.
 - **(EN) Initial Refactoring Cost:** Initial development time was spent refactoring the existing `tonweb`-based code to the `@ton/core`-based implementation.
 - **(KO) 학습 곡선:** 팀원들이 새로운 라이브러리의 API에 익숙해져야 할 수 있습니다. (현재는 AI 단독 개발이므로 영향 없음)
