@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.8] - 2025-10-10
+
+### Fixed
+- **(KO) TON Wallet Manifest 오류 및 연결 실패 근본 해결:**
+  - **문제 (Error):** TON Wallet 연결 시 'App Manifest Error' 발생.
+  - **원인 (Cause):** `tonconnect-manifest.json`에 필수 필드(`network`) 누락 및 `iconUrl`이 상대 경로(`/icon.png`)로 지정되어 외부 접근 불가.
+  - **해결 (Solution):** manifest에 `network` 필드 추가, `iconUrl`을 절대 경로(`https://aiandyou.me/icon.png`)로 수정하여 TON Connect 명세를 완전히 준수.
+- **(EN) Fundamentally resolved TON Wallet manifest error and connection failure:**
+  - **Error:** 'App Manifest Error' occurred when connecting to TON Wallet.
+  - **Cause:** Missing required field (`network`) and relative `iconUrl` in `tonconnect-manifest.json` prevented manifest validation and external access.
+  - **Solution:** Added `network` field and changed `iconUrl` to absolute path (`https://aiandyou.me/icon.png`) for full TON Connect spec compliance.
+
 ## [3.1.7] - 2025-10-10
 
 ### Fixed
