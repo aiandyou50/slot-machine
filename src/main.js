@@ -2,7 +2,8 @@ import { Buffer } from 'buffer';
 window.Buffer = Buffer;
 
 import './style.css';
-import { TonConnectUI } from '@tonconnect/ui';
+// (KO) @tonconnect/ui는 CDN으로 window 객체에 로드됨
+// (EN) @tonconnect/ui is loaded via CDN and available on window
 import {
   callCommitApi,
   callRevealApi,
@@ -270,7 +271,7 @@ async function main() {
 
   versionDisplay.textContent = `v${import.meta.env.VITE_APP_VERSION}`;
 
-  tonConnectUI = new TonConnectUI({
+  tonConnectUI = new window.TonConnectUI({
     // (KO) TON Wallet 연결 오류 해결: manifestUrl을 절대 경로로 지정
     // (EN) Fix TON Wallet connection error: use absolute manifestUrl
     manifestUrl: 'https://aiandyou.me/tonconnect-manifest.json',

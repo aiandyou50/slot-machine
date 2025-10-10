@@ -6,9 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CandleSpinner: The Galactic Casino</title>
     <!--
-      (KO) @tonconnect/ui는 이제 NPM을 통해 로컬로 번들링됩니다.
-      (EN) @tonconnect/ui is now bundled locally via NPM.
+      (KO) @tonconnect/ui는 CDN 기반 하이브리드 방식으로 로드됩니다.
+      (EN) @tonconnect/ui is loaded via CDN (hybrid model).
     -->
+    <link rel="stylesheet" href="https://unpkg.com/@tonconnect/ui@2.3.1/dist/tonconnect-ui.min.css" />
   </head>
   <body>
     <div id="starfield"></div>
@@ -91,6 +92,9 @@
         </footer>
       </div>
     </div>
-    <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/main.js"></script>
+  <!-- (KO) @tonconnect/ui JS CDN 로드 -->
+  <!-- (EN) Load @tonconnect/ui JS from CDN -->
+  <script src="https://unpkg.com/@tonconnect/ui@2.3.1/dist/tonconnect-ui.min.js"></script>
   </body>
 </html>

@@ -2,6 +2,54 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.13] - 2025-10-10
+
+### Fixed / Improved
+- **(EN) Backend Security Hardening:**
+  - **Error:** JWT tickets with missing or forged payloads could bypass detailed logging and monitoring.
+  - **Cause:** Only generic INVALID_TICKET errors were returned for JWT verification failures, making it hard to distinguish malicious attempts.
+  - **Solution:** Added INVALID_TICKET_PAYLOAD error code and enhanced logging for missing spinId in claimPrize.js and doubleUp.js.
+- **(KO) 백엔드 보안 강화:**
+  - **문제:** JWT 페이로드가 누락되거나 위조된 경우, 상세 로깅 및 모니터링이 어려움.
+  - **원인:** JWT 검증 실패 시 일반적인 INVALID_TICKET 오류만 반환되어 악의적 시도 구분이 어려움.
+  - **해결:** claimPrize.js, doubleUp.js에서 spinId 누락 시 INVALID_TICKET_PAYLOAD 오류 코드 및 로깅 강화.
+
+- **(EN) Transaction Ownership Verification:**
+  - **Error:** Users could submit transactions (BOC) not signed by their own wallet, risking prize theft.
+  - **Cause:** verifyTransaction in revealSpin.js did not check sender address against userAddress.
+  - **Solution:** Added strict sender address check; returns INVALID_TRANSACTION if mismatch.
+- **(KO) 트랜잭션 소유권 검증:**
+  - **문제:** 사용자가 본인 지갑이 아닌 트랜잭션을 제출할 수 있어 상금 탈취 위험.
+  - **원인:** revealSpin.js의 verifyTransaction에서 발신자 주소와 userAddress 일치 여부 미검증.
+  - **해결:** 발신자 주소 불일치 시 INVALID_TRANSACTION 반환.
+
+- **(EN) Documentation Consistency:**
+  - **Error:** PROJECT_ARCHITECTURE.MD referenced obsolete /getJettonWalletAddress API.
+  - **Cause:** API was removed and replaced by client-side calculation.
+  - **Solution:** Removed all references to /getJettonWalletAddress and updated docs to reflect client-side calculation.
+- **(KO) 문서 일관성 확보:**
+  - **문제:** PROJECT_ARCHITECTURE.MD에 삭제된 /getJettonWalletAddress API가 남아있음.
+  - **원인:** API가 삭제되고 클라이언트 계산 방식으로 변경됨.
+  - **해결:** 관련 다이어그램 및 명세 삭제, 클라이언트 계산 방식으로 문서 최신화.
+
+- **(EN) ADR-002 Status Update:**
+  - **Error:** ADR-002 suggested backend proxy pattern, now obsolete.
+  - **Cause:** Client-side calculation is more robust and secure.
+  - **Solution:** ADR-002 status changed to Superseded, with historical note added.
+- **(KO) ADR-002 상태 변경:**
+  - **문제:** ADR-002가 더 이상 적용되지 않는 백엔드 프록시 패턴을 제안함.
+  - **원인:** 클라이언트 직접 계산 방식이 더 안전하고 견고함.
+  - **해결:** ADR-002 상태를 대체됨(Superseded)으로 변경, 역사적 설명 추가.
+
+- **(EN) Hybrid Loading for @tonconnect/ui:**
+  - **Error:** NPM-only loading caused manifest errors and wallet connection instability.
+  - **Cause:** ADR-003 required hybrid CDN/NPM loading for reliability.
+  - **Solution:** Removed @tonconnect/ui from package.json, restored CDN CSS/JS loading in index.html, and switched to window.TonConnectUI in main.js.
+- **(KO) @tonconnect/ui 하이브리드 로딩 복원:**
+  - **문제:** NPM 단독 로딩 시 manifest 오류 및 지갑 연결 불안정 발생.
+  - **원인:** ADR-003에서 CDN/NPM 하이브리드 로딩을 요구함.
+  - **해결:** package.json에서 @tonconnect/ui 제거, index.html에 CDN CSS/JS 추가, main.js에서 window.TonConnectUI 사용.
+
 ## [3.1.12] - 2025-10-10
 
 ### Fixed

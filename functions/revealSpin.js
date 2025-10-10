@@ -102,7 +102,7 @@ async function verifyTransaction(boc, betAmount, userAddress) {
     const message = loadMessage(messageCell);
 
     if (message.info.src.toString() !== Address.parse(userAddress).toString()) {
-      throw new Error('Sender address does not match user address.');
+      return { isValid: false, error: 'INVALID_TRANSACTION: Sender address does not match user address.' };
     }
 
     const bodySlice = message.body.beginParse();

@@ -1,6 +1,6 @@
 # ADR-002: 백엔드 RPC 프록시 패턴 도입 (Introduce Backend RPC Proxy Pattern)
 
-- **상태 (Status):** 채택됨 (Accepted)
+- **상태 (Status):** 대체됨 (Superseded)
 - **날짜 (Date):** 2025-10-08
 
 ## 배경 (Context)
@@ -26,6 +26,9 @@ During the execution of the `handleSpin` function, the transaction failed with a
 2.  Create a new backend API endpoint, `/getJettonWalletAddress`, to securely proxy these calls.
 3.  This backend function will use a protected API key, sourced from Cloudflare environment variables, to make requests to a more reliable, non-rate-limited RPC endpoint.
 4.  The frontend will now fetch the required data by calling this backend proxy API instead of directly querying the blockchain.
+
+> (KO) 이 결정은 이후 클라이언트 측에서 Jetton Wallet Address를 직접 계산하는 더 안정적인 방식으로 대체되었습니다.
+> (EN) This decision has since been superseded by a more robust approach: calculating the Jetton Wallet Address directly on the client-side.
 
 ## 결과 (Consequences)
 
