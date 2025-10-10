@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.11] - 2025-10-10
+
+### Fixed
+- **(EN) Math.random() usage in doubleUp.js violates provable fairness principle:**
+  - **Error:** The `doubleUp.js` function was using `Math.random()` on line 121 to determine double-up win/loss results, which violates the project's core principle of provable fairness as specified in AI_AGENT_GUIDELINES.md Section 6 (Forbidden Actions).
+  - **Cause:** The previous implementation relied on JavaScript's non-deterministic `Math.random()` function, making the double-up results unpredictable and unverifiable by users, contradicting the Commit-Reveal scheme used in the spin functionality.
+  - **Solution:** Replaced `Math.random()` with a deterministic PRNG (Pseudo-Random Number Generator) based on `createDeterministicRandom()` function. The seed is generated from a combination of `ticketId`, user `choice`, and `payout` amount, ensuring the result is deterministic yet unpredictable. This maintains fairness while allowing cryptographic verification.
+- **(KO) doubleUp.js에서 Math.random() 사용이 검증 가능한 공정성 원칙을 위반:**
+  - **문제:** `doubleUp.js` 함수가 더블업 승/패 결과를 결정하기 위해 121번째 줄에서 `Math.random()`을 사용하고 있었으며, 이는 AI_AGENT_GUIDELINES.md 섹션 6 (금지 조항)에 명시된 검증 가능한 공정성이라는 프로젝트의 핵심 원칙을 위반합니다.
+  - **원인:** 이전 구현은 JavaScript의 비결정론적 `Math.random()` 함수에 의존했으며, 이로 인해 더블업 결과를 사용자가 예측하거나 검증할 수 없어 스핀 기능에서 사용되는 Commit-Reveal 방식과 모순됩니다.
+  - **해결:** `Math.random()`을 `createDeterministicRandom()` 함수 기반의 결정론적 PRNG(의사 난수 생성기)로 교체했습니다. 시드는 `ticketId`, 사용자 `choice`, `payout` 금액의 조합으로 생성되어 결과가 결정론적이면서도 예측 불가능하도록 보장합니다. 이를 통해 공정성을 유지하면서 암호학적 검증이 가능합니다.
+
 ## [3.1.10] - 2025-10-10
 
 ### Fixed
