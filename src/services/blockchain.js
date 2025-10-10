@@ -58,18 +58,18 @@ export function createJettonTransferPayload(
   toAddress,
   responseAddress
 ) {
-  // (KO) 'Invalid CRC32C' 오류를 해결하기 위해, 데이터 손상을 유발하는 것으로 의심되는
-  // (KO) 불필요한 forward_payload('Bet' 주석) 부분을 완전히 제거합니다.
-  // (EN) To resolve the 'Invalid CRC32C' error, the unnecessary forward_payload
-  // (EN) (the 'Bet' comment), which is suspected of causing data corruption, is completely removed.
+  // (KO) 'Invalid CRC32C' 오류를 해결하기 위해, 데이터 손상을 유발할 수 있는 모든
+  // (KO) 부가 필드를 제거하고 가장 기본적인 표준 Jetton 전송 메시지를 생성합니다.
+  // (EN) To resolve the 'Invalid CRC32C' error, all optional fields that could
+  // (EN) cause data corruption are removed to create the most basic, standard Jetton transfer message.
   return beginCell()
     .storeUint(0x0f8a7ea5, 32) // (KO) Jetton 전송 op-code (EN) op-code for jetton transfer
     .storeUint(0, 64) // (KO) query_id (EN) query_id
-    .storeCoins(toNano(jettonAmount))
-    .storeAddress(Address.parse(toAddress))
-    .storeAddress(Address.parse(responseAddress))
+    .storeCoins(toNano(jettonAmount)) // (KO) 전송할 Jetton 양 (EN) amount of Jettons to send
+    .storeAddress(Address.parse(toAddress)) // (KO) 수신자 주소 (EN) recipient address
+    .storeAddress(Address.parse(responseAddress)) // (KO) 응답 주소 (EN) response address
     .storeBit(false) // (KO) 커스텀 페이로드 없음 (EN) no custom payload
-    .storeCoins(toNano('0.01')) // (KO) 포워딩 수수료 (EN) forward fee
+    .storeCoins(0) // (KO) 포워딩할 TON 없음 (0으로 설정) (EN) no TON to forward (set to 0)
     .storeBit(false) // (KO) 포워드 페이로드 없음 (EN) no forward payload
     .endCell();
 }
