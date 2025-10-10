@@ -1,4 +1,42 @@
-import { Address, toNano, beginCell } from '@ton/core';
+import { Address, toNano, beginCell, contractAddress, Cell } from '@ton/core';
+import JETTON_WALLET_CODE_BOC from '../contract/jetton-wallet-code.txt?raw';
+
+/**
+ * (KO) 사용자의 Jetton 지갑 주소를 클라이언트 측에서 직접 계산합니다.
+ * (EN) Calculates the user's Jetton wallet address directly on the client-side.
+ * @param {string} ownerAddress - (KO) 사용자 지갑 주소 (EN) The user's wallet address.
+ * @param {string} jettonMinterAddress - (KO) Jetton 마스터 컨트랙트 주소 (EN) The Jetton master contract address.
+ * @returns {Address} The calculated user's Jetton wallet address.
+ */
+export function calculateJettonWalletAddress(ownerAddress, jettonMinterAddress) {
+  const owner = Address.parse(ownerAddress);
+  const minter = Address.parse(jettonMinterAddress);
+
+  // (KO) 표준 Jetton 지갑의 코드 셀을 가져옵니다.
+  // (EN) Get the code cell for a standard Jetton wallet.
+  const walletCode = Cell.fromBase64(JETTON_WALLET_CODE_BOC.trim());
+
+  // (KO) Jetton 지갑의 초기 데이터 셀을 구성합니다.
+  // (EN) Construct the initial data cell for the Jetton wallet.
+  const data = beginCell()
+    .storeCoins(0) // balance
+    .storeAddress(owner)
+    .storeAddress(minter)
+    .endCell();
+
+  // (KO) stateInit 객체는 코드와 데이터를 포함합니다.
+  // (EN) The stateInit object contains the code and data.
+  const stateInit = {
+    code: walletCode,
+    data: data,
+  };
+
+  // (KO) workchain 0에서 컨트랙트 주소를 계산합니다.
+  // (EN) Calculate the contract address on workchain 0.
+  const jettonWalletAddress = contractAddress(0, stateInit);
+
+  return jettonWalletAddress;
+}
 
 /**
  * (KO) 블록체인 관련 유틸리티 함수 모음
@@ -20,24 +58,28 @@ export function createJettonTransferPayload(
   toAddress,
   responseAddress
 ) {
-  // (KO) 이 함수는 이제 순수하게 데이터 변환 책임만 가집니다.
-  // (EN) This function now purely holds the responsibility for data transformation.
-  const forwardPayload = beginCell()
-    .storeUint(0, 32) // (KO) 텍스트 주석을 위한 op-code (EN) op-code for a text comment
-    .storeStringTail('Bet')
-    .endCell();
+  try {
+    const payload = beginCell()
+      .storeUint(0x0f8a7ea5, 32) // (KO) Jetton 전송 op-code (EN) op-code for jetton transfer
+      .storeUint(0, 64) // (KO) query_id (EN) query_id
+      .storeCoins(toNano(jettonAmount)) // (KO) 전송할 Jetton 양 (EN) amount of Jettons to send
+      .storeAddress(Address.parse(toAddress)) // (KO) 수신자 주소 (EN) recipient address
+      .storeAddress(Address.parse(responseAddress)) // (KO) 응답 주소 (EN) response address
+      .storeBit(false) // (KO) 커스텀 페이로드 없음 (EN) no custom payload
+      .storeCoins(0) // (KO) 포워딩할 TON 없음 (EN) no TON to forward
+      .storeBit(false) // (KO) 포워드 페이로드 없음 (EN) no forward payload
+      .endCell();
 
-  return beginCell()
-    .storeUint(0x0f8a7ea5, 32) // (KO) Jetton 전송 op-code (EN) op-code for jetton transfer
-    .storeUint(0, 64) // (KO) query_id (EN) query_id
-    .storeCoins(toNano(jettonAmount))
-    .storeAddress(Address.parse(toAddress))
-    .storeAddress(Address.parse(responseAddress))
-    .storeBit(false) // (KO) 커스텀 페이로드 없음 (EN) no custom payload
-    .storeCoins(toNano('0.01')) // (KO) 포워딩 수수료 (EN) forward fee
-    .storeBit(true) // (KO) 포워드 페이로드 포함 (EN) forward payload included
-    .storeRef(forwardPayload)
-    .endCell();
+    if (!payload) {
+      throw new Error('Payload serialization failed');
+    }
+
+    return payload;
+  } catch (error) {
+    console.error('[KO] Jetton 전송 메시지 생성 오류:', error);
+    console.error('[EN] Jetton transfer message creation error:', error);
+    throw error;
+  }
 }
 
 /**
@@ -53,20 +95,40 @@ export function createSpinTransaction(
   betAmount,
   userWalletAddress
 ) {
-  const transferPayload = createJettonTransferPayload(
-    betAmount.toString(),
-    GAME_WALLET_ADDRESS,
-    userWalletAddress
-  );
+  try {
+    // (KO) 입력값 검증 로직을 리팩토링합니다.
+    // (EN) Refactor input validation logic.
+    if (!Address.isValid(GAME_WALLET_ADDRESS)) {
+      throw new Error(`Invalid GAME_WALLET_ADDRESS: ${GAME_WALLET_ADDRESS}`);
+    }
+    if (!Address.isValid(userWalletAddress)) {
+      throw new Error(`Invalid userWalletAddress: ${userWalletAddress}`);
+    }
+    if (typeof betAmount !== 'number' || betAmount <= 0 || betAmount > 1000000) {
+      throw new Error(`Invalid betAmount: ${betAmount}`);
+    }
 
-  return {
-    validUntil: Math.floor(Date.now() / 1000) + 600,
-    messages: [
-      {
-        address: jettonWalletAddress,
-        amount: toNano('0.05').toString(), // (KO) 가스비 (EN) Gas fee
-        payload: transferPayload.toBoc().toString('base64'),
-      },
-    ],
-  };
+    const transferPayload = createJettonTransferPayload(
+      betAmount.toString(),
+      GAME_WALLET_ADDRESS,
+      userWalletAddress
+    );
+
+    return {
+      validUntil: Math.floor(Date.now() / 1000) + 600,
+      messages: [
+        {
+          address: jettonWalletAddress,
+          amount: toNano('0.05').toString(), // (KO) 가스비 (EN) Gas fee
+          payload: transferPayload.toBoc().toString('base64'),
+        },
+      ],
+    };
+  } catch (err) {
+    // (KO) 오류 발생 시 상세 로그 출력
+    // (EN) Log detailed error information
+    console.error('[KO] 스핀 트랜잭션 생성 오류:', err.message);
+    console.error('[EN] Spin transaction creation error:', err.message);
+    throw err;
+  }
 }

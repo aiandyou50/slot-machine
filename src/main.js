@@ -4,13 +4,15 @@ window.Buffer = Buffer;
 import './style.css';
 import { TonConnectUI } from '@tonconnect/ui';
 import {
-  getJettonWalletAddress,
   callCommitApi,
   callRevealApi,
   callClaimApi,
   callDoubleUpApi,
 } from './services/api.js';
-import { createSpinTransaction } from './services/blockchain.js';
+import {
+  createSpinTransaction,
+  calculateJettonWalletAddress,
+} from './services/blockchain.js';
 
 // (KO) English and (KO) Korean comments are mandatory.
 
@@ -162,8 +164,20 @@ async function handleSpin() {
     const clientSeed = crypto.randomUUID();
 
     showMessage('creating_transaction_message');
-    const jettonWalletAddress = await getJettonWalletAddress(walletInfo.account.address);
-    const transaction = createSpinTransaction(jettonWalletAddress, currentBet, walletInfo.account.address);
+    // (KO) 클라이언트 측에서 Jetton 지갑 주소를 직접 계산합니다. API 호출이 필요 없습니다.
+    // (EN) Calculate the Jetton wallet address directly on the client-side. No API call needed.
+    const jettonMinterAddress =
+      'EQBZ6nHfmT2wct9d4MoOdNPzhtUGXOds1y3NTmYUFHAA3uvV'; // (KO) CSPIN 토큰 컨트랙트 주소 (EN) CSPIN Token Contract Address
+    const userJettonWalletAddress = calculateJettonWalletAddress(
+      walletInfo.account.address,
+      jettonMinterAddress
+    );
+
+    const transaction = createSpinTransaction(
+      userJettonWalletAddress.toString(),
+      currentBet,
+      walletInfo.account.address
+    );
 
     showMessage('confirm_transaction_message');
     const sentTransaction = await tonConnectUI.sendTransaction(transaction);
@@ -257,7 +271,9 @@ async function main() {
   versionDisplay.textContent = `v${import.meta.env.VITE_APP_VERSION}`;
 
   tonConnectUI = new TonConnectUI({
-    manifestUrl: '/tonconnect-manifest.json',
+    // (KO) TON Wallet 연결 오류 해결: manifestUrl을 절대 경로로 지정
+    // (EN) Fix TON Wallet connection error: use absolute manifestUrl
+    manifestUrl: 'https://aiandyou.me/tonconnect-manifest.json',
     buttonRootId: 'ton-connect-button',
   });
 

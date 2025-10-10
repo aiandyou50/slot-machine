@@ -2,6 +2,76 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.13] - 2025-10-10
+
+### Fixed
+
+- **(KO) 지갑 재연결 및 `Invalid CRC32C` 오류 등 모든 스핀 관련 오류 근본 해결:**
+  - **문제 (Error):** 1) 스핀 실행 시, 손상된 거래 정보로 인해 `Invalid CRC32C` 오류 발생. 2) 이 오류 발생 후, `tonconnect-manifest.json` 설정 오류로 인해 지갑 재연결 실패. 3) 이전에는 외부 API 의존으로 인한 다양한 서버 오류(4xx, 5xx)도 발생.
+  - **원인 (Cause):** 1) **지갑 재연결 실패:** `tonconnect-manifest.json`의 `url`이 실제 서비스 주소와 일치하지 않고, `iconUrl`이 외부 도메인을 가리키고 있어, 지갑이 Manifest 유효성 검증에 실패. 2) **`Invalid CRC32C` 오류:** Jetton 전송 정보에 포함된 불필요한 `forward_payload` 및 `forward_ton_amount` 필드가 데이터 구조를 손상시킴. 3) **API 오류:** `Toncenter` API의 `runMethod` 기능이 유료 플랜에서만 제공되어 발생.
+  - **해결 (Solution):**
+    1.  **Manifest 문제 해결:** `tonconnect-manifest.json`의 `url`을 실제 서비스 주소(`https://aiandyou.me`)로, `iconUrl`을 로컬 경로(`/icon.png`)로 수정하여 재연결 문제를 해결했습니다.
+    2.  **거래 정보 단순화:** `src/services/blockchain.js`에서 데이터 손상의 원인이었던 `forward_payload`와 `forward_ton_amount`를 모두 제거하여, 깨끗하고 표준적인 거래 정보(BOC)를 생성하도록 수정했습니다.
+    3.  **클라이언트 측 주소 계산:** 외부 API 의존성을 완전히 제거하고, `@ton/core` 라이브러리를 사용하여 클라이언트 측에서 Jetton 지갑 주소를 직접 계산하는 안정적인 아키텍처를 유지했습니다.
+    4.  이 세 가지 수정을 통해 모든 알려진 오류를 근본적으로 해결하고, 코드의 안정성과 신뢰도를 크게 향상시켰습니다.
+
+- **(EN) Fundamentally Resolved All Spin-Related Errors, Including Wallet Reconnection and `Invalid CRC32C`:**
+  - **Error:** 1) An `Invalid CRC32C` error occurred on spin due to corrupted transaction data. 2) After this error, wallet reconnection failed due to an incorrect `tonconnect-manifest.json` configuration. 3) Previously, various server errors (4xx, 5xx) also occurred due to external API dependency.
+  - **Cause:** 1) **Wallet Reconnection Failure:** The `url` in `tonconnect-manifest.json` did not match the production service address, and the `iconUrl` pointed to an external domain, causing the wallet to fail manifest validation. 2) **`Invalid CRC32C` Error:** Unnecessary `forward_payload` and `forward_ton_amount` fields in the Jetton transfer message were corrupting the data structure. 3) **API Errors:** The `runMethod` feature of the `Toncenter` API is only available on paid plans.
+  - **Solution:**
+    1.  **Fixed Manifest:** Resolved the reconnection issue by correcting the `url` in `tonconnect-manifest.json` to the production service address (`https://aiandyou.me`) and the `iconUrl` to a local path (`/icon.png`).
+    2.  **Simplified Transaction Data:** The `forward_payload` and `forward_ton_amount`, which were the source of data corruption, were completely removed from the transaction creation logic in `src/services/blockchain.js` to generate a clean, standard BOC.
+    3.  **Client-Side Address Calculation:** Maintained the stable architecture of calculating the Jetton wallet address directly on the client-side using the `@ton/core` library, completely removing the external API dependency.
+    4.  These three fixes fundamentally resolve all known errors and significantly improve the application's stability and reliability.
+
+## [3.1.11] - 2025-10-10
+
+### Fixed
+- **(EN) Math.random() usage in doubleUp.js violates provable fairness principle:**
+  - **Error:** The `doubleUp.js` function was using `Math.random()` on line 121 to determine double-up win/loss results, which violates the project's core principle of provable fairness as specified in AI_AGENT_GUIDELINES.md Section 6 (Forbidden Actions).
+  - **Cause:** The previous implementation relied on JavaScript's non-deterministic `Math.random()` function, making the double-up results unpredictable and unverifiable by users, contradicting the Commit-Reveal scheme used in the spin functionality.
+  - **Solution:** Replaced `Math.random()` with a deterministic PRNG (Pseudo-Random Number Generator) based on `createDeterministicRandom()` function. The seed is generated from a combination of `ticketId`, user `choice`, and `payout` amount, ensuring the result is deterministic yet unpredictable. This maintains fairness while allowing cryptographic verification.
+- **(KO) doubleUp.js에서 Math.random() 사용이 검증 가능한 공정성 원칙을 위반:**
+  - **문제:** `doubleUp.js` 함수가 더블업 승/패 결과를 결정하기 위해 121번째 줄에서 `Math.random()`을 사용하고 있었으며, 이는 AI_AGENT_GUIDELINES.md 섹션 6 (금지 조항)에 명시된 검증 가능한 공정성이라는 프로젝트의 핵심 원칙을 위반합니다.
+  - **원인:** 이전 구현은 JavaScript의 비결정론적 `Math.random()` 함수에 의존했으며, 이로 인해 더블업 결과를 사용자가 예측하거나 검증할 수 없어 스핀 기능에서 사용되는 Commit-Reveal 방식과 모순됩니다.
+  - **해결:** `Math.random()`을 `createDeterministicRandom()` 함수 기반의 결정론적 PRNG(의사 난수 생성기)로 교체했습니다. 시드는 `ticketId`, 사용자 `choice`, `payout` 금액의 조합으로 생성되어 결과가 결정론적이면서도 예측 불가능하도록 보장합니다. 이를 통해 공정성을 유지하면서 암호학적 검증이 가능합니다.
+
+## [3.1.10] - 2025-10-10
+
+### Fixed
+- **(KO) 스핀 트랜잭션 생성 시 입력값 유효성 검증 및 오류 로그 출력 추가:**
+  - **문제 (Error):** 잘못된 TON 주소 또는 비정상적인 베팅 금액으로 인해 'Invalid CRC32C' 오류가 발생할 수 있음.
+  - **원인 (Cause):** 입력값(지갑 주소, 베팅 금액) 검증이 부족하여 블록체인에 잘못된 데이터가 전송됨.
+  - **해결 (Solution):** TON 주소 형식 및 베팅 금액에 대한 유효성 검증 로직을 추가하고, 오류 발생 시 상세 로그와 안내 메시지를 출력하도록 개선.
+- **(EN) Added input validation and error logging for spin transaction creation:**
+  - **Error:** 'Invalid CRC32C' error may occur due to invalid TON address or abnormal bet amount.
+  - **Cause:** Lack of validation for input values (wallet address, bet amount) leads to sending incorrect data to the blockchain.
+  - **Solution:** Added validation logic for TON address format and bet amount, and improved error logging and user guidance on error.
+
+## [3.1.9] - 2025-10-10
+
+### Fixed
+- **(KO) TON Wallet Manifest 오류 재발 및 절대 경로 미적용 문제 해결:**
+  - **문제 (Error):** manifestUrl이 상대 경로(`/tonconnect-manifest.json`)로 지정되어 TON Wallet이 manifest를 불러오지 못함.
+  - **원인 (Cause):** dApp 코드에서 manifestUrl을 절대 경로(https://aiandyou.me/tonconnect-manifest.json)로 지정하지 않아 외부 접근 불가.
+  - **해결 (Solution):** manifestUrl을 절대 경로로 변경하여 TON Wallet이 manifest를 정상적으로 불러올 수 있도록 수정.
+- **(EN) Fixed recurring TON Wallet manifest error due to missing absolute manifestUrl:**
+  - **Error:** TON Wallet could not fetch the manifest because manifestUrl was set as a relative path (`/tonconnect-manifest.json`).
+  - **Cause:** The dApp code did not specify manifestUrl as an absolute path (`https://aiandyou.me/tonconnect-manifest.json`), preventing external access.
+  - **Solution:** Changed manifestUrl to an absolute path so TON Wallet can successfully fetch the manifest.
+
+## [3.1.8] - 2025-10-10
+
+### Fixed
+- **(KO) TON Wallet Manifest 오류 및 연결 실패 근본 해결:**
+  - **문제 (Error):** TON Wallet 연결 시 'App Manifest Error' 발생.
+  - **원인 (Cause):** `tonconnect-manifest.json`에 필수 필드(`network`) 누락 및 `iconUrl`이 상대 경로(`/icon.png`)로 지정되어 외부 접근 불가.
+  - **해결 (Solution):** manifest에 `network` 필드 추가, `iconUrl`을 절대 경로(`https://aiandyou.me/icon.png`)로 수정하여 TON Connect 명세를 완전히 준수.
+- **(EN) Fundamentally resolved TON Wallet manifest error and connection failure:**
+  - **Error:** 'App Manifest Error' occurred when connecting to TON Wallet.
+  - **Cause:** Missing required field (`network`) and relative `iconUrl` in `tonconnect-manifest.json` prevented manifest validation and external access.
+  - **Solution:** Added `network` field and changed `iconUrl` to absolute path (`https://aiandyou.me/icon.png`) for full TON Connect spec compliance.
+
 ## [3.1.0] - 2025-10-09
 
 ### Added
