@@ -221,7 +221,7 @@ AI 에이전트는 다음 행동을 절대 수행해서는 안 됩니다.
       - (KO) 관련 문서(`PROJECT_ARCHITECTURE.MD`, `CHANGELOG.md` 등)의 업데이트가 없는 기능 코드 변경 PR은 절대 생성해서는 안 됩니다.
       - (EN) Never create a PR with feature code changes without corresponding updates to the relevant documentation (e.g., `PROJECT_ARCHITECTURE.MD`, `CHANGELOG.md`).
 
-## 1.4. UI/UX 원칙 (UI/UX Principles)
+## 7\. 프론트엔드 UI/UX 원칙 (UI/UX Principles)
 
 - (KO) 모든 프론트엔드 페이지에는 사용자가 현재 버전을 확인할 수 있는 버전 표시 기능이 포함되어야 한다. 버전 정보는 package.json의 버전을 동적으로 참조하여 표시해야 한다.
 - (EN) All frontend pages must include a version display feature so users can check the current version. The version info must be dynamically referenced from package.json.
