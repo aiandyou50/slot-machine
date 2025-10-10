@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.12] - 2025-10-10
+
+### Fixed
+- **(EN) Fixed Vite build error by splitting Jetton Wallet code BOC into multiple lines. Jetton transfer payload logic refactored to strictly follow standard, resolving CRC32C error.**
+- **(KO) Jetton Wallet 코드 BOC를 여러 줄로 분할하여 Vite 빌드 오류를 해결. Jetton 트랜스퍼 페이로드 로직을 표준에 맞게 리팩터링하여 CRC32C 오류 수정.**
+
 ## [3.1.11] - 2025-10-10
 
 ### Fixed
