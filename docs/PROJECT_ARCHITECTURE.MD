@@ -286,3 +286,5 @@ sequenceDiagram
   - **[ADR-001](https://www.google.com/search?q=./adr/20251008-modernize-ton-library-stack.md):** `tonweb` 라이브러리를 제거하고 최신 `@ton/core` 및 `@ton/ton`으로 전환. (EN: Replaced `tonweb` with modern `@ton/core` and `@ton/ton` libraries.)
   - **[ADR-002](https://www.google.com/search?q=./adr/20251008-backend-rpc-proxy-for-get-methods.md):** 클라이언트 측 RPC 호출의 안정성 문제를 해결하기 위해 백엔드 프록시 패턴 도입. (EN: Introduced a backend proxy pattern to resolve client-side RPC call instability.)
   - **[ADR-003](https://www.google.com/search?q=./adr/20251008-hybrid-dependency-model-for-tonconnect-ui.md):** `@tonconnect/ui`의 렌더링 안정성을 위해 CDN 기반 하이브리드 의존성 모델 채택. (EN: Adopted a hybrid CDN-based dependency model for `@tonconnect/ui` rendering stability.)
+
+    - **[ADR-004](./adr/20251010-spin-tx-validation-and-error-logging.md):** (KO) 스핀 트랜잭션 입력값 검증 및 오류 로깅 로직 도입. (EN) Introduced validation logic and error logging for spin transaction creation.
