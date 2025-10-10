@@ -4,6 +4,36 @@ import { SignJWT, jwtVerify } from 'jose';
 // (EN) Constant for the maximum number of double-ups.
 const MAX_DOUBLE_UP = 5;
 
+/**
+ * (KO) 시드 기반의 결정론적 난수 생성기(PRNG)
+ * (EN) A deterministic Pseudo-Random Number Generator (PRNG) based on a seed.
+ * @param {string} seed - 난수 생성을 위한 시드
+ * @returns {() => number} 0과 1 사이의 부동 소수점을 반환하는 함수
+ */
+function createDeterministicRandom(seed) {
+  let h = 1779033703,
+    u = 3735928559,
+    v = 2891695549,
+    w = 1025202367;
+  for (let i = 0, k; i < seed.length; i++) {
+    k = seed.charCodeAt(i);
+    h = (h ^ k) * 16777619;
+    u = (u ^ k) * 16777619;
+    v = (v ^ k) * 16777619;
+    w = (w ^ k) * 16777619;
+  }
+  return function () {
+    h = (h ^ (h << 13)) | 0;
+    h = h >>> 17;
+    h = (h ^ (h << 5)) | 0;
+    u = (u + v) | 0;
+    v = (v + w) | 0;
+    w = (w + h) | 0;
+    h = (h + u) | 0;
+    return (h >>> 0) / 4294967296;
+  };
+}
+
 export async function onRequestPost(context) {
   try {
     const { request, env } = context;
@@ -116,9 +146,13 @@ export async function onRequestPost(context) {
     // (EN) Mark the previous ticket as used (the old ticket is invalidated regardless of success or failure)
     await env.USED_TICKETS.put(ticketId, 'true', { expirationTtl: 3600 });
 
-    // (KO) 50% 확률로 더블업 성공/실패 결정
-    // (EN) Determine double-up success/failure with 50% probability
-    const isWin = Math.random() < 0.5;
+    // (KO) 50% 확률로 더블업 성공/실패 결정 (시드 기반 결정론적 방식)
+    // (EN) Determine double-up success/failure with 50% probability (deterministic seed-based approach)
+    // (KO) ticketId와 choice를 결합하여 결정론적이면서도 예측 불가능한 결과 생성
+    // (EN) Combine ticketId and choice to generate deterministic yet unpredictable result
+    const doubleUpSeed = `${ticketId}-${choice}-${payload.payout}`;
+    const random = createDeterministicRandom(doubleUpSeed);
+    const isWin = random() < 0.5;
 
     if (isWin) {
       const newPayout = payload.payout * 2;
