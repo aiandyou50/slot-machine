@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.10] - 2025-10-10
+
+### Fixed
+- **(KO) 스핀 트랜잭션 생성 시 입력값 유효성 검증 및 오류 로그 출력 추가:**
+  - **문제 (Error):** 잘못된 TON 주소 또는 비정상적인 베팅 금액으로 인해 'Invalid CRC32C' 오류가 발생할 수 있음.
+  - **원인 (Cause):** 입력값(지갑 주소, 베팅 금액) 검증이 부족하여 블록체인에 잘못된 데이터가 전송됨.
+  - **해결 (Solution):** TON 주소 형식 및 베팅 금액에 대한 유효성 검증 로직을 추가하고, 오류 발생 시 상세 로그와 안내 메시지를 출력하도록 개선.
+- **(EN) Added input validation and error logging for spin transaction creation:**
+  - **Error:** 'Invalid CRC32C' error may occur due to invalid TON address or abnormal bet amount.
+  - **Cause:** Lack of validation for input values (wallet address, bet amount) leads to sending incorrect data to the blockchain.
+  - **Solution:** Added validation logic for TON address format and bet amount, and improved error logging and user guidance on error.
+
 ## [3.1.9] - 2025-10-10
 
 ### Fixed

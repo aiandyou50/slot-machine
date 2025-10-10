@@ -87,20 +87,46 @@ export function createSpinTransaction(
   betAmount,
   userWalletAddress
 ) {
-  const transferPayload = createJettonTransferPayload(
-    betAmount.toString(),
-    GAME_WALLET_ADDRESS,
-    userWalletAddress
-  );
+  // (KO) 입력값 유효성 검증: TON 주소 형식 및 베팅 금액 체크
+  // (EN) Input validation: TON address format and bet amount check
+  try {
+    if (!Address.isValid(GAME_WALLET_ADDRESS)) {
+      console.error('[KO] GAME_WALLET_ADDRESS가 유효하지 않습니다.', GAME_WALLET_ADDRESS);
+      console.error('[EN] GAME_WALLET_ADDRESS is invalid.', GAME_WALLET_ADDRESS);
+      throw new Error('Invalid GAME_WALLET_ADDRESS');
+    }
+    if (!Address.isValid(userWalletAddress)) {
+      console.error('[KO] userWalletAddress가 유효하지 않습니다.', userWalletAddress);
+      console.error('[EN] userWalletAddress is invalid.', userWalletAddress);
+      throw new Error('Invalid userWalletAddress');
+    }
+    if (typeof betAmount !== 'number' || betAmount <= 0 || betAmount > 1000000) {
+      console.error('[KO] betAmount 값이 비정상적입니다:', betAmount);
+      console.error('[EN] betAmount value is abnormal:', betAmount);
+      throw new Error('Invalid betAmount');
+    }
 
-  return {
-    validUntil: Math.floor(Date.now() / 1000) + 600,
-    messages: [
-      {
-        address: jettonWalletAddress,
-        amount: toNano('0.05').toString(), // (KO) 가스비 (EN) Gas fee
-        payload: transferPayload.toBoc().toString('base64'),
-      },
-    ],
-  };
+    const transferPayload = createJettonTransferPayload(
+      betAmount.toString(),
+      GAME_WALLET_ADDRESS,
+      userWalletAddress
+    );
+
+    return {
+      validUntil: Math.floor(Date.now() / 1000) + 600,
+      messages: [
+        {
+          address: jettonWalletAddress,
+          amount: toNano('0.05').toString(), // (KO) 가스비 (EN) Gas fee
+          payload: transferPayload.toBoc().toString('base64'),
+        },
+      ],
+    };
+  } catch (err) {
+    // (KO) 오류 발생 시 상세 로그 출력 및 사용자 안내
+    // (EN) Detailed error logging and user guidance on error
+    console.error('[KO] 스핀 트랜잭션 생성 오류:', err);
+    console.error('[EN] Spin transaction creation error:', err);
+    throw err;
+  }
 }
