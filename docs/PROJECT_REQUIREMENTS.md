@@ -153,6 +153,12 @@
     - (KO) 새로운 ADR의 작성 및 기존 ADR의 상태 변경은 **반드시 팀의 논의를 거쳐야 하며, 관련 Pull Request에 해당 ADR이 링크**되어야 한다.
     - (EN) The creation of a new ADR or a status change to an existing one **must be discussed by the team and linked in the relevant Pull Request**.
 
+  ## [2025-10-10] Spin 트랜잭션 입력값 검증 및 오류 로깅 요구사항
+  - (KO) TON 주소 형식 및 베팅 금액에 대한 입력값 검증이 필수적이어야 한다.
+  - (EN) Input validation for TON address format and bet amount must be mandatory.
+  - (KO) 오류 발생 시 상세 로그와 사용자 안내 메시지를 제공해야 한다.
+  - (EN) Detailed error logs and user-facing error messages must be provided on failure.
+
 - **NFR-UI-01: 시각적 테마 (Visual Theme)**
   애플리케이션은 "Cosmic Gemstone" 테마를 가지며, 네온 스타일 UI 요소와 동적인 별 배경 효과를 포함해야 한다.
 
