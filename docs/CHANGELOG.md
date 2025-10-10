@@ -2,13 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.1.6] - 2025-10-10
+## [3.1.7] - 2025-10-10
 
 ### Fixed
 
 - **(KO) 지갑 재연결 및 `Invalid CRC32C` 오류 등 모든 스핀 관련 오류 근본 해결:**
   - **문제 (Error):** 1) 스핀 실행 시, 손상된 거래 정보로 인해 `Invalid CRC32C` 오류 발생. 2) 이 오류 발생 후, `tonconnect-manifest.json` 설정 오류로 인해 지갑 재연결 실패. 3) 이전에는 외부 API 의존으로 인한 다양한 서버 오류(4xx, 5xx)도 발생.
-  - **원인 (Cause):** 1) **지갑 재연결 실패:** `tonconnect-manifest.json`의 `url`이 로컬 주소(`localhost`)로 되어 있고, `iconUrl`이 외부 도메인을 가리키고 있어, 실제 서비스 환경에서 지갑이 Manifest 유효성 검증에 실패. 2) **`Invalid CRC32C` 오류:** Jetton 전송 정보에 포함된 불필요한 `forward_payload` 및 `forward_ton_amount` 필드가 데이터 구조를 손상시킴. 3) **API 오류:** `Toncenter` API의 `runMethod` 기능이 유료 플랜에서만 제공되어 발생.
+  - **원인 (Cause):** 1) **지갑 재연결 실패:** `tonconnect-manifest.json`의 `url`이 실제 서비스 주소와 일치하지 않거나, `iconUrl`이 외부 도메인을 가리키고 있어, 지갑이 Manifest 유효성 검증에 실패. 2) **`Invalid CRC32C` 오류:** Jetton 전송 정보에 포함된 불필요한 `forward_payload` 및 `forward_ton_amount` 필드가 데이터 구조를 손상시킴. 3) **API 오류:** `Toncenter` API의 `runMethod` 기능이 유료 플랜에서만 제공되어 발생.
   - **해결 (Solution):**
     1.  **Manifest 문제 해결:** `tonconnect-manifest.json`의 `url`을 실제 서비스 주소(`https://aiandyou.me`)로, `iconUrl`을 로컬 경로(`/icon.png`)로 수정하여 재연결 문제를 해결했습니다.
     2.  **거래 정보 단순화:** `src/services/blockchain.js`에서 데이터 손상의 원인이었던 `forward_payload`와 `forward_ton_amount`를 모두 제거하여, 깨끗하고 표준적인 거래 정보(BOC)를 생성하도록 수정했습니다.
@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file.
 
 - **(EN) Fundamentally Resolved All Spin-Related Errors, Including Wallet Reconnection and `Invalid CRC32C`:**
   - **Error:** 1) An `Invalid CRC32C` error occurred on spin due to corrupted transaction data. 2) After this error, wallet reconnection failed due to an incorrect `tonconnect-manifest.json` configuration. 3) Previously, various server errors (4xx, 5xx) also occurred due to external API dependency.
-  - **Cause:** 1) **Wallet Reconnection Failure:** The `url` in `tonconnect-manifest.json` was set to a local address (`localhost`) and the `iconUrl` pointed to an external domain, causing the wallet to fail manifest validation in the production environment. 2) **`Invalid CRC32C` Error:** Unnecessary `forward_payload` and `forward_ton_amount` fields in the Jetton transfer message were corrupting the data structure. 3) **API Errors:** The `runMethod` feature of the `Toncenter` API is only available on paid plans.
+  - **Cause:** 1) **Wallet Reconnection Failure:** The `url` in `tonconnect-manifest.json` did not match the production service address, and/or the `iconUrl` pointed to an external domain, causing the wallet to fail manifest validation. 2) **`Invalid CRC32C` Error:** Unnecessary `forward_payload` and `forward_ton_amount` fields in the Jetton transfer message were corrupting the data structure. 3) **API Errors:** The `runMethod` feature of the `Toncenter` API is only available on paid plans.
   - **Solution:**
     1.  **Fixed Manifest:** Resolved the reconnection issue by correcting the `url` in `tonconnect-manifest.json` to the production service address (`https://aiandyou.me`) and the `iconUrl` to a local path (`/icon.png`).
     2.  **Simplified Transaction Data:** The `forward_payload` and `forward_ton_amount`, which were the source of data corruption, were completely removed from the transaction creation logic in `src/services/blockchain.js` to generate a clean, standard BOC.
