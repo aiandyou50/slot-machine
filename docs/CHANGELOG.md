@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.9] - 2025-10-10
+
+### Fixed
+- **(KO) TON Wallet Manifest 오류 재발 및 절대 경로 미적용 문제 해결:**
+  - **문제 (Error):** manifestUrl이 상대 경로(`/tonconnect-manifest.json`)로 지정되어 TON Wallet이 manifest를 불러오지 못함.
+  - **원인 (Cause):** dApp 코드에서 manifestUrl을 절대 경로(https://aiandyou.me/tonconnect-manifest.json)로 지정하지 않아 외부 접근 불가.
+  - **해결 (Solution):** manifestUrl을 절대 경로로 변경하여 TON Wallet이 manifest를 정상적으로 불러올 수 있도록 수정.
+- **(EN) Fixed recurring TON Wallet manifest error due to missing absolute manifestUrl:**
+  - **Error:** TON Wallet could not fetch the manifest because manifestUrl was set as a relative path (`/tonconnect-manifest.json`).
+  - **Cause:** The dApp code did not specify manifestUrl as an absolute path (`https://aiandyou.me/tonconnect-manifest.json`), preventing external access.
+  - **Solution:** Changed manifestUrl to an absolute path so TON Wallet can successfully fetch the manifest.
+
 ## [3.1.8] - 2025-10-10
 
 ### Fixed

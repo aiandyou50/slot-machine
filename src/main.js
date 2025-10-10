@@ -271,7 +271,9 @@ async function main() {
   versionDisplay.textContent = `v${import.meta.env.VITE_APP_VERSION}`;
 
   tonConnectUI = new TonConnectUI({
-    manifestUrl: '/tonconnect-manifest.json',
+    // (KO) TON Wallet 연결 오류 해결: manifestUrl을 절대 경로로 지정
+    // (EN) Fix TON Wallet connection error: use absolute manifestUrl
+    manifestUrl: 'https://aiandyou.me/tonconnect-manifest.json',
     buttonRootId: 'ton-connect-button',
   });
 
