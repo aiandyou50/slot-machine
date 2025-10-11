@@ -1,5 +1,4 @@
 import { Address, toNano, beginCell, contractAddress, Cell } from '@ton/core';
-import JETTON_WALLET_CODE_BOC from '../contract/jetton-wallet-code.txt?raw';
 
 /**
  * (KO) 사용자의 Jetton 지갑 주소를 클라이언트 측에서 직접 계산합니다.
@@ -12,7 +11,6 @@ export function calculateJettonWalletAddress(ownerAddress, jettonMinterAddress) 
   const owner = Address.parse(ownerAddress);
   const minter = Address.parse(jettonMinterAddress);
 
-<<<<<<< HEAD
 // (KO) 표준 Jetton 지갑의 코드 셀입니다.
 // (EN) The code cell for a standard Jetton wallet.
 const JETTON_WALLET_CODE_BOC =
@@ -20,11 +18,6 @@ const JETTON_WALLET_CODE_BOC =
   '6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj6An9oA4A4Y+gD6APoA+gAwE+gL4PpA+gJ9AQn6AvhY+gJ/aA+gL4CfgW+gL4WPoCf2gPoC+En4FvoC+Fj';
 
   const walletCode = Cell.fromBase64(JETTON_WALLET_CODE_BOC);
-=======
-  // (KO) 표준 Jetton 지갑의 코드 셀을 가져옵니다.
-  // (EN) Get the code cell for a standard Jetton wallet.
-  const walletCode = Cell.fromBase64(JETTON_WALLET_CODE_BOC.trim());
->>>>>>> 51e7e4273b85d9f139be292c0872379e4b88d685
 
   // (KO) Jetton 지갑의 초기 데이터 셀을 구성합니다.
   // (EN) Construct the initial data cell for the Jetton wallet.
@@ -141,8 +134,4 @@ export function createSpinTransaction(
     console.error('[EN] Spin transaction creation error:', err.message);
     throw err;
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 51e7e4273b85d9f139be292c0872379e4b88d685
