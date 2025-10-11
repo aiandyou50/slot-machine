@@ -38,6 +38,27 @@ priority_sections:
 
 현재 P2 우선순위 이슈 없음.
 
+## 2.4. Newly reported issues (Pending triage)
+
+- **(KO) [BUG-005] `Invalid magic` 오류 - Spin 트랜잭션/핸들러 실행 실패 (P1 - High)**
+  - **문제 (Error, KO):** 스핀 버튼 클릭 시 클라이언트가 외부 핸들러(tg://...)를 실행하며 `Invalid magic` 오류가 발생하고 스핀/트랜잭션이 정상 처리되지 않음.
+    - **콘솔 로그(요약):** Launched external handler for 'tg://resolve?...--22manifestUrl--22--3A--22https--3A--2F--2Faiandyou--2Eme--2Ftonconnect--2Dmanifest--2Ejson--22...'
+  - **Error (EN):** Clicking Spin launches an external handler (tg://...) and the flow fails with `Invalid magic`, preventing transaction reveal/reconciliation.
+  - **재현 단계 (Reproduction):**
+    1. 브라우저에서 게임 접속 및 지갑 연결
+    2. 게임 화면에서 'Spin' 버튼 클릭
+    3. 외부 핸들러 호출이 발생하고 콘솔에 `Invalid magic` 메시지 출력
+  - **초기 원인 가설 (Initial Cause Hypothesis):**
+    - BOC 또는 트랜잭션 페이로드가 잘못 생성되었거나, `tonconnect` 매니페스트/URL 구성(또는 manifestUrl에 대한 접근성)이 잘못되어 Wallet 측에서 핸들러 실행 시 유효성 검증 실패로 이어짐.
+  - **영향도 (Impact):** Spin 플로우 중단(결제/리빌/보상 미발생), 사용자 경험 심각도 중상.
+  - **다음 조치(우선순위):**
+    1. 브라우저 콘솔의 전체 로그와 외부 핸들러로 전달되는 deep-link(가능하면 전체 문자열)를 확보
+    2. `src/services/blockchain.js`의 BOC/트랜잭션 생성 로직과 인코딩 점검
+    3. `public/tonconnect-manifest.json`의 `url`, `iconUrl`, `manifestUrl` 접근성 확인 및 CORS/HTTPS 유효성 검증
+    4. 실패 시 사용자에게 표시할 명확한 오류 메시지(한/영) 추가
+  - **담당자:** TBD
+  - **비고:** 이 이슈는 Active Issues에 등록되었으며, Human이 우선 조사/우선순위 지정 후 Phase-2(구현)를 지시해야 합니다.
+
 ---
 
 # 3. 기능 요구사항 (Functional Requirements)
