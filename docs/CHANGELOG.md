@@ -21,21 +21,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- **(KO) [BUG-005] `Invalid magic` 오류로 인한 Spin 처리 실패:**
+- **(KO) [BUG-005] `Invalid magic` 오류의 근본 원인 해결:**
   - **문제 (Error):** 스핀 버튼 클릭 시 `Invalid magic` 오류가 발생하며 트랜잭션이 실패했습니다. (`src/services/blockchain.js`)
-  - **원인 (Cause):** Jetton 전송 페이로드(BOC) 생성 시, 비어있는 `forward_payload` 필드를 잘못 직렬화했습니다. TON 표준에 따르면 `Either Cell ^Cell` 타입의 빈 값은 `storeBit(0)`이 아니라, `storeBit(1)`과 비어있는 셀 참조(`storeRef(beginCell().endCell())`)로 인코딩해야 합니다. 이 불일치로 인해 지갑이 페이로드를 유효하지 않다고 판단했습니다.
+  - **원인 (Cause):** Jetton 전송 페이로드(BOC) 생성 시, 일부 지갑과의 호환성 문제를 일으키는 불필요한 `forward_ton_amount`와 `forward_payload` 필드가 포함되어 BOC 데이터 구조가 손상되었습니다. 이는 `CHANGELOG.md` v3.1.13에 이미 언급된 문제였으나, 수정이 완전히 반영되지 않았습니다.
   - **해결 (Solution):**
     1. `src/services/blockchain.js`의 `createJettonTransferPayload` 함수를 수정했습니다.
-    2. 비어있는 `forward_payload`를 직렬화하는 코드를 기존 `.storeBit(0)`에서 `.storeBit(1).storeRef(beginCell().endCell())`로 변경하여 TON 표준을 준수하도록 했습니다.
-    3. 이 수정으로 올바른 BOC가 생성되어 `Invalid magic` 오류가 해결되었습니다.
+    2. 데이터 손상의 원인이었던 `forward_ton_amount`와 `forward_payload` 관련 코드를 완전히 제거했습니다.
+    3. `custom_payload`가 비어있음을 나타내는 로직을 `.storeBit(false)`로 변경하여, 가장 단순하고 표준적인 페이로드를 생성하도록 보장했습니다.
 
-- **(EN) [BUG-005] Spin flow failure caused by `Invalid magic`:**
+- **(EN) [BUG-005] Fixed root cause of `Invalid magic` error:**
   - **Error:** The transaction failed with an "Invalid magic" error when the spin button was clicked. (`src/services/blockchain.js`)
-  - **Cause:** The empty `forward_payload` field was incorrectly serialized when creating the Jetton transfer payload (BOC). According to the TON standard, an empty value for the `Either Cell ^Cell` type must be encoded with `.storeBit(1)` and a reference to an empty cell (`.storeRef(beginCell().endCell())`), not just `.storeBit(0)`. This discrepancy caused wallets to deem the payload invalid.
+  - **Cause:** The Jetton transfer payload (BOC) included unnecessary `forward_ton_amount` and `forward_payload` fields, which corrupted the BOC data structure when interacting with certain wallets. This was previously noted in the v3.1.13 `CHANGELOG.md` but not fully implemented.
   - **Solution:**
     1. Modified the `createJettonTransferPayload` function in `src/services/blockchain.js`.
-    2. Changed the serialization for an empty `forward_payload` from `.storeBit(0)` to `.storeBit(1).storeRef(beginCell().endCell())` to comply with the TON standard.
-    3. This correction ensures the generation of a valid BOC, resolving the "Invalid magic" error.
+    2. Completely removed the code related to `forward_ton_amount` and `forward_payload` that was causing the data corruption.
+    3. Changed the logic for the empty `custom_payload` to `.storeBit(false)` to ensure a minimal, standard-compliant payload is generated.
 
 ### Added
 

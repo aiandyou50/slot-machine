@@ -59,20 +59,15 @@ export function createJettonTransferPayload(
   responseAddress
 ) {
   try {
-    // (KO) TON 문서의 표준 Jetton 전송 예시에 따라 페이로드를 정확하게 재구성합니다.
-    // (EN) Reconstruct the payload exactly according to the standard Jetton transfer example in the TON documentation.
+    // (KO) 가장 표준적이고 단순한 Jetton 전송 페이로드로 수정합니다. 불필요한 forward 필드를 제거하여 데이터 손상을 방지합니다.
+    // (EN) Modified to the most standard and simple Jetton transfer payload. Removed unnecessary forward fields to prevent data corruption.
     const payload = beginCell()
-      .storeUint(0x0f8a7ea5, 32) // (KO) Jetton 전송 op-code (EN) op-code for jetton transfer
-      .storeUint(0, 64) // (KO) query_id (EN) query_id
-      .storeCoins(toNano(jettonAmount)) // (KO) 전송할 Jetton 양 (EN) amount of Jettons to send
-      .storeAddress(Address.parse(toAddress)) // (KO) 수신자 주소 (EN) recipient address
-      .storeAddress(Address.parse(responseAddress)) // (KO) 응답 주소 (EN) response address
-      .storeUint(0, 1) // (KO) 커스텀 페이로드 없음 (Maybe ^Cell) (EN) no custom payload (Maybe ^Cell)
-      .storeCoins(toNano('0.05')) // (KO) 포워딩할 TON 양 (EN) forward_ton_amount
-      // (KO) TON 표준에 따라, 비어있는 포워드 페이로드는 Bit(1)과 빈 셀 참조로 인코딩합니다. 이것이 'Invalid magic' 오류를 해결합니다.
-      // (EN) Per TON standard, an empty forward payload is encoded with a Bit(1) and a ref to an empty cell. This fixes the 'Invalid magic' error.
-      .storeBit(1)
-      .storeRef(beginCell().endCell())
+      .storeUint(0x0f8a7ea5, 32) // op-code for jetton transfer
+      .storeUint(0, 64) // query_id
+      .storeCoins(toNano(jettonAmount)) // amount of Jettons to send
+      .storeAddress(Address.parse(toAddress)) // recipient address
+      .storeAddress(Address.parse(responseAddress)) // response address
+      .storeBit(false) // custom payload is null
       .endCell();
 
     if (!payload) {
