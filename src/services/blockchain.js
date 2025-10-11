@@ -120,7 +120,12 @@ export function createSpinTransaction(
     // (EN) In developer mode, print the raw BOC (binary), Base64 string, and the generated deep-link to the console.
     const bocBuffer = transferPayload.toBoc();
 
-    if (import.meta.env && import.meta.env.DEV) {
+    // (KO) 로깅 활성화 조건: 개발 모드이거나(local dev) 브라우저에서 수동 토글(localStorage 'BOC_DEBUG' === '1')이 켜진 경우에만 로그를 남깁니다.
+    // (EN) Logging enabled only in dev mode or when the manual localStorage toggle ('BOC_DEBUG' === '1') is set by a developer in the browser.
+    const localToggle = (typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('BOC_DEBUG') === '1');
+    const shouldLog = (import.meta.env && import.meta.env.DEV) || localToggle;
+
+    if (shouldLog) {
       try {
         // (KO) Raw BOC 출력 (Uint8Array/Buffer 형태)
         // (EN) Log raw BOC (Uint8Array/Buffer)
