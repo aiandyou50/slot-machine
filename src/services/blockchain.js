@@ -69,7 +69,10 @@ export function createJettonTransferPayload(
       .storeAddress(Address.parse(responseAddress)) // (KO) 응답 주소 (EN) response address
       .storeUint(0, 1) // (KO) 커스텀 페이로드 없음 (Maybe ^Cell) (EN) no custom payload (Maybe ^Cell)
       .storeCoins(toNano('0.05')) // (KO) 포워딩할 TON 양 (EN) forward_ton_amount
-      .storeBit(0) // (KO) 포워드 페이로드 없음 (Either Cell ^Cell) (EN) no forward payload (Either Cell ^Cell)
+      // (KO) TON 표준에 따라, 비어있는 포워드 페이로드는 Bit(1)과 빈 셀 참조로 인코딩합니다. 이것이 'Invalid magic' 오류를 해결합니다.
+      // (EN) Per TON standard, an empty forward payload is encoded with a Bit(1) and a ref to an empty cell. This fixes the 'Invalid magic' error.
+      .storeBit(1)
+      .storeRef(beginCell().endCell())
       .endCell();
 
     if (!payload) {

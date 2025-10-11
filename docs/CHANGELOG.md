@@ -22,30 +22,20 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 - **(KO) [BUG-005] `Invalid magic` 오류로 인한 Spin 처리 실패:**
-  - **문제 (Error):** 스핀 버튼 클릭 시 외부 핸들러(tg://resolve...)가 실행되며 Wallet/핸들러 측에서 `Invalid magic` 오류가 발생하여 스핀 트랜잭션의 리빌/검증 플로우가 중단됩니다. 콘솔 로그에 외부 핸들러로 전달된 deep-link 문자열이 출력됩니다.
-  - **원인 (Cause) (가설):**
-    1. BOC 또는 트랜잭션 페이로드가 생성/인코딩되는 과정에서 손상 또는 잘못된 형식(예: 잘못된 base64, URL 이스케이프 문제)이 발생했을 가능성.
-    2. `tonconnect` 매니페스트 또는 manifestUrl 필드의 구성 혹은 접근성(HTTPS, CORS) 문제로 인해 Wallet이 manifest를 검증하지 못함.
-    3. deep-link 구성 시 특수문자/인코딩 누락으로 인해 Wallet이 수신한 payload를 유효하지 않은 것으로 판단함.
-  - **해결 (Solution) (초안):**
-    1. 프론트엔드에서 외부 핸들러로 전달되는 deep-link 전체 문자열을 로그로 캡처하고, 필요 시 BOC 원본(base64)도 함께 저장하여 비교 분석을 수행합니다.
-    2. `src/services/blockchain.js`의 BOC/트랜잭션 생성 로직에서 base64 인코딩/디코딩 및 문자열 이스케이프 처리를 점검하고, 레거시 `forward_payload`/`forward_ton_amount` 등의 불필요 필드를 제거합니다.
-    3. `public/tonconnect-manifest.json`의 `url`, `iconUrl`, `manifestUrl` 필드가 정확한 HTTPS 경로를 가리키며, 외부에서 접근 가능한지(HTTP 200), CORS 또는 리디렉션 이슈가 없는지 확인합니다.
-    4. Wallet이 요구하는 deep-link 포맷(인코딩/escape 규칙)에 맞게 deep-link 생성 코드를 표준화하고, 테스트 케이스(특수문자 포함)를 추가합니다.
-    5. 사용자에게 표시할 한/영 에러 메시지와 개발자용 상세 로그(BOC, deep-link) 수집 로직을 구현합니다.
+  - **문제 (Error):** 스핀 버튼 클릭 시 `Invalid magic` 오류가 발생하며 트랜잭션이 실패했습니다. (`src/services/blockchain.js`)
+  - **원인 (Cause):** Jetton 전송 페이로드(BOC) 생성 시, 비어있는 `forward_payload` 필드를 잘못 직렬화했습니다. TON 표준에 따르면 `Either Cell ^Cell` 타입의 빈 값은 `storeBit(0)`이 아니라, `storeBit(1)`과 비어있는 셀 참조(`storeRef(beginCell().endCell())`)로 인코딩해야 합니다. 이 불일치로 인해 지갑이 페이로드를 유효하지 않다고 판단했습니다.
+  - **해결 (Solution):**
+    1. `src/services/blockchain.js`의 `createJettonTransferPayload` 함수를 수정했습니다.
+    2. 비어있는 `forward_payload`를 직렬화하는 코드를 기존 `.storeBit(0)`에서 `.storeBit(1).storeRef(beginCell().endCell())`로 변경하여 TON 표준을 준수하도록 했습니다.
+    3. 이 수정으로 올바른 BOC가 생성되어 `Invalid magic` 오류가 해결되었습니다.
 
 - **(EN) [BUG-005] Spin flow failure caused by `Invalid magic`:**
-  - **Error:** Clicking Spin launches an external handler (tg://resolve...) and the wallet/handler rejects the payload with `Invalid magic`, interrupting reveal/verification flow. The console prints the deep-link sent to the handler.
-  - **Cause (Hypothesis):**
-    1. Malformed or incorrectly encoded BOC/transaction payload (e.g., wrong base64, improper URL escaping) may cause the wallet to reject it.
-    2. `tonconnect` manifest or manifestUrl configuration/accessibility (HTTPS, CORS) may be invalid, causing the wallet to fail manifest validation.
-    3. Deep-link construction may omit proper encoding/escaping for special characters, resulting in an invalid payload received by the wallet.
-  - **Solution (Draft):**
-    1. Capture the full deep-link string sent to the external handler from the frontend logs and store the raw BOC (base64) for analysis.
-    2. Inspect and harden `src/services/blockchain.js` transaction/BOC generation for correct base64 encoding/decoding and escaping; remove legacy `forward_payload`/`forward_ton_amount` fields if present.
-    3. Verify `public/tonconnect-manifest.json` `url`, `iconUrl`, `manifestUrl` are reachable over HTTPS (HTTP 200) and free of CORS/redirect issues.
-    4. Standardize deep-link construction to wallet requirements and add unit/integration tests for special-character payloads.
-    5. Implement bilingual user-facing error messages and developer-focused logs (BOC, deep-link) for post-mortem analysis.
+  - **Error:** The transaction failed with an "Invalid magic" error when the spin button was clicked. (`src/services/blockchain.js`)
+  - **Cause:** The empty `forward_payload` field was incorrectly serialized when creating the Jetton transfer payload (BOC). According to the TON standard, an empty value for the `Either Cell ^Cell` type must be encoded with `.storeBit(1)` and a reference to an empty cell (`.storeRef(beginCell().endCell())`), not just `.storeBit(0)`. This discrepancy caused wallets to deem the payload invalid.
+  - **Solution:**
+    1. Modified the `createJettonTransferPayload` function in `src/services/blockchain.js`.
+    2. Changed the serialization for an empty `forward_payload` from `.storeBit(0)` to `.storeBit(1).storeRef(beginCell().endCell())` to comply with the TON standard.
+    3. This correction ensures the generation of a valid BOC, resolving the "Invalid magic" error.
 
 ### Added
 
