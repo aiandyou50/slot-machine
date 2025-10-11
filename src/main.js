@@ -319,6 +319,82 @@ async function main() {
 
   updateBetDisplay();
   renderReels(Array(5).fill(Array(3).fill('?')));
+
+  // (KO) 개발자 디버그 패널: localStorage 'BOC_DEBUG'가 켜져 있으면
+  // window.__LAST_BASE64_BOC가 설정되는 것을 감시해 페이지에 보여줍니다.
+  // (EN) Developer debug panel: when localStorage 'BOC_DEBUG' is set,
+  // watch for window.__LAST_BASE64_BOC and display it on the page.
+  try {
+    if (typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('BOC_DEBUG') === '1') {
+      const debugWatcher = setInterval(() => {
+        try {
+          if (window.__LAST_BASE64_BOC) {
+            // create panel
+            const existing = document.getElementById('candle-debug-panel');
+            if (!existing) {
+              const panel = document.createElement('div');
+              panel.id = 'candle-debug-panel';
+              panel.style.position = 'fixed';
+              panel.style.right = '12px';
+              panel.style.bottom = '12px';
+              panel.style.zIndex = '99999';
+              panel.style.maxWidth = '480px';
+              panel.style.maxHeight = '60vh';
+              panel.style.overflow = 'auto';
+              panel.style.background = 'rgba(0,0,0,0.85)';
+              panel.style.color = '#fff';
+              panel.style.padding = '12px';
+              panel.style.border = '2px solid #f0f';
+              panel.style.borderRadius = '8px';
+              panel.style.fontSize = '12px';
+              panel.style.fontFamily = 'monospace';
+
+              const title = document.createElement('div');
+              title.textContent = 'DEBUG: Last Base64 BOC (local only)';
+              title.style.fontWeight = '700';
+              title.style.marginBottom = '8px';
+              panel.appendChild(title);
+
+              const pre = document.createElement('pre');
+              pre.style.whiteSpace = 'pre-wrap';
+              pre.style.wordBreak = 'break-all';
+              pre.style.maxHeight = '40vh';
+              pre.textContent = window.__LAST_BASE64_BOC || '';
+              panel.appendChild(pre);
+
+              const link = document.createElement('a');
+              link.href = window.__LAST_DEEP_LINK || '#';
+              link.textContent = 'Open deep-link (may prompt wallet)';
+              link.style.display = 'inline-block';
+              link.style.marginTop = '8px';
+              link.style.color = '#0ff';
+              link.target = '_blank';
+              panel.appendChild(link);
+
+              const closeBtn = document.createElement('button');
+              closeBtn.textContent = 'Close';
+              closeBtn.style.marginLeft = '12px';
+              closeBtn.addEventListener('click', () => panel.remove());
+              panel.appendChild(closeBtn);
+
+              document.body.appendChild(panel);
+            } else {
+              // update existing panel content
+              const pre = existing.querySelector('pre');
+              if (pre) pre.textContent = window.__LAST_BASE64_BOC;
+              const a = existing.querySelector('a');
+              if (a) a.href = window.__LAST_DEEP_LINK || '#';
+            }
+            clearInterval(debugWatcher);
+          }
+        } catch (e) {
+          // ignore
+        }
+      }, 400);
+    }
+  } catch (e) {
+    // ignore
+  }
 }
 
 document.addEventListener('DOMContentLoaded', main);
