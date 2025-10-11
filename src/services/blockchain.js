@@ -116,9 +116,11 @@ export function createSpinTransaction(
       userWalletAddress
     );
 
-    // (KO) 개발자 모드에서는 BOC(원본 바이너리)와 Base64, 그리고 생성된 deep-link를 콘솔에 출력합니다.
-    // (EN) In developer mode, print the raw BOC (binary), Base64 string, and the generated deep-link to the console.
-    const bocBuffer = transferPayload.toBoc();
+  // (KO) 개발자 모드에서는 BOC(원본 바이너리)와 Base64, 그리고 생성된 deep-link를 콘솔에 출력합니다.
+  // (EN) In developer mode, print the raw BOC (binary), Base64 string, and the generated deep-link to the console.
+  const bocBuffer = transferPayload.toBoc();
+  // Compute base64 once and reuse it (avoids multiple toString calls and makes it accessible)
+  const base64Boc = bocBuffer.toString('base64');
 
     // (KO) 로깅 활성화 조건: 개발 모드이거나(local dev) 브라우저에서 수동 토글(localStorage 'BOC_DEBUG' === '1')이 켜진 경우에만 로그를 남깁니다.
     // (EN) Logging enabled only in dev mode or when the manual localStorage toggle ('BOC_DEBUG' === '1') is set by a developer in the browser.
@@ -129,17 +131,27 @@ export function createSpinTransaction(
       try {
         // (KO) Raw BOC 출력 (Uint8Array/Buffer 형태)
         // (EN) Log raw BOC (Uint8Array/Buffer)
-        console.log('[DEBUG] Raw BOC (Uint8Array):', bocBuffer);
+        console.error('[DEBUG] Raw BOC (Uint8Array):', bocBuffer);
 
         // (KO) Base64 인코딩 출력
         // (EN) Base64-encoded BOC
-        const base64Boc = bocBuffer.toString('base64');
-        console.log('[DEBUG] Base64 BOC:', base64Boc);
+        console.error('[DEBUG] Base64 BOC:', base64Boc);
 
         // (KO) Full deep-link 예시 출력 (URL 인코딩 포함)
         // (EN) Full deep-link example (with URL encoding)
         const deepLink = `ton://transfer/?payload=${encodeURIComponent(base64Boc)}`;
-        console.log('[DEBUG] Full deep-link:', deepLink);
+        console.error('[DEBUG] Full deep-link:', deepLink);
+
+        // (KO) 편의상 현재 페이지에서 쉽게 값을 복사할 수 있도록 전역에 노출합니다.
+        // (EN) For convenience expose values on window so developers can retrieve them without special tooling.
+        try {
+          if (typeof window !== 'undefined') {
+            window.__LAST_BASE64_BOC = base64Boc;
+            window.__LAST_DEEP_LINK = deepLink;
+          }
+        } catch (ex) {
+          // ignore
+        }
       } catch (logErr) {
         // (KO) 로깅 중 예외가 발생해도 실행 흐름을 방해하지 않습니다.
         // (EN) Do not let logging errors break the main flow.
@@ -153,7 +165,7 @@ export function createSpinTransaction(
         {
           address: jettonWalletAddress,
           amount: toNano('0.05').toString(), // (KO) 가스비 (EN) Gas fee
-          payload: bocBuffer.toString('base64'),
+          payload: base64Boc,
         },
       ],
     };
