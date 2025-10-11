@@ -211,3 +211,20 @@ button:hover:not(:disabled) {
   font-size: 0.7em;
   opacity: 0.3;
 }
+
+/* (KO) 상세 오류 로그 디스플레이 스타일 */
+/* (EN) Style for the detailed error log display */
+#error-log-display {
+  display: none; /* (KO) 기본적으로 숨김 (EN) Hidden by default */
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ff4444;
+  background-color: rgba(255, 0, 0, 0.1);
+  color: #ffcccc;
+  border-radius: 5px;
+  text-align: left;
+  white-space: pre-wrap; /* (KO) 줄바꿈 및 공백 유지 (EN) Preserve line breaks and spaces */
+  word-break: break-all;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+}

@@ -101,7 +101,9 @@ async function verifyTransaction(boc, betAmount, userAddress) {
     const messageCell = Cell.fromBoc(Buffer.from(boc, 'base64'))[0];
     const message = loadMessage(messageCell);
 
-    if (message.info.src.toString() !== Address.parse(userAddress).toString()) {
+    // (KO) .toString() 대신 .equals()를 사용하여 주소를 안전하게 비교합니다.
+    // (EN) Use .equals() for safe address comparison instead of .toString().
+    if (!message.info.src.equals(Address.parse(userAddress))) {
       throw new Error('Sender address does not match user address.');
     }
 
@@ -119,7 +121,9 @@ async function verifyTransaction(boc, betAmount, userAddress) {
       throw new Error(`Bet amount mismatch. Expected ${betAmount}, got ${jettonAmount}`);
     }
 
-    if (toAddress.toString() !== Address.parse(GAME_WALLET_ADDRESS).toString()) {
+    // (KO) .toString() 대신 .equals()를 사용하여 주소를 안전하게 비교합니다.
+    // (EN) Use .equals() for safe address comparison instead of .toString().
+    if (!toAddress.equals(Address.parse(GAME_WALLET_ADDRESS))) {
       throw new Error('Invalid recipient address.');
     }
 

@@ -59,15 +59,17 @@ export function createJettonTransferPayload(
   responseAddress
 ) {
   try {
+    // (KO) TON 문서의 표준 Jetton 전송 예시에 따라 페이로드를 정확하게 재구성합니다.
+    // (EN) Reconstruct the payload exactly according to the standard Jetton transfer example in the TON documentation.
     const payload = beginCell()
       .storeUint(0x0f8a7ea5, 32) // (KO) Jetton 전송 op-code (EN) op-code for jetton transfer
       .storeUint(0, 64) // (KO) query_id (EN) query_id
       .storeCoins(toNano(jettonAmount)) // (KO) 전송할 Jetton 양 (EN) amount of Jettons to send
       .storeAddress(Address.parse(toAddress)) // (KO) 수신자 주소 (EN) recipient address
       .storeAddress(Address.parse(responseAddress)) // (KO) 응답 주소 (EN) response address
-      .storeBit(false) // (KO) 커스텀 페이로드 없음 (EN) no custom payload
-      .storeCoins(0) // (KO) 포워딩할 TON 없음 (EN) no TON to forward
-      .storeBit(false) // (KO) 포워드 페이로드 없음 (EN) no forward payload
+      .storeUint(0, 1) // (KO) 커스텀 페이로드 없음 (Maybe ^Cell) (EN) no custom payload (Maybe ^Cell)
+      .storeCoins(toNano('0.05')) // (KO) 포워딩할 TON 양 (EN) forward_ton_amount
+      .storeBit(0) // (KO) 포워드 페이로드 없음 (Either Cell ^Cell) (EN) no forward payload (Either Cell ^Cell)
       .endCell();
 
     if (!payload) {

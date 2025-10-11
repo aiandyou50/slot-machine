@@ -44,6 +44,10 @@
 
         <div id="message-display">Welcome!</div>
 
+        <!-- (KO) 상세 오류 로그 출력을 위한 컨테이너 -->
+        <!-- (EN) Container for detailed error log output -->
+        <div id="error-log-display"></div>
+
         <div id="post-win-actions" class="hidden">
           <button id="claim-button" data-i18n-key="claim_button_text">
             Claim Prize
@@ -85,9 +89,9 @@
         <!-- (KO) 현재 버전 정보 표시: package.json의 버전을 동적으로 표시합니다. -->
         <!-- (EN) Display current version info: dynamically shows package.json version. -->
         <footer id="footer">
-          <!-- (KO) package.json의 최신 버전(v3.1.13)으로 동기화 -->
-          <!-- (EN) Synced to latest package.json version (v3.1.13) -->
-          <span id="version-display">v3.1.13</span>
+          <!-- (KO) JavaScript에 의해 동적으로 버전이 채워집니다. -->
+          <!-- (EN) Version is dynamically populated by JavaScript. -->
+          <span id="version-display"></span>
         </footer>
       </div>
     </div>

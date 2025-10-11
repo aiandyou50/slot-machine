@@ -43,6 +43,7 @@ const decreaseBetButton = document.getElementById('decrease-bet');
 const increaseBetButton = document.getElementById('increase-bet');
 const spinButton = document.getElementById('spin-button');
 const versionDisplay = document.getElementById('version-display');
+const errorLogDisplay = document.getElementById('error-log-display');
 
 // --- (EN) I18n & Message Functions / (KO) 다국어 및 메시지 함수 ---
 function t(key, params = {}) {
@@ -66,6 +67,16 @@ function showMessage(key, params = {}) {
   lastMessage = { key, params };
   const message = t(key, params);
   messageDisplay.innerHTML = message; // Use innerHTML to allow simple HTML tags like <br>
+
+  // (KO) 상세 오류 로그 기능: 오류가 있으면 표시하고, 없으면 숨깁니다.
+  // (EN) Detailed Error Log Feature: Show if there is an error, otherwise hide.
+  if (params && params.error) {
+    errorLogDisplay.innerHTML = `<strong>[DEBUG]</strong><br>${params.error}`;
+    errorLogDisplay.style.display = 'block';
+  } else {
+    errorLogDisplay.innerHTML = '';
+    errorLogDisplay.style.display = 'none';
+  }
 }
 
 function applyStaticTranslations() {
@@ -268,6 +279,8 @@ async function main() {
   if (window.__CANDLESPINNER_INITIALIZED) return;
   window.__CANDLESPINNER_INITIALIZED = true;
 
+  // (KO) 동적 버전 표시 기능 구현
+  // (EN) Implement dynamic version display feature
   versionDisplay.textContent = `v${import.meta.env.VITE_APP_VERSION}`;
 
   tonConnectUI = new TonConnectUI({
