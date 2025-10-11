@@ -47,6 +47,26 @@ All notable changes to this project will be documented in this file.
     4. Standardize deep-link construction to wallet requirements and add unit/integration tests for special-character payloads.
     5. Implement bilingual user-facing error messages and developer-focused logs (BOC, deep-link) for post-mortem analysis.
 
+### Added
+
+- **(KO) [FR-DEV-03] 개발자 모드 Deep-link BOC 로깅 기능 (초안):**
+  - **문제 (Error):** Jetton 전송 시 Wallet에 전달되는 deep-link의 payload(BOC)가 손상 또는 인코딩 문제로 인해 Wallet에서 거부되는 상황의 원인 분석이 어렵습니다. 개발자들이 재현 가능한 원본 BOC와 deep-link를 확보할 수 있는 방법이 필요합니다.
+  - **원인 (Cause):** 디버깅 시 원본 바이너리 데이터(BOC)를 수집하지 못하면, 인코딩/이스케이프 문제 또는 manifest/URL 구성 문제를 정확히 판별하기 어렵습니다.
+  - **해결 (Solution):** `src/services/blockchain.js`의 Jetton 전송 BOC 직렬화 직후, 개발자 모드(`import.meta.env.DEV`)에서만 콘솔에 다음을 출력하도록 구현했습니다:
+    1. Raw BOC (Uint8Array/Buffer)
+    2. Base64-encoded BOC
+    3. 예시 deep-link (URL-encoded payload 포함)
+  - **영향 (Impact):** 개발 환경에서 재현 가능한 디버깅 데이터가 확보되어 `Invalid magic` 유형의 문제 분석이 쉬워집니다. 프로덕션에는 영향을 주지 않습니다.
+
+- **(EN) [FR-DEV-03] Deep-link BOC logging in developer mode (Draft):**
+  - **Error:** It's difficult to analyze causes when the deep-link payload (BOC) delivered to wallets is rejected due to corruption or encoding issues. Developers need a way to capture reproducible raw BOC and deep-link strings.
+  - **Cause:** Without capturing raw binary BOC data during debugging, it's hard to determine whether encoding/escaping issues or manifest/URL misconfigurations caused the rejection.
+  - **Solution:** After serializing the Jetton transfer to a BOC in `src/services/blockchain.js`, log the following in developer mode (`import.meta.env.DEV`) only:
+    1. Raw BOC (Uint8Array/Buffer)
+    2. Base64-encoded BOC
+    3. Example deep-link (with URL-encoded payload)
+  - **Impact:** Enables reproducible debugging data in development for `Invalid magic`-type investigations. No effect in production.
+
 ---
 
 ## [3.1.13] - 2025-10-10

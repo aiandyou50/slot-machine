@@ -116,13 +116,39 @@ export function createSpinTransaction(
       userWalletAddress
     );
 
+    // (KO) 개발자 모드에서는 BOC(원본 바이너리)와 Base64, 그리고 생성된 deep-link를 콘솔에 출력합니다.
+    // (EN) In developer mode, print the raw BOC (binary), Base64 string, and the generated deep-link to the console.
+    const bocBuffer = transferPayload.toBoc();
+
+    if (import.meta.env && import.meta.env.DEV) {
+      try {
+        // (KO) Raw BOC 출력 (Uint8Array/Buffer 형태)
+        // (EN) Log raw BOC (Uint8Array/Buffer)
+        console.log('[DEBUG] Raw BOC (Uint8Array):', bocBuffer);
+
+        // (KO) Base64 인코딩 출력
+        // (EN) Base64-encoded BOC
+        const base64Boc = bocBuffer.toString('base64');
+        console.log('[DEBUG] Base64 BOC:', base64Boc);
+
+        // (KO) Full deep-link 예시 출력 (URL 인코딩 포함)
+        // (EN) Full deep-link example (with URL encoding)
+        const deepLink = `ton://transfer/?payload=${encodeURIComponent(base64Boc)}`;
+        console.log('[DEBUG] Full deep-link:', deepLink);
+      } catch (logErr) {
+        // (KO) 로깅 중 예외가 발생해도 실행 흐름을 방해하지 않습니다.
+        // (EN) Do not let logging errors break the main flow.
+        console.error('[DEBUG] BOC logging error:', logErr);
+      }
+    }
+
     return {
       validUntil: Math.floor(Date.now() / 1000) + 600,
       messages: [
         {
           address: jettonWalletAddress,
           amount: toNano('0.05').toString(), // (KO) 가스비 (EN) Gas fee
-          payload: transferPayload.toBoc().toString('base64'),
+          payload: bocBuffer.toString('base64'),
         },
       ],
     };

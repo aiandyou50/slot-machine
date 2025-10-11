@@ -141,6 +141,13 @@ priority_sections:
   - 이 모드가 활성화되었을 때, 개발자가 웹 기능 테스트를 위해 실제 토큰을 소비하지 않고 슬롯머신 게임을 플레이할 수 있도록 허용해야 한다.
   - 무료 플레이 모드에서는 CSPIN 잔액을 **가상 값**(예: 1000)으로 표시하며, 실제 지갑 잔액과는 무관하게 동작해야 한다.
 
+- **[FR-DEV-03] 개발자 모드 BOC 로깅 (Deep-link BOC logging)** `상태: ✅ 계획` `버전: v3.0.0`
+  - (KO) 개발자 모드(`import.meta.env.DEV === true`)에서만, Jetton 전송 메시지가 BOC로 직렬화된 직후 원본 BOC(Uint8Array/Buffer), Base64 인코딩 문자열, 그리고 생성되는 deep-link 예시를 콘솔에 출력해야 합니다.
+  - (EN) In developer mode (`import.meta.env.DEV === true`) only, immediately after serializing the Jetton transfer message to a BOC, log the raw BOC (Uint8Array/Buffer), its Base64 string, and the generated deep-link example to the console.
+  - (KO) 로그는 로컬 콘솔에만 남기며, 프로덕션 빌드에서는 절대 출력해서는 안 됩니다.
+  - (EN) Logs must remain local to the console and must never be emitted in production builds.
+  - **관련 파일:** `src/services/blockchain.js`
+
 ## 3.4. 게임 경제 (Game Economy)
 
 - **[FR-ECON-01] 공식 게임 화폐 (Official Game Currency)** `상태: ✅ 완료` `버전: v3.0.0`
