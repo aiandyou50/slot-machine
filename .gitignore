@@ -1,0 +1,24 @@
+# (KO) 의존성 폴더
+# (EN) Dependencies
+/node_modules
+
+# (KO) 빌드 출력 폴더
+# (EN) Build output
+/dist
+/build
+
+# (KO) Vite 캐시
+# (EN) Vite cache
+/.vite/
+
+# (KO) 환경 변수 파일
+# (EN) Environment variable files
+.env
+.env.*
+!/.env.example
+
+# (KO) 운영체제 및 IDE 관련 파일
+# (EN) OS and IDE generated files
+.DS_Store
+.vscode/
+Thumbs.db
